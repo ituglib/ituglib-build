@@ -1,0 +1,23 @@
+Usage() {
+	echo "usage: $0 manifest-file"
+	echo "needs INSTALL_LOCATION, WORKSPACE, BASENAME, VERSION, RELEASENAME, DEST variables"
+	exit 1
+}
+
+echo Running standard binary packaging script
+if [ "$1" = "" ]; then
+	Usage
+fi
+
+(cd ${INSTALL_LOCATION} && tar -cvf - --files-from=${WORKSPACE}/../Ituglib_Build/${MANIFEST}) | \
+        gzip --best > /tmp/${RELEASENAME}.tar.gz
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Created ${RELEASENAME}.tar.gz"
+mv /tmp/${RELEASENAME}.tar.gz ${DEST}
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Moved /tmp/${RELEASENAME}.tar.gz to $DEST"
+

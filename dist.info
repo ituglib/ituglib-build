@@ -16,4 +16,4 @@ export SRCINSTALL=/tmp/${NAME}
 export SRCFILE=${NAME}-src.tar
 export NSETAR=${NAME}-nse.tar
 export RELEASENAME=${NAME}-release
-
+echo Loaded

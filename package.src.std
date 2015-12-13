@@ -1,0 +1,49 @@
+TAR=tar
+
+Usage() {
+	echo "usage: $0"
+	echo "needs WORKSPACE, BASENAME, VERSION, RELEASENAME, DEST variables"
+	exit 1
+}
+
+echo Running standard source packaging script
+if [ "$NAME" = "" ]; then
+	Usage
+fi
+
+TEMP=/tmp/$RANDOM
+TARGET=/tmp/${SRCFILE}.gz
+
+echo Creating file list in $TEMP
+if [ "${SRC_EXCLUDES}" != "" ]; then
+	echo "Excluding ${SRC_EXCLUDES}"
+fi
+
+(cd ${WORKSPACE} && find . -not -path "./.git/*" -not -name ".git" -not -name ".gitignore" ${SRC_EXCLUDES}) | \
+        sed '/\/trash/d' | sort > $TEMP
+if [ $? -ne 0 ]; then
+	rm $TEMP
+	exit 1
+fi
+
+echo "Copying files to ${TARGET}"
+(cd ${WORKSPACE} && \
+        ${TAR} ${TARFLAGS} --no-recursion --files-from $TEMP -cf - ) | \
+        gzip --best > ${TARGET}
+if [ $? -ne 0 ]; then
+	rm $TEMP
+	exit 1
+fi
+
+ls -l ${TARGET}
+
+rm $TEMP
+
+echo "Created $TARGET"
+mv ${TARGET} ${DEST}
+if [ $? -ne 0 ]; then
+	exit 1
+fi
+echo "Moved $TARGET to $DEST"
+exit 0
+
