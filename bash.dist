@@ -1,0 +1,2 @@
+export VERSION=`fgrep DISTVERSION ${WORKSPACE}/version.h | sed '1,$s/.*VERSION "\(.*\)".*$/\1/'`
+

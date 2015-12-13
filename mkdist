@@ -1,0 +1,119 @@
+#! /bin/bash -
+#
+# mkdist - make a distribution directory from a master manifest file
+#
+# usage: mkdist [-m manifest] [-s srcdir] [-r rootname] [-v] version
+#
+# SRCDIR defaults to src
+# MANIFEST defaults to $SRCDIR/MANIFEST
+# if MKDIST_USER is supplied,
+#	that user is set up as the owner for distributions
+# if MKDIST_GROUP is supplied,
+#	that group is set up as the group for distributions
+#
+
+SRCDIR=src
+ROOTNAME=bash
+
+usage()
+{
+	echo usage: mkdist [-m manifest] [-s srcdir] [-r rootname] [-v] version 1>&2
+	exit 2
+}
+
+vmsg()
+{
+	if [ -n "$verbose" ]; then
+		echo mkdist: "$@"
+	fi
+}
+
+while getopts m:s:r:v name
+do
+	case $name in
+	m)	MANIFEST=$OPTARG ;;
+	s)	SRCDIR=$OPTARG ;;
+	r)	ROOTNAME=$OPTARG ;;
+	v)	verbose=yes ;;
+	?)	usage ;;
+	esac
+done
+
+: ${MANIFEST:=$SRCDIR/MANIFEST}
+
+vmsg using $MANIFEST
+
+shift $(( $OPTIND - 1 ))
+
+if [ $# -lt 1 ]; then
+	usage
+fi
+
+version=$1
+newdir=${ROOTNAME}-$version
+
+vmsg creating distribution for version $version in $newdir
+
+if [ -d $newdir ]; then
+	rm -rf $newdir || { echo $0: cannot clean old directory $newdir 1>&2 ; exit 1; }
+fi
+
+if [ ! -d $newdir ]; then
+	mkdir $newdir || { echo $0: cannot make directory $newdir 1>&2 ; exit 1; }
+fi
+
+dirmode=755
+filmode=644
+
+while read fname type mode
+do
+	[ -z "$fname" ] && continue
+
+	case "$fname" in
+	\#*)	continue ;;
+	esac
+
+	case "$type" in
+	d)	mkdir $newdir/$fname ;;				# directory
+	f)	cp -p $SRCDIR/$fname $newdir/$fname ;;		# file
+        s)      ln -s $mode $newdir/$fname ; mode= ;;           # symlink
+        l)      ln $mode $newdir/$fname ; mode= ;;              # hard link
+	*)	echo "unknown file type $type" 1>&2 ;;
+	esac
+
+	if [ -n "$mode" ]; then
+		chmod $mode $newdir/$fname
+	fi
+
+	if [ -n "$MKDIST_USER" ]; then
+		sudo chown $MKDIST_USER $newdir/$fname
+	fi
+
+	if [ -n "$MKDIST_GROUP" ]; then
+		sudo chgrp $MKDIST_GROUP $newdir/$fname
+	fi
+
+done < $MANIFEST
+
+# cut off the `-alpha' in something like `2.0-alpha', leaving just the
+# numeric version
+#version=${version%%-*}
+
+#case "$version" in
+#*.*.*)	vers=${version%.*} ;;
+#*.*)	vers=${version} ;;
+#esac
+
+#echo $vers > $newdir/.distribution
+
+#case "$version" in
+#*.*.*)	plevel=${version##*.} ;;
+#*)	plevel=0 ;;
+#esac
+#[ -z "$plevel" ] && plevel=0
+#echo ${plevel} > $newdir/.patchlevel
+
+vmsg $newdir created
+
+exit 0
+
