@@ -1,0 +1,12 @@
+bin/c_rehash
+bin/openssl
+include/openssl/
+lib/engines/
+ssl/
+lib/libcrypto.a
+lib/libssl.a
+lib/libcrypto.so
+lib/libssl.so
+lib/pkgconfig/libcrypto.pc
+lib/pkgconfig/libssl.pc
+lib/pkgconfig/openssl.pc
