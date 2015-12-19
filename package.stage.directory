@@ -17,10 +17,18 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Building distribution archive from ${DIST} into ${DEST}/${NAME}.tar.gz"
-(cd ${DIST} && tar cvzf ${DEST}/${NAME}.tar.gz .)
-if [ $? -ne 0 ]; then
-	echo "Packaging failed."
-	exit 1
+if [ "${PREFIX}" = "" ]; then
+	(cd ${DIST} && tar cvzf ${DEST}/${NAME}.tar.gz .)
+	if [ $? -ne 0 ]; then
+		echo "Packaging failed."
+		exit 1
+	fi
+else
+	(cd ${DIST} && tar cvzf ${DEST}/${PREFIX}-${NAME}.tar.gz .)
+	if [ $? -ne 0 ]; then
+		echo "Packaging failed."
+		exit 1
+	fi
 fi
 
 echo "Removing ${DIST} - Actually not at the moment yet"
