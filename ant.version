@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ "${VERSION_PATH}" = "" ]; then
+	echo `${DIST}/bin/ant -version | fgrep 'version' | \
+		sed '1,$s/^.*version \([^ ]*\) .*$/\1/'`
+else
+	echo `${VERSION_PATH}t -version | fgrep 'version' | \
+		sed '1,$s/^.*version \([^ ]*\) .*$/\1/'`
+fi
