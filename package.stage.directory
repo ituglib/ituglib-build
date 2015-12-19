@@ -1,8 +1,17 @@
 echo "Packaging ${NAME} in ${DIST}"
-echo sudo chmod -R super.super ${DIST}
-sudo chmod -R super.super ${DIST}
-echo sudo chgrp -R SUPER ${DIST}
-sudo chgrp -R SUPER ${DIST}
+echo "chmod -R super.super ${DIST}"
+chmod -R super.super ${DIST}
+if [ $? -ne 0 ]; then
+	echo "Unable to change owner of the distribution to SUPER.SUPER"
+	# exit 1
+fi
+
+echo "chgrp -R SUPER ${DIST}"
+chgrp -R SUPER ${DIST}
+if [ $? -ne 0 ]; then
+	echo "Unable to change group of the distribution to SUPER"
+	# exit 1
+fi
 
 echo "Building distribution archive from ${DIST} into ${DEST}/${NAME}.tar.gz"
 (cd ${DIST} && tar cvzf ${DEST}/${NAME}.tar.gz .)
