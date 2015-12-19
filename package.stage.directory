@@ -1,4 +1,6 @@
 echo "Packaging ${NAME} in ${DIST}"
+echo
+echo "Changing ownership to SUPER.SUPER"
 echo "sudo chown -R super.super ${DIST}"
 sudo chown -R super.super ${DIST}
 if [ $? -ne 0 ]; then
@@ -6,6 +8,7 @@ if [ $? -ne 0 ]; then
 	# exit 1
 fi
 
+echo "Changing group to SUPER.SUPER"
 echo "sudo chgrp -R SUPER ${DIST}"
 sudo chgrp -R SUPER ${DIST}
 if [ $? -ne 0 ]; then
