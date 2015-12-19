@@ -1,0 +1,8 @@
+echo "Packaging ${NAME} in ${DIST}"
+echo sudo chmod -R super.super ${DIST}
+sudo chmod -R super.super ${DIST}
+echo sudo chgrp -R SUPER ${DIST}
+sudo chgrp -R SUPER ${DIST}
+(cd ${DIST} tar cvzf ${DEST}/${NAME}.tar.gz .)
+echo rm -rf ${DIST}
+

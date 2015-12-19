@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${DIST}/bin/ant -version | fgrep 'version' | \
+		sed '1,$s/^.*version \([^ ]*\) .*$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH}t -version | fgrep 'version' | \
+		sed '1,$s/^.*version \([^ ]*\) .*$/\1/'` \
+echo "Distributing ant version ${VERSION}"
+
