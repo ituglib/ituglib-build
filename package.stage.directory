@@ -3,6 +3,18 @@ echo sudo chmod -R super.super ${DIST}
 sudo chmod -R super.super ${DIST}
 echo sudo chgrp -R SUPER ${DIST}
 sudo chgrp -R SUPER ${DIST}
-(cd ${DIST} tar cvzf ${DEST}/${NAME}.tar.gz .)
+
+echo "Building distribution archive from ${DIST} into ${DEST}/${NAME}.tar.gz"
+(cd ${DIST} && tar cvzf ${DEST}/${NAME}.tar.gz .)
+if [ $? -ne 0 ]; then
+	echo "Packaging failed."
+	exit 1
+fi
+
+echo "Removing ${DIST} - Actually not at the moment yet"
 echo rm -rf ${DIST}
+if [ $? -ne 0 ]; then
+	exit 1
+fi
+echo
 
