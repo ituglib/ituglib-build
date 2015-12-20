@@ -139,7 +139,11 @@ class Versions {
       statement.setInt(2,packageKey);
       statement.setString(3,packageName+"-"+version);
       statement.setString(4,version);
-      statement.setString(5,url);
+      if (url == null) {
+         statement.setNull(5,Types.VARCHAR);
+      } else {
+         statement.setString(5,url);
+      }
       statement.executeUpdate();
       statement.close();
    }
