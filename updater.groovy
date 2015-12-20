@@ -35,19 +35,6 @@ Class.forName("com.tandem.sqlmx.SQLMXDriver");
 Connection connection = DriverManager.getConnection("jdbc:sqlmx:");
 connection.setAutoCommit(false);
 
-class Website {
-   String schema;
-   public Website(String schema) {
-      this.schema = schema;
-   }
-
-   public dostuff() {
-      println "Help me "+schema+", you're my only hope!\n";
-   }
-}
-
-Website website = new Website(schema);
-
 class Directories {
    
    String schema;
