@@ -1,4 +1,4 @@
 #!/bin/sh
 
-echo ${DEST}/${PREFIX}${NAME}.tar.gz
+echo ${DEST}/${NSETAR}.gz
 

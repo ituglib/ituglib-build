@@ -13,7 +13,7 @@
 export NAME=${BASENAME}-${VERSION}
 export LIST=${NAME}.bin.list
 export SRCINSTALL=/tmp/${NAME}
-export SRCFILE=${NAME}-src.tar
-export NSETAR=${NAME}-nse.tar
+export SRCFILE=${PREFIX}${NAME}-src.tar
+export NSETAR=${PREFIX}${NAME}-nse.tar
 export RELEASENAME=${NAME}-release
 echo Loaded

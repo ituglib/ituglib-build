@@ -16,8 +16,8 @@ if [ $? -ne 0 ]; then
 	# exit 1
 fi
 
-echo "Building distribution archive from ${DIST} into ${DEST}/${NAME}.tar.gz"
-(cd ${DIST} && sudo tar cvzf ${DEST}/${PREFIX}${NAME}.tar.gz .)
+echo "Building distribution archive from ${DIST} into ${DEST}/${NSETAR}.gz"
+(cd ${DIST} && sudo tar cvzf ${DEST}/${NSETAR}.gz .)
 if [ $? -ne 0 ]; then
 	echo "Packaging failed."
 	exit 1
