@@ -19,6 +19,10 @@ String targetShell = String.format('sh %s/../../Ituglib_Build/workspace/package.
 File destinationDirectory = new File(destination);
 String archive = packageName.trim()+'-'+version.trim()+suffix.trim()+'.tar.gz';
 File tarFile = new File(destinationDirectory, archive);
+if (! tarFile.exists()) {
+   println tarFile.getAbsolutePath() + ' does not exist.';
+   System.exit(1);
+}
 println "Preparing distribution: "+tarFile.getAbsolutePath();
 
 File localFile = new File("/usr/tandem/jdbcMx/current/lib/jdbcMx.jar");
