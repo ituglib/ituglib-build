@@ -23,11 +23,11 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-echo "Removing ${DIST}"
-echo "sudo rm -rf ${DIST}"
-sudo rm -rf ${DIST}
-if [ $? -ne 0 ]; then
-	exit 1
-fi
-echo
+#echo "Removing ${DIST}"
+#echo "sudo rm -rf ${DIST}"
+#sudo rm -rf ${DIST}
+#if [ $? -ne 0 ]; then
+#	exit 1
+#fi
+#echo
 
