@@ -16,6 +16,8 @@ class Repackage {
       String command = null;
       if (compression.equals("gz"))
          command = 'tar xzf ' + archive + ' -C ' + target.getAbsolutePath();
+      else if (compression.equals("bz2"))
+         command = 'tar xjf ' + archive + ' -C ' + target.getAbsolutePath();
       if (!target.mkdir()) {
          println 'Unable to create directory '+target.getAbsolutePath();
          System.exit(1);
@@ -60,6 +62,8 @@ class Repackage {
    public void recompress(File source, File target) {
       String command = null;
       if (compression.equals("gz")) {
+         command = "sh maketar.sh " + source.getAbsolutePath() + " " + target.getAbsolutePath();
+      } else if (compression.equals("bz2")) {
          command = "sh maketar.sh " + source.getAbsolutePath() + " " + target.getAbsolutePath();
       }
       Process process = command.execute();
