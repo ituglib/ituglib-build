@@ -73,7 +73,7 @@ class Repackage {
    }
 
    public void clean(File target) {
-      String command = 'rm -rf ' +
+      String command = 'sudo rm -rf ' +
          target.getAbsolutePath();
 
       println command
