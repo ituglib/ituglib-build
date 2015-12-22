@@ -89,5 +89,9 @@ class Repackage {
          System.exit(result);
       }
    }
+
+   public void setCompression(String value) {
+      this.compression = value;
+   }
 }
 
