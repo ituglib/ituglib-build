@@ -10,6 +10,10 @@ class BareSourcePackageEngine extends AbstractPackageEngine {
       this.connection = connection;
    }
 
+   String getName() {
+      return "Packaging simple strategy from non-suffix to "+suffix;
+   }
+
    String archivePattern() {
       return packageName + "-([^-]*)" + ".tar.(.*)";
    }

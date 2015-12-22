@@ -20,6 +20,8 @@ abstract class AbstractPackageEngine {
    String schema;
    Connection connection;
 
+   abstract String getName();
+
    abstract String archivePattern();
 
    abstract String targetPattern(String version);
@@ -39,19 +41,21 @@ abstract class AbstractPackageEngine {
    }
 
    public void execute() {
+      println getName();
+
       int directoryKey = new Directories(schema, connection).getKey(destination);
       if (directoryKey < 0) {
          println "Cannot find directory "+destination+"\n";
          System.exit(1);
       }
-      println "Found "+destination;
+      println "Found "+destination+" in the database";
 
       int packageKey = new Packages(schema, connection).getKey(packageName);
       if (packageKey < 0) {
-         println "Cannot find package "+packageName;
+         println "Cannot find package "+packageName+" in the database";
          System.exit(1);
       }
-      println "Found "+packageName;
+      println "Found "+packageName+" in the database";
 
       for (File archive : new File(staging).listFiles()) {
          Matcher matcher = pattern.matcher(archive.getName());
@@ -82,7 +86,7 @@ abstract class AbstractPackageEngine {
                versions.insertNewVersion(versionKey, packageName, packageKey, version, url);
                println "New version entry created for "+version;
             } else {
-               println "Found version "+version;
+               println "Found version "+version+" in the database";
             }
             
             FileSet fileset = new FileSet(schema, connection);
@@ -97,12 +101,12 @@ abstract class AbstractPackageEngine {
                }
                fileset.insertNewFile(fileKey, versionKey, directoryKey, type, tarFile);
             } else {
-               println "Found "+tarFile.getName();
+               println "Found "+tarFile.getName()+" in the database";
                fileset.updateExisting(fileKey, tarFile);
             }
             connection.commit();
             repackager.clean(temp);
-            // repackager.clean(archive);
+            repackager.clean(archive);
          }
       }
    }

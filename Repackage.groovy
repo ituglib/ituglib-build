@@ -25,10 +25,11 @@ class Repackage {
       println command
       Process process = command.execute();
       int result = process.waitFor();
-      println 'tar reported '+result;
       println process.text;
-      if (result != 0)
+      if (result != 0) {
+         println 'tar reported '+result;
          System.exit(result);
+      }
    }
 
    public void chown(File target) {
@@ -69,9 +70,8 @@ class Repackage {
       Process process = command.execute();
       int result = process.waitFor();
       println process.text;
-      println 'maketar.sh reported '+result;
       if (result != 0) {
-         println 'chmod reported '+result;
+         println 'maketar.sh reported '+result;
          System.exit(result);
       }
    }
