@@ -16,6 +16,7 @@ SUFFIX=$3
 
 ed $1 << FIXME
 /${VERSIONKEY}/s/${SUFFIX}//
+.n
 w
 q
 FIXME
