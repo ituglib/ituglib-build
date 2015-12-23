@@ -2,7 +2,7 @@ test -z "${VERSION_PATH}" && \
 	export VERSION=`${WORKSPACE}/src/curl --version | grep '^curl' | \
 		sed '1,$s/curl \([^ ]*\) .*$/\1/'` \
  || \
-	export VERSION=`${VERSION_PATH}/src/curl --version | grep '^curl' | \
+	export VERSION=`${VERSION_PATH} --version | grep '^curl' | \
 		sed '1,$s/curl \([^ ]*\) .*$/\1/'` \
 echo "Packaging curl version ${VERSION}"
 
