@@ -3,6 +3,7 @@ import java.io.*;
 import java.sql.*;
 
 class Repackage {
+   String taskName = "[" + this.getClass().getSimpleName() + "] ";
    File archive;
    String version;
    String compression;
@@ -19,15 +20,15 @@ class Repackage {
       else if (compression.equals("bz2"))
          command = 'tar xjf ' + archive + ' -C ' + target.getAbsolutePath();
       if (!target.mkdir()) {
-         println 'Unable to create directory '+target.getAbsolutePath();
+         println taskName+'Unable to create directory '+target.getAbsolutePath();
          System.exit(1);
       }
-      println command
+      println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
-      println process.text;
+      println taskName+process.text;
       if (result != 0) {
-         println 'tar reported '+result;
+         println taskName+'tar reported '+result;
          System.exit(result);
       }
    }
@@ -36,12 +37,12 @@ class Repackage {
       String command = 'sudo chown -R super.super ' + 
          target.getAbsolutePath();
 
-      println command
+      println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
-      println process.text;
+      println taskName+process.text;
       if (result != 0) {
-         println 'chmod reported '+result;
+         println taskName+'chmod reported '+result;
          System.exit(result);
       }
    }
@@ -50,12 +51,12 @@ class Repackage {
       String command = 'sudo chgrp -R SUPER ' + 
          target.getAbsolutePath();
 
-      println command
+      println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
-      println process.text;
+      println taskName+process.text;
       if (result != 0) {
-         println 'chgrp reported '+result;
+         println taskName+'chgrp reported '+result;
          System.exit(result);
       }
    }
@@ -69,9 +70,9 @@ class Repackage {
       }
       Process process = command.execute();
       int result = process.waitFor();
-      println process.text;
+      println taskName+process.text;
       if (result != 0) {
-         println 'maketar.sh reported '+result;
+         println taskName+'maketar.sh reported '+result;
          System.exit(result);
       }
    }
@@ -80,12 +81,12 @@ class Repackage {
       String command = 'sudo rm -rf ' +
          target.getAbsolutePath();
 
-      println command
+      println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
-      println process.text;
+      println taskName+process.text;
       if (result != 0) {
-         println 'rm reported '+result;
+         println taskName+'rm reported '+result;
          System.exit(result);
       }
    }
