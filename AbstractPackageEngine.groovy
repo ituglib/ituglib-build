@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.regex.*;
 
 abstract class AbstractPackageEngine {
+   String taskLabel = "[PackageEngine] ";
    String basename = System.getenv("BASENAME");
    String staging = System.getenv("DIST");
    String destination = System.getenv("DEST");
@@ -41,25 +42,28 @@ abstract class AbstractPackageEngine {
    }
 
    public void execute() {
-      println getName();
+      println taskLabel+getName();
 
       int directoryKey = new Directories(schema, connection).getKey(destination);
       if (directoryKey < 0) {
-         println "Cannot find directory "+destination+"\n";
+         println taskLabel+"Cannot find directory "+destination+"\n";
          System.exit(1);
       }
-      println "Found "+destination+" in the database";
+      println taskLabel+"Found "+destination+" in the database";
 
       int packageKey = new Packages(schema, connection).getKey(packageName);
       if (packageKey < 0) {
-         println "Cannot find package "+packageName+" in the database";
+         println taskLabel+"Cannot find package "+packageName+" in the database";
          System.exit(1);
       }
-      println "Found "+packageName+" in the database";
+      println taskLabel+"Found "+packageName+" in the database";
+
+      int packageCount = 0;
 
       for (File archive : new File(staging).listFiles()) {
          Matcher matcher = pattern.matcher(archive.getName());
          if (matcher.matches()) {
+            packageCount++;
             String version = matcher.group(1);
             String compression = matcher.group(2);
             Repackage repackager = new Repackage(archive, version, compression);
@@ -79,14 +83,14 @@ abstract class AbstractPackageEngine {
                versionKey = versions.getNewVersion();
                if (versionKey < 0) {
                   versionKey = 1;
-                  println "Initial version key";
+                  println taskLabel+"Initial version key";
                } else {
-                  println "New version detected for "+version;
+                  println taskLabel+"New version detected for "+version;
                }
                versions.insertNewVersion(versionKey, packageName, packageKey, version, url);
-               println "New version entry created for "+version;
+               println taskLabel+"New version entry created for "+version;
             } else {
-               println "Found version "+version+" in the database";
+               println taskLabel+"Found version "+version+" in the database";
             }
             
             FileSet fileset = new FileSet(schema, connection);
@@ -95,19 +99,25 @@ abstract class AbstractPackageEngine {
                fileKey = fileset.getNewFile();
                if (fileKey < 0) {
                   fileKey = 1;
-                  println "Initial file key"
+                  println taskLabel+"Initial file key"
                } else {
-                  println "New file "+tarFile.getName();
+                  println taskLabel+"New file "+tarFile.getName();
                }
                fileset.insertNewFile(fileKey, versionKey, directoryKey, type, tarFile);
             } else {
-               println "Found "+tarFile.getName()+" in the database";
+               println taskLabel+"Found "+tarFile.getName()+" in the database";
                fileset.updateExisting(fileKey, tarFile);
             }
             connection.commit();
             repackager.clean(temp);
             repackager.clean(archive);
          }
+      }
+      if (packageCount < 1) {
+         println taskLabel+"No work found\n";
+         System.exit(1);
+      } else {
+         println taskLabel+packageCount + " packages added";
       }
    }
 }
