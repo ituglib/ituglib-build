@@ -3,6 +3,6 @@ test -z "${VERSION_PATH}" && \
 		sed '1,$s/.*REL_VERSION[ \t]*= \(.*\)/\1/'` \
  || \
 	export VERSION=`grep '#define.*NCURSES_VERSION[ \t]' ${VERSION_PATH} | \
-		sed '1,$s/.*NCURSES_VERSION[ \t]*"\(.*\)"/\1/'` \
+		sed '1,$s/.*NCURSES_VERSION[ \t]*"\(.*\)"/\1/'`
 echo "Packaging ncurses version ${VERSION}"
 
