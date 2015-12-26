@@ -1,5 +1,5 @@
 test -z "${VERSION_PATH}" && \
-	export VERSION=`fgrep 'REL_VERSION' ${WORKSPACE}/ncurses/Maefile | \
+	export VERSION=`fgrep 'REL_VERSION' ${WORKSPACE}/ncurses/Makefile | \
 		sed '1,$s/.*REL_VERSION[ \t]*= \(.*\)/\1/'` \
  || \
 	export VERSION=`grep '#define.*NCURSES_VERSION[ \t]' ${VERSION_PATH} | \
