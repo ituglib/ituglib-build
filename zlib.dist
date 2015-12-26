@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`grep '#define.*ZLIB_VERSION' ${WORKSPACE}/zlib.h | \
+		sed '1,$s/.*ZLIB_VERSION "\(.*\)".*/\1/'` \
+ || \
+	export VERSION=`grep '#define.*ZLIB_VERSION' ${VERSION_PATH} | \
+		sed '1,$s/.*ZLIB_VERSION "\(.*\)".*/\1/'`
+echo "Packaging zlib version ${VERSION}"
+
