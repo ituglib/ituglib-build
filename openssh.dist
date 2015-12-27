@@ -1,7 +1,11 @@
+RANDVERS=/tmp/$RANDOM
+
 test -z "${VERSION_PATH}" && \
-	export VERSION=`${WORKSPACE}/ssh -V | sed '1,$s/OpenSSH_\([^ ,]*\).*$/\1/'`\
+	${WORKSPACE}/ssh -V 2> ${RANDVERS} \
  || \
-	export VERSION=`${VERSION_PATH} -V | sed '1,$s/OpenSSH_\([^ ,]*\).*$/\1/'`
+	${VERSION_PATH} -V 2> ${RANDVERS}
+export VERSION=`sed '1,$s/OpenSSH_\([^ ,]*\).*$/\1/' <${RANDVERS}`
+rm -f ${RANDVERS}
 echo "Packaging OpenSSH version ${VERSION}"
 
 
