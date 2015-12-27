@@ -1,0 +1,7 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/ssh -V | sed '1,$s/OpenSSH_\([^ ,]*\).*$/\1/'`\
+ || \
+	export VERSION=`${VERSION_PATH} -V | sed '1,$s/OpenSSH_\([^ ,]*\).*$/\1/'`
+echo "Packaging OpenSSH version ${VERSION}"
+
+
