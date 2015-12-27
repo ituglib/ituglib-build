@@ -1,10 +1,10 @@
 test -z "${VERSION_PATH}" && \
 	export VERSION=`${WORKSPACE}/sed/sed --version | fgrep '(GNU sed)' | \
-		sed '1,$s/.*(GNU sed) \(.*\)-dirty/\1/'` | \
+		sed '1,$s/.*(GNU sed) \(.*\)-dirty/\1/' | \
 		sed '1,$s/.*(GNU sed) \(.*\)/\1/'` \
  || \
 	export VERSION=`${VERSION_PATH} --version | fgrep '(GNU sed)' | \
-		sed '1,$s/.*(GNU sed) \(.*\)-dirty/\1/'` | \
+		sed '1,$s/.*(GNU sed) \(.*\)-dirty/\1/' | \
 		sed '1,$s/.*(GNU sed) \(.*\)/\1/'` 
 echo "Packaging sed version ${VERSION}"
 
