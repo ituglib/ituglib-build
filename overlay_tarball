@@ -5,10 +5,11 @@ CPFLAGS="-Rpv"
 
 Usage() {
 	echo "usage: ${PROGRAM} product version url-prefix"
+	echo "The WORKSPACE variable needs to be set for this script to run"
 	exit 1
 }
 
-if [ "$1" = "" -o "$2" = "" -o "$3" = "" ]; then
+if [ "$1" = "" -o "$2" = "" -o "$3" = "" -o "$WORKSPACE" = "" ]; then
 	Usage
 fi
 
