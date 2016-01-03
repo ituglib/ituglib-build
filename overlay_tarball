@@ -1,0 +1,60 @@
+#!/bin/sh
+
+PROGRAM=`basename $0`
+CPFLAGS="-Rpv"
+
+Usage() {
+	echo "usage: ${PROGRAM} product version url-prefix"
+	exit 1
+}
+
+if [ "$1" == "" -o "$2" == "" -o "$3" == "" ]; then
+	Usage
+fi
+
+export PRODUCT=$1
+export VERSION=$2
+export URL_PREFIX=$3
+export TARGET_DIR=${PRODUCT}-${VERSION}
+export TARGET=${PRODUCT}-${VERSION}.tar.gz
+
+cleanup() {
+	rm -rf /tmp/${TARGET} /tmp/${TARGET_DIR}
+}
+
+echo "[${PROGRAM}] cd /tmp"
+cd /tmp
+if [ $? -ne 0 ]; then
+	exit 1
+fi
+
+echo "[${PROGRAM}] wget ${URL_PREFIX}/${TARGET}"
+wget ${URL_PREFIX}/${TARGET}
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
+
+echo "[${PROGRAM}] tar xzf ${TARGET}"
+tar xzf ${TARGET}
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
+
+echo "[${PROGRAM}] cd ${TARGET_DIR}"
+cd ${TARGET_DIR}
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
+
+echo "[${PROGRAM}] cp ${CPFLAGS} . ${WORKSPACE}"
+cp ${CPFLAGS} . ${WORKSPACE}
+if [ $? -ne 0 ]; then
+	cleanup
+	exit 1
+fi
+
+cleanup
+exit 0
