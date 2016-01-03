@@ -1,0 +1,15 @@
+#!/bin/sh
+
+PROGRAM=`basename $0`
+
+echo "[${PROGRAM}] git reset --hard"
+git reset --hard
+if [ $? != 0 ]; then
+	exit 1
+fi
+
+echo "[${PROGRAM}] git clean -d -x -f"
+git clean -d -x -f
+if [ $? != 0 ]; then
+	exit 1
+fi
