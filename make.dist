@@ -1,6 +1,6 @@
 test -z "${VERSION_PATH}" && \
 	export VERSION=`${WORKSPACE}/make --version | grep '^GNU Make' | \
-		sed '1,$s/GNU Make \(.*\)/\1/' || \
+		sed '1,$s/GNU Make \(.*\)/\1/' \
  || \
 	export VERSION=`${VERSION_PATH} --version | grep '^GNU Make' | \
 		sed '1,$s/GNU Make \(.*\)/\1/'
