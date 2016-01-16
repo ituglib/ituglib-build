@@ -1,8 +1,8 @@
 test -z "${VERSION_PATH}" && \
-	export VERSION=`fgrep PACKAGE_VERSION ${WORKSPACE}/lib/Makefile | \
+	export VERSION=`grep '^PACKAGE_VERSION' ${WORKSPACE}/lib/Makefile | \
 		sed '1,$s/PACKAGE_VERSION = \(.*\)/\1/'` \
  || \
-	export VERSION=`fgrep PACKAGE_VERSION ${VERSION_PATH} | \
+	export VERSION=`grep '^PACKAGE_VERSION' ${VERSION_PATH} | \
 		sed '1,$s/PACKAGE_VERSION = \(.*\)/\1/'`
 echo "Packaging Libiconv version ${VERSION}"
 
