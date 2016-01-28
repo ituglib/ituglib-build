@@ -6,7 +6,7 @@ Usage() {
 	exit 1
 }
 
-if [ "$1" -eq "" -o "$2" -eq "" -o "$3" -eq "" ]; then
+if [ "$1" = "" -o "$2" = "" -o "$3" = "" ]; then
 	Usage
 fi
 
