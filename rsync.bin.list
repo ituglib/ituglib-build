@@ -1,0 +1,3 @@
+bin/rsync
+share/man/man1/rsync.1
+share/man/man1/rsync.conf.8
