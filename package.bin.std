@@ -4,12 +4,19 @@ Usage() {
 	exit 1
 }
 
+set -x -v
+
 echo Running standard binary packaging script
 if [ "$1" = "" ]; then
 	Usage
 fi
 
-(cd ${INSTALL_LOCATION} && tar -cvf - --files-from=${WORKSPACE}/../Ituglib_Build/${MANIFEST}) | \
+if [ "$1" = "-local" ]; then
+	export PATH_PREFIX=`pwd`
+else
+	export PATH_PREFIX=${WORKSPACE}/../Ituglib_Build
+fi
+(cd ${INSTALL_LOCATION} && tar -cvf - --files-from=${PATH_PREFIX}/${MANIFEST}) | \
         gzip --best > /tmp/${RELEASENAME}.tar.gz
 if [ "$?" != 0 ]; then
 	exit 1

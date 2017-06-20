@@ -1,0 +1,14 @@
+# Obey script to load variables into the environment directly for make's use
+
+set +x +v
+
+echo "Loading ${BASENAME}.dist"
+. ./${BASENAME}.dist
+
+export NAME=${BASENAME}-${VERSION}
+export LIST=${NAME}.bin.list
+export SRCINSTALL=/tmp/${NAME}
+export SRCFILE=${PREFIX}${NAME}-src.tar
+export NSETAR=${PREFIX}${NAME}-nse.tar
+export RELEASENAME=${NAME}-release
+echo Loaded
