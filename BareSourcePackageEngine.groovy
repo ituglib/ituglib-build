@@ -15,7 +15,7 @@ class BareSourcePackageEngine extends AbstractPackageEngine {
    }
 
    String archivePattern() {
-      return packageName + "-([^-]*)" + ".tar.(.*)";
+      return Pattern.quote(packageName) + "-([^-]*)" + ".tar.(.*)";
    }
 
    String targetPattern(String version) {

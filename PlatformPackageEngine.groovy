@@ -13,7 +13,7 @@ class PlatformPackageEngine extends AbstractPackageEngine {
    }
 
    String archivePattern() {
-      return packageName + "-([^-]*)" + "-release"+suffix+".tar.(.*)";
+      return Pattern.quote(packageName) + "-([^-]*)" + "-release"+suffix+".tar.(.*)";
    }
 
    String targetPattern(String version) {

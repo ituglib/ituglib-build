@@ -13,7 +13,7 @@ class NormalQualifiedPackageEngine extends AbstractPackageEngine {
    }
 
    String archivePattern() {
-      return packageName + "-([^-]*-[^-]*)" + suffix + ".tar.(.*)";
+      return Pattern.quote(packageName) + "-([^-]*-[^-]*)" + suffix + ".tar.(.*)";
    }
 
    String targetPattern(String version) {
