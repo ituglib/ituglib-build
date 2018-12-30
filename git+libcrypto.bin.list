@@ -6,10 +6,6 @@ bin/git-upload-archive
 bin/git-upload-pack
 bin/gitk
 lib/libcrypto.so
-lib/perl5/5.8.7/NSE-D-nonstopkernel/perllocal.pod
-lib/perl5/site_perl/5.8.7/Git.pm
-lib/perl5/site_perl/5.8.7/Git
-lib/perl5/site_perl/5.8.7/NSE-D-nonstopkernel/auto/Git/.packlist
 libexec/git-core
 share/git
 share/git-core
@@ -203,4 +199,5 @@ share/man/man7/gitsubmodules.7
 share/man/man7/gittutorial-2.7
 share/man/man7/gittutorial.7
 share/man/man7/gitworkflows.7
-
+share/perl5/Git
+share/perl5/Git.pm
