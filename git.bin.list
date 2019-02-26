@@ -44,6 +44,7 @@ share/man/man1/git-citool.1
 share/man/man1/git-clean.1
 share/man/man1/git-clone.1
 share/man/man1/git-column.1
+share/man/man1/git-commit-graph.1
 share/man/man1/git-commit-tree.1
 share/man/man1/git-commit.1
 share/man/man1/git-config.1
@@ -103,6 +104,7 @@ share/man/man1/git-mergetool--lib.1
 share/man/man1/git-mergetool.1
 share/man/man1/git-mktag.1
 share/man/man1/git-mktree.1
+share/man/man1/git-multi-pack-index.1
 share/man/man1/git-mv.1
 share/man/man1/git-name-rev.1
 share/man/man1/git-notes.1
@@ -117,6 +119,7 @@ share/man/man1/git-prune.1
 share/man/man1/git-pull.1
 share/man/man1/git-push.1
 share/man/man1/git-quiltimport.1
+share/man/man1/git-range-diff.1
 share/man/man1/git-read-tree.1
 share/man/man1/git-rebase.1
 share/man/man1/git-receive-pack.1
