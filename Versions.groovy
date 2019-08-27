@@ -42,7 +42,7 @@ class Versions {
    public void insertNewVersion(int versionKey,
                                 String packageName, int packageKey,
                                 String version, String url) {
-      String INSERT_VERSION = "INSERT INTO "+schema+".versions (version_key,package_key,version_name,version_number,url,NONSTOP_EXTENSIONS,DEPENDENCIES) VALUES (?,?,?,?,?,NULL,NULL)";
+      String INSERT_VERSION = "INSERT INTO "+schema+".versions (version_key,package_key,version_name,version_number,url,NONSTOP_EXTENSIONS,DEPENDENCIES,README_FILE,README_DIR_KEY) VALUES (?,?,?,?,?,?,?,?,?)";
       PreparedStatement statement = connection.prepareStatement(INSERT_VERSION);
       statement.setInt(1,versionKey);
       statement.setInt(2,packageKey);
@@ -52,6 +52,26 @@ class Versions {
          statement.setNull(5,Types.VARCHAR);
       } else {
          statement.setString(5,url);
+      }
+      if (nonstopExtensions == null) {
+         statement.setNull(6,Types.VARCHAR);
+      } else {
+         statement.setString(6,nonstopExtensions);
+      }
+      if (dependencies == null) {
+         statement.setNull(7,Types.VARCHAR);
+      } else {
+         statement.setString(7,dependencies);
+      }
+      if (readmeFile == null) {
+         statement.setNull(8,Types.VARCHAR);
+      } else {
+         statement.setString(8,readmeFile);
+      }
+      if (readmeDirKeyValue >= 0) {
+         statement.setNull(9,Types.INTEGER);
+      } else {
+         statement.setString(9,readmeDirKeyValue);
       }
       statement.executeUpdate();
       statement.close();

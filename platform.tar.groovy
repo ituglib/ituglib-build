@@ -10,6 +10,29 @@
 import hudson.model.*;
 import java.sql.*;
 
+boolean debug = System.getenv("DEBUG") != null;
+if (debug) {
+	println "Platform Groovy Script";
+}
+if (System.getenv("BASENAME") == null) {
+	println "Missing BASENAME";
+	System.exit(1);
+}
+	
+if (System.getenv("DIST") == null) {
+	println "Missing DIST";
+	System.exit(1);
+}
+if (System.getenv("DEST") == null) {
+	println "Missing DEST";
+	System.exit(1);
+}
+if (System.getenv("TYPE") == null) {
+	println "Missing TYPE";
+	System.exit(1);
+}
+
+
 PlatformPackageEngine engine = new PlatformPackageEngine();
 JdbcLoader loader = new JdbcLoader();
 

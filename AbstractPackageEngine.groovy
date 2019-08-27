@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.regex.*;
 
 abstract class AbstractPackageEngine {
+   boolean debug = System.getenv("DEBUG") != null;
    String taskLabel = "[PackageEngine] ";
    String basename = System.getenv("BASENAME");
    String staging = System.getenv("DIST");
@@ -15,6 +16,11 @@ abstract class AbstractPackageEngine {
    String packageName = prefix == null ? basename : prefix + basename;
    String workspace = System.getenv("WORKSPACE");
    String url = System.getenv("URL");
+   String nonstopExtensions = System.getenv("NONSTOP_EXTENSIONS");
+   String dependencies = System.getenv("DEPENDENCIES");
+   String readmeFile = System.getenv("README_FILE");
+   int readmeDirKeyValue = System.getenv("README_DIR_KEY") != null
+      ? Integer.parseInt(System.getenv("README_DIR_KEY")) : -1;
    String targetShell = String.format('sh package.stage.target', workspace);
    String patternString = null;
    Pattern pattern = null;

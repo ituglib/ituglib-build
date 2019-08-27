@@ -5,7 +5,11 @@ import java.util.regex.*;
 
 class PlatformPackageEngine extends AbstractPackageEngine {
 
+   boolean debug = System.getenv("DEBUG") != null;
+
    public PlatformPackageEngine() {
+      if (debug)
+         println "PlatformPackageEngine loaded";
    }
 
    String getName() {
