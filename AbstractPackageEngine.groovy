@@ -19,8 +19,7 @@ abstract class AbstractPackageEngine {
    String nonstopExtensions = System.getenv("NONSTOP_EXTENSIONS");
    String dependencies = System.getenv("DEPENDENCIES");
    String readmeFile = System.getenv("README_FILE");
-   int readmeDirKeyValue = System.getenv("README_DIR_KEY") != null
-      ? Integer.parseInt(System.getenv("README_DIR_KEY")) : -1;
+   int readmeDirKeyValue = 2; // Hard coded value for the readme folder
    String targetShell = String.format('sh package.stage.target', workspace);
    String patternString = null;
    Pattern pattern = null;
