@@ -5,10 +5,17 @@ import java.sql.*;
 class Versions {
    String schema;
    Connection connection;
+   String nonstopExtensions;
+   String dependencies;
+   String readmeFile;
+   int readmeDirKeyValue = 0;
    
    public Versions(String schema, Connection connection) {
       this.schema = schema;
       this.connection = connection;
+      this.nonstopExtensions;
+      this.dependencies;
+      this.readmeFile;
    }
 
    public int getKey(int packageKey, String version) {
@@ -75,6 +82,18 @@ class Versions {
       }
       statement.executeUpdate();
       statement.close();
+   }
+   void setNonstopExtensions(String value) {
+      nonstopExtensions = value;
+   }
+   void setDependencies(String value) {
+      dependencies = value;
+   }
+   void setReadmeFile(String value) {
+      readmeFile = value;
+   }
+   void setReadmeDirKeyValue(int value) {
+      readmeDirKeyValue = value;
    }
 }
 
