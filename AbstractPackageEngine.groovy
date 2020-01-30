@@ -83,6 +83,11 @@ abstract class AbstractPackageEngine {
             temp.delete();
       
             Versions versions = new Versions(schema, connection);
+            versions.setNonstopExtensions(nonstopExtensions);
+            versions.setDependencies(dependencies);
+            versions.setReadmeFile(readmeFile);
+            versions.setReadmeDirKeyValue(readmeDirKeyValue);
+
             int versionKey = versions.getKey(packageKey, version);
             if (versionKey < 0) {
                versionKey = versions.getNewVersion();
