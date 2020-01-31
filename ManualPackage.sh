@@ -3,7 +3,7 @@
 PROGNAME=$0
 
 Usage() {
-	echo "Usage: $PROGNAME base-name ( nse | nsx ) [-v version-file]"
+	echo "Usage: $PROGNAME base-name ( nse | nsx ) [-v version-file] [-d dest-dir]"
 }
 
 if [ "$1" = "" -o "$2" = "" ]; then
@@ -43,9 +43,18 @@ while [ "$1" != "" ]; do
 			fi
 			export VERSION_PATH=/usr/local/bin/$1
 			;;
+		-d)
+			shift
+			if [ "$1" = "" ]; then
+				Usage
+				exit 1
+			fi
+			export DEST=$1
+			;;
 		*)
 			Usage
 			exit 1
+			;;
 	esac
 	shift
 done
