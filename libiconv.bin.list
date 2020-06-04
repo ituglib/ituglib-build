@@ -1,3 +1,4 @@
+bin/iconv
 include/iconv.h
 include/libcharset.h
 include/localcharset.h
