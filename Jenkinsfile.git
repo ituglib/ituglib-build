@@ -1,0 +1,31 @@
+pipeline {
+	agent none
+	options {
+		buildDiscarder(logRotator(numToKeepStr: '2'))
+	}
+	stages {
+		stage('development') {
+			when {
+				branch 'development'
+			}
+			steps {
+				lock(resource: 'nsgit-test-environment') {
+					checkout([$class: 'GitSCM',
+				        	branches: [[name: '*/ituglib_release']],
+				        	extensions: [
+							[$class: 'CleanBeforeCheckout'],
+							[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+				            		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+				            	doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
+				        	userRemoteConfigs: [[url: '/home/git/git']]])
+					load '../Ituglib_Build/c.std.properties'
+					withEnv(['GIT_DIST=/web/stage',
+						'PREFIX=/usr/local']) {
+						# coreutils bash is required
+						sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
+					}
+			        }
+		        }
+		}
+	}
+}
