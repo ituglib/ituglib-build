@@ -4,12 +4,12 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr: '2'))
 	}
 	stages {
-		stage('development') {
+		stage('build') {
 			when {
-				branch 'development'
+				branch 'ituglib_release'
 			}
 			steps {
-				lock(resource: 'nsgit-test-environment') {
+				lock(resource: 'git-test-environment') {
 					checkout([$class: 'GitSCM',
 				        	branches: [[name: '*/ituglib_release']],
 				        	extensions: [
