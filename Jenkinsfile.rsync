@@ -1,44 +1,54 @@
 # Paste the rest of this file into a standard Pipeline project to
-# build/test/stage git.
+# build/test/stage rsync.
 # Also set Discard old builds, typically log rotation to 2
 # Poll SCM something useful, like H/10 * * * *
 
 node {
     stage('checkout') {
-        lock(resource: 'git-test-environment') {
+        lock(resource: 'rsync-test-environment') {
             checkout([$class: 'GitSCM',
             changelog: true,
             poll: true,
             branches: [[name: '*/ituglib_release']],
             extensions: [
-                [$class: 'CleanBeforeCheckout']],
+                [$class: 'CleanBeforeCheckout'],
+            	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+            		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
             doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
-            userRemoteConfigs: [[url: '/home/git/git']]])
+            userRemoteConfigs: [[url: '/home/git/rsync']]])
+        }
+    }
+    stage('config') {
+        lock(resource: 'rsync-test-environment') {
+            withEnv(['PREFIX=/usr/local',
+                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'CFLAGS=-D_FILE_OFFSET_BITS=64 conf_script_floss_cc'
+            }
         }
     }
     stage('build') {
-        lock(resource: 'git-test-environment') {
-            withEnv(['GIT_DIST=/web/stage',
-                    'PREFIX=/usr/local',
+        lock(resource: 'rsync-test-environment') {
+            withEnv(['PREFIX=/usr/local',
                     'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                     '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
+                sh 'make'
             }
         }
     }
     stage('findcall_floss') {
-        lock(resource: 'git-test-environment') {
+        lock(resource: 'rsync-test-environment') {
             withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                     '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh 'findcall_floss || echo "Ignoring results"'
+                sh 'findcall_floss'
             }
         }
     }
     stage('test') {
-        lock(resource: 'git-test-environment') {
+        lock(resource: 'rsync-test-environment') {
             withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                     '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh '/usr/coreutils/bin/make -k test TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+                sh 'make test'
             }
         }
     }
