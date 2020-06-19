@@ -4,8 +4,8 @@
 # Poll SCM something useful, like H/10 * * * *
 
 node {
-    stage('checkout') {
-        lock(resource: 'git-test-environment') {
+    lock(resource: 'git-test-environment') {
+        stage('checkout') {
             checkout([$class: 'GitSCM',
             changelog: true,
             poll: true,
@@ -15,9 +15,7 @@ node {
             doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
             userRemoteConfigs: [[url: '/home/git/git']]])
         }
-    }
-    stage('build') {
-        lock(resource: 'git-test-environment') {
+        stage('build') {
             withEnv(['GIT_DIST=/web/stage',
                     'PREFIX=/usr/local',
                     'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -25,17 +23,13 @@ node {
                 sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
             }
         }
-    }
-    stage('findcall_floss') {
-        lock(resource: 'git-test-environment') {
+        stage('findcall_floss') {
             withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                     '_RLD_LIB_PATH=:/usr/local/lib']) {
                 sh 'findcall_floss || echo "Ignoring results"'
             }
         }
-    }
-    stage('test') {
-        lock(resource: 'git-test-environment') {
+        stage('test') {
             withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                     '_RLD_LIB_PATH=:/usr/local/lib']) {
                 sh '/usr/coreutils/bin/make -k test TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
