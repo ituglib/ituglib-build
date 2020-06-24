@@ -1,8 +1,8 @@
 test -z "${VERSION_PATH}" && \
-	export VERSION=`${WORKSPACE}/git --version | fgrep 'gawk version' | \
-		sed '1,$s/gawk --version \(.*\)\.[^.]*$/\1/'` \
+	export VERSION=`${WORKSPACE}/gawk --version | fgrep 'GNU Awk' | \
+		sed '1,$s/GNU Awk //'` \
  || \
-	export VERSION=`${VERSION_PATH} --version | fgrep 'gawk --version' | \
-		sed '1,$s/gawk --version \(.*\)\.[^.]*$/\1/'`
+	export VERSION=`${VERSION_PATH} --version | fgrep 'GNU Awk' | \
+		sed '1,$s/GNU Awk //'`
 echo "Packaging gawk version ${VERSION}"
 
