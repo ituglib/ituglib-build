@@ -1,0 +1,52 @@
+# Paste the rest of this file into a standard Pipeline project to
+# build/test/stage libtool.
+# Also set Discard old builds, typically log rotation to 2
+# Poll SCM something useful, like H/10 * * * *
+
+node {
+    lock(resource: 'ncurses-test-environment') {
+        stage('checkout') {
+            checkout([$class: 'GitSCM',
+            branches: [[name: '*/ituglib_release']],
+            extensions: [
+                [$class: 'CleanBeforeCheckout']],
+            userRemoteConfigs: [[url: '/home/git/ncurses']]])
+        }
+        stage('config') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib',
+                    'PREFIX=/usr/local']) {
+                sh 'conf_script_floss_cc --with-shared'
+            }
+        }
+        stage('build') {
+            withEnv(['PREFIX=/usr/local',
+                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'make -k || echo "v6.2 had one test that did not compile"'
+            }
+        }
+        stage('findcall_floss') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'findcall_floss || echo "read and write are safe in ncurses"'
+            }
+        }
+        stage('deploy_src') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib',
+                    'BASENAME=ncurses',
+                    'DEST=/web/stage']) {
+                sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                    tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                        --exclude="*.o" \
+                        --exclude="*.a" \
+                        --exclude="*.so" \
+                        --exclude=".git*" \
+                        --exclude="./.git/*" \
+                        .'
+            }
+        }
+    }
+}
+

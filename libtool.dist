@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/libtool --version | fgrep 'GNU libtool' | \
+		sed '1,$s/.*libtool) //'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | fgrep 'GNU libtool' | \
+		sed '1,$s/.*libtool) //'`
+echo "Packaging libtool version ${VERSION}"
+
