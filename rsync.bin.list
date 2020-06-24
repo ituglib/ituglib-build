@@ -1,3 +1,3 @@
 bin/rsync
 share/man/man1/rsync.1
-share/man/man1/rsync.conf.8
+share/man/man5/rsync.conf.5
