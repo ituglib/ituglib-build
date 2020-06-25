@@ -125,7 +125,7 @@ abstract class AbstractPackageEngine {
       }
       if (packageCount < 1) {
          println taskLabel+"No work found\n";
-         System.exit(1);
+         // System.exit(1);
       } else {
          println taskLabel+packageCount + " packages added";
       }
