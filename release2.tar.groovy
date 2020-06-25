@@ -1,3 +1,5 @@
+#!groovy
+
 /**
  * Packager used for gz and bz2 files where the name has the form:
  *    package-version-release.tar.(gz|bz2)
@@ -10,7 +12,7 @@
 import hudson.model.*;
 import java.sql.*;
 
-def package() {
+def packageRelease() {
 	ReleasePackageEngine engine = new ReleasePackageEngine();
 	JdbcLoader loader = new JdbcLoader();
 
@@ -25,5 +27,5 @@ def package() {
 }
 
 return [
-	package: this.&package
+	packageRelease: this.&packageRelease
 ]
