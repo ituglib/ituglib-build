@@ -1,0 +1,63 @@
+# Paste the rest of this file into a standard Pipeline project to
+# build/test/stage rsync.
+# Also set Discard old builds, typically log rotation to 2
+# Poll SCM something useful, like H/10 * * * *
+
+node {
+    lock(resource: 'rsync-test-environment') {
+        stage('checkout') {
+            checkout([$class: 'GitSCM',
+            changelog: true,
+            poll: true,
+            branches: [[name: '*/ituglib_release']],
+            extensions: [
+                [$class: 'CleanBeforeCheckout'],
+            	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+            		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+            doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
+            userRemoteConfigs: [[url: '/home/git/rsync']]])
+        }
+        stage('config') {
+            withEnv(['PREFIX=/usr/local',
+                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'CFLAGS=-D_FILE_OFFSET_BITS=64 conf_script_floss_cc'
+            }
+        }
+        stage('build') {
+            withEnv(['PREFIX=/usr/local',
+                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'make'
+            }
+        }
+        stage('findcall_floss') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'findcall_floss'
+            }
+        }
+        stage('test') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib']) {
+                sh 'make test'
+            }
+        }
+        stage('deploy_src') {
+            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                    '_RLD_LIB_PATH=:/usr/local/lib',
+                    'BASENAME=rsync',
+                    'DEST=/web/stage']) {
+                sh '. ${WORKSPACE}/../Ituglib_Build/dist.info && \
+                    tar cvzf ${DEST}/${BASENAME}-${VERSION}-src.tar.gz \
+                   --exclude="*.o" \
+                   --exclude="*.a" \
+                   --exclude="*.so" \
+                   --exclude=".git*" \
+                   --exclude="./.git/*" \
+                   .'
+            }
+        }
+    }
+}
+
