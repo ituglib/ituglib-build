@@ -18,8 +18,8 @@ elif [ -d ${WORKSPACE}/../../Ituglib_Build/workspace ]; then
 	echo In new-style Jenkins structure
 	ITUGLIB_BUILD="${WORKSPACE}/../../Ituglib_Build/workspace"
 else
-	echo Cannot file Ituglib_Build
-	exit 1
+	echo Cannot file Ituglib_Build. Working without.
+	ITUGLIB_BUILD=
 fi
 
 

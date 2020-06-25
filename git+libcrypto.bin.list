@@ -7,7 +7,8 @@ bin/git-upload-archive
 bin/git-upload-pack
 bin/gitk
 libexec/git-core
-share/git
+share/git-core
+share/git-gui
 share/gitk
 share/gitweb
 share/locale/bg/LC_MESSAGES/git.mo
