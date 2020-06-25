@@ -1,4 +1,5 @@
 #!groovy
+@library('JdbcLoader.groovy')
 
 /**
  * Packager used for gz and bz2 files where the name has the form:
