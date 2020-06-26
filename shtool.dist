@@ -1,0 +1,7 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/shtool --version | fgrep 'GNU shtool' | \
+		sed '1,$s/GNU shtool \([^ ]*\) .*$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | fgrep 'GNU shtool' | \
+		sed '1,$s/GNU shtool \([^ ]*\) .*$/\1/'`
+echo "Packaging shtool version ${VERSION}"
