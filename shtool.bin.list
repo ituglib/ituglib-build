@@ -1,3 +1,4 @@
 bin/shtool
 bin/shtoolize
 share/man/man1/shtool*.1
+share/shtool
