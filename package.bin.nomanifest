@@ -1,0 +1,37 @@
+Usage() {
+	echo "usage: $0"
+	echo "needs INSTALL_LOCATION, WORKSPACE, BASENAME, VERSION, RELEASENAME, DEST variables"
+	exit 1
+}
+
+set -x -v
+
+echo Running standard binary packaging script without a manifest
+if [ "$1" = "" ]; then
+	Usage
+fi
+
+if [ -d ${WORKSPACE}/../Ituglib_Build ]; then
+	echo In old-style Jenkins structure
+	ITUGLIB_BUILD="${WORKSPACE}/../Ituglib_Build"
+elif [ -d ${WORKSPACE}/../../Ituglib_Build/workspace ]; then
+	echo In new-style Jenkins structure
+	ITUGLIB_BUILD="${WORKSPACE}/../../Ituglib_Build/workspace"
+else
+	echo Cannot file Ituglib_Build. Working without.
+	ITUGLIB_BUILD=
+fi
+
+
+(cd ${INSTALL_LOCATION} && tar -cvf - ) | \
+        gzip --best > /tmp/${RELEASENAME}.tar.gz
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Created ${RELEASENAME}.tar.gz"
+mv /tmp/${RELEASENAME}.tar.gz ${DEST}
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Moved /tmp/${RELEASENAME}.tar.gz to $DEST"
+
