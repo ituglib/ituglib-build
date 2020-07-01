@@ -20,7 +20,7 @@ else
 fi
 
 
-(cd ${INSTALL_LOCATION} && tar -cvf - ) | \
+(cd ${INSTALL_LOCATION} && tar -cvf - *) | \
         gzip --best > /tmp/${RELEASENAME}.tar.gz
 if [ "$?" != 0 ]; then
 	exit 1
