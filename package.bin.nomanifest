@@ -20,12 +20,13 @@ else
 fi
 
 
-(cd ${INSTALL_LOCATION} && tar -cvf - *) | \
-        gzip --best > /tmp/${RELEASENAME}.tar.gz
+(cd ${INSTALL_LOCATION} && pwd && tar -cvf - * | \
+	gzip --best -v > /tmp/${RELEASENAME}.tar.gz)
 if [ "$?" != 0 ]; then
 	exit 1
 fi
 echo "Created ${RELEASENAME}.tar.gz"
+ls -l /tmp/${RELEASENAME}.tar.gz
 mv /tmp/${RELEASENAME}.tar.gz ${DEST}
 if [ "$?" != 0 ]; then
 	exit 1
