@@ -1,0 +1,25 @@
+Usage() {
+	echo "usage: $0"
+	echo "needs INSTALL_LOCATION, WORKSPACE, BASENAME, VERSION, RELEASENAME, DEST variables"
+	exit 1
+}
+
+DEST=/home/ituglib/randall/stage
+
+set -x -v
+
+echo Running standard binary packaging script without a manifest
+
+(cd ${INSTALL_LOCATION} && pwd && tar -cvf - * | \
+	gzip --best -v > /tmp/${RELEASENAME}.tar.gz)
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Created ${RELEASENAME}.tar.gz"
+ls -l /tmp/${RELEASENAME}.tar.gz
+mv /tmp/${RELEASENAME}.tar.gz ${DEST}
+if [ "$?" != 0 ]; then
+	exit 1
+fi
+echo "Moved /tmp/${RELEASENAME}.tar.gz to $DEST"
+
