@@ -1,0 +1,58 @@
+# Paste the rest of this file into a standard Pipeline project to
+# build/test/stage OpenSSL PUT.
+# Also set Discard old builds, typically log rotation to 2
+# Poll SCM something useful, like H/2 2 * * *, remember that this job takes
+# a long time to clone and checkout.
+
+node {
+    stage('checkout') {
+        checkout([$class: 'GitSCM',
+        branches: [[name: '*/nonstop_port']],
+        extensions: [
+                [$class: 'CleanBeforeCheckout'],
+        doGenerateSubmoduleConfigurations: false, extensions: [
+            [$class: 'CleanCheckout'],
+            [$class: 'CloneOption', timeout: 60, shallow: true],
+            [$class: 'CheckoutOption', timeout: 60],
+            ],
+        userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
+    }
+    stage('config') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib']) {
+            sh './Configure nonstop-nse_put --prefix=${PWD}/install --openssldir=${PWD}/install no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+        }
+    }
+    stage('build') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib']) {
+            sh 'make'
+        }
+    }
+    stage('findcall_floss') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib']) {
+            sh 'findcall_floss || echo "Never mind"'
+        }
+    }
+    stage('test') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib']) {
+            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
+        }
+    }
+    stage('install') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib']) {
+            sh 'make install'
+        }
+    }
+    stage('deploy') {
+        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                '_RLD_LIB_PATH=:/usr/local/lib',
+                'BASENAME=openssl-put',
+                'DEST=/web/stage']) {
+            sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+        }
+    }
+}
