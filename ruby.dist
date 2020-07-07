@@ -1,0 +1,9 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/ruby --version | \
+		sed '1,$s/^ruby \([^ ]*\) .*$/\1/'`\
+ || \
+	export VERSION=`${VERSION_PATH} --version | fgrep OpenSSL | \
+		sed '1,$s/^ruby \([^ ]*\) .*$/\1/'`
+echo "Packaging ruby version ${VERSION}"
+
+
