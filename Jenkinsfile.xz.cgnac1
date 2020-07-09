@@ -1,0 +1,107 @@
+# Paste the rest of this file into a standard Pipeline project to
+# build/test/stage xz NSX standard.
+# Also set Discard old builds, typically log rotation to 2
+# Poll SCM something useful, like H/45 2 * * *, remember that this job takes
+# a long time to clone and checkout.
+# Whomever the user is running this (a.k.a. Jenkins), must have proper
+# credentials in NonStop SSH.
+
+pipeline {
+    agent any
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                branches: [[name: '*/ituglib_release']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout']],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 60, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 60],
+                    ],
+            /*    userRemoteConfigs: [[url: 'ssh://randall@ituglib-nskos.xid.com/home/git/xz']] */
+                userRemoteConfigs: [[url: '/home/ituglib/randall/xz']]
+                ])
+            }
+        }
+        stage('redate') {
+            steps {
+                script {
+                    currentTime = sh(returnStdout: true, script: 'date +%Y%m%d%H%M.%S').trim()
+                    sh(returnStdout: true, script: 'echo Set all files to '+currentTime+' to inhibit aclocal-1.16 requirement')
+                    sh(returnStdout: true, script: 'find . -exec touch -t '+currentTime+' {} ";" || echo Ignore any errors')
+                }
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=1252,272,734 -D_PUT_MODEL_ -I/usr/include -I/usr/local/include" LDFLAGS="-lput -lfloss" conf_script_floss_cc'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignore pthread errors"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=xz',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/xz" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=xz',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
+
