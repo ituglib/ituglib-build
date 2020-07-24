@@ -1,6 +1,7 @@
 pipeline {
 	agent {
-		node {
+		label {
+			label ""
 			customWorkspace '/home/jenkins/.jenkins/workspace/Ituglib_Build'
 		}
 	}
