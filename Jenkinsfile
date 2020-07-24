@@ -1,5 +1,7 @@
 pipeline {
-	agent any
+	agent any {
+		customWorkspace '/home/jenkins/.jenkins/workspace/Ituglib_Build'
+	}
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '2'))
 	}
