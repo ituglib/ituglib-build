@@ -1,5 +1,5 @@
 pipeline {
-	agent any {
+	agent {
 		customWorkspace '/home/jenkins/.jenkins/workspace/Ituglib_Build'
 	}
 	options {
