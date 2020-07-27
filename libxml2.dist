@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`grep '^VERSION = ' ${WORKSPACE}/Makefile | \
+		sed '1,$s/^VERSION = \(.*\)/\1/'` \
+ || \
+	export VERSION=`grep '^VERSION = ' ${VERSION_PATH} | \
+		sed '1,$s/^VERSION = \(.*\)/\1/'`
+echo "Packaging Libxml2 version ${VERSION}"
+
