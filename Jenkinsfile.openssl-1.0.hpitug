@@ -1,4 +1,4 @@
-/* Rsync - Paste into Jenkins Pipeline */
+/* OpenSSL 1.0 - Paste into Jenkins Pipeline */
 
 pipeline {
     agent any
@@ -6,34 +6,44 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '2'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H * * * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                changelog: true,
-                poll: true,
-                branches: [[name: 'master']],
+                branches: [[name: '*/ituglib_release']],
                 extensions: [
                     [$class: 'CleanBeforeCheckout'],
-                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
-                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 60, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 60],
+                    [$class: 'CloneOption', timeout: 120, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 120],
                     ],
-                userRemoteConfigs: [[url: 'git://git.samba.org/rsync.git']]])
+                userRemoteConfigs: [[url: '/home/git/openssl']]])
             }
         }
         stage('config') {
             steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh './config --prefix=/usr/local shared'
+                }
+            }
+        }
+        stage('fix_version') {
+            steps {
+                withEnv([]) {
+                    sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh Makefile "^VERSION=" -dev'
+                    sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh crypto/opensslv.h "OPENSSL_VERSION_TEXT" -dev'
+                    sh 'echo "Should report no -dev entries" && fgrep -R -e "-dev" .'
+                }
+            }
+        }
+        stage('make_depend') {
+            steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                /*    sh 'sed -i "1s/3.2.3dev/3.2.2/" version.h' */
-                    sh 'CFLAGS="-c99 -Wnowarn=734" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'make depend'
                 }
             }
         }
@@ -42,7 +52,7 @@ pipeline {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make'
+                    sh 'make LDFLAGS=-lrld'
                 }
             }
         }
@@ -58,16 +68,25 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make test'
+                }
+            }
+        }
+        stage('deploy_src') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=openssl',
+                        'DEST=/web/stage',
+                        'SRC_EXCLUDES=-not -path "CVS/*" -not -path "*/CVS/*" -not -name CVS -not -name .cvsignore -not -name STATUS -not -name TABLE']) {
+                    sh '. ${WORKSPACE}/../Ituglib_Build/dist.info && bash ${WORKSPACE}/../Ituglib_Build/package.src.std'
                 }
             }
         }
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=rsync',
-                        'DEST=install']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -76,9 +95,9 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=rsync',
+                        'BASENAME=openssl',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/libtool" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }

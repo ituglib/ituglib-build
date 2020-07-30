@@ -1,39 +1,82 @@
-# Paste the rest of this file into a standard Pipeline project to
-# build/test/stage git.
-# Also set Discard old builds, typically log rotation to 2
-# Poll SCM something useful, like H/10 * * * *
+/* Git - Jenkins Pipeline */
 
-node {
-    lock(resource: 'git-test-environment') {
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
         stage('checkout') {
-            checkout([$class: 'GitSCM',
-            changelog: true,
-            poll: true,
-            branches: [[name: '*/ituglib_release']],
-            extensions: [
-                [$class: 'CleanBeforeCheckout']],
-            doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
-            userRemoteConfigs: [[url: '/home/git/git']]])
+            steps {
+                checkout([$class: 'GitSCM',
+                changelog: true,
+                poll: true,
+                branches: [[name: 'master']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout'],
+                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 120, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 120],
+                    ],
+                userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+            }
         }
         stage('build') {
-            withEnv(['GIT_DIST=/web/stage',
-                    'PREFIX=/usr/local',
-                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
+            steps {
+                withEnv(['GIT_DIST=/web/stage',
+                        'PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
+                }
             }
         }
         stage('findcall_floss') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh 'findcall_floss || echo "Ignoring results"'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring results"'
+                }
             }
         }
         stage('test') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh '/usr/coreutils/bin/make -k test TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh '/usr/coreutils/bin/make -k test TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+                }
             }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }

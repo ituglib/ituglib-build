@@ -1,4 +1,4 @@
-/* Rsync - Paste into Jenkins Pipeline */
+/* Curl - Paste this fileinto a Pipeline */
 
 pipeline {
     agent any
@@ -12,28 +12,37 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                changelog: true,
-                poll: true,
-                branches: [[name: 'master']],
+                branches: [[name: '*/ituglib_release']],
                 extensions: [
                     [$class: 'CleanBeforeCheckout'],
-                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
-                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
                     [$class: 'CloneOption', timeout: 60, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 60],
-                    ],
-                userRemoteConfigs: [[url: 'git://git.samba.org/rsync.git']]])
+                    [$class: 'CheckoutOption', timeout: 60]],
+                userRemoteConfigs: [[url: '/home/git/curl']]])
+            }
+        }
+        stage('fix_version') {
+            steps {
+                sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh include/curl/curlver.h LIBCURL_VERSION -DEV && sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh include/curl/curlver.h LIBCURL_TIMESTAMP "\\[unreleased\\]" `date +%Y-%m-%d`'
+            }
+        }
+        stage('link_shtool') {
+            steps {
+                sh 'ln -s /usr/local/bin/shtool shtool'
+            }
+        }
+        stage('buildconf') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh './buildconf'
+                }
             }
         }
         stage('config') {
             steps {
-                withEnv(['PREFIX=/usr/local',
-                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                /*    sh 'sed -i "1s/3.2.3dev/3.2.2/" version.h' */
-                    sh 'CFLAGS="-c99 -Wnowarn=734" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
@@ -58,27 +67,24 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make check || echo "Tests failed but expected"'
                 }
             }
         }
-        stage('install') {
+        stage('deploy_src') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=rsync',
-                        'DEST=install']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
-                }
-            }
-        }
-        stage('deploy') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=rsync',
+                        'BASENAME=curl',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
                 }
             }
         }
