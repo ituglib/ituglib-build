@@ -1,58 +1,85 @@
-# Paste the rest of this file into a standard Pipeline project to
-# build/test/stage OpenSSL PUT.
-# Also set Discard old builds, typically log rotation to 2
-# Poll SCM something useful, like H/2 2 * * *, remember that this job takes
-# a long time to clone and checkout.
+/* OpenSSL 1.1 PUT - Jenkins Pipeline */
 
-node {
-    stage('checkout') {
-        checkout([$class: 'GitSCM',
-        branches: [[name: '*/nonstop_port']],
-        extensions: [
-                [$class: 'CleanBeforeCheckout'],
-        doGenerateSubmoduleConfigurations: false, extensions: [
-            [$class: 'CleanCheckout'],
-            [$class: 'CloneOption', timeout: 60, shallow: true],
-            [$class: 'CheckoutOption', timeout: 60],
-            ],
-        userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
     }
-    stage('config') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib']) {
-            sh './Configure nonstop-nse_put --prefix=${PWD}/install --openssldir=${PWD}/install no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                branches: [[name: '*/nonstop_port']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout']],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 120, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 120],
+                    ],
+                userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh './Configure nonstop-nse_put --prefix=${PWD}/install --openssldir=${PWD}/install no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Nevermind" '
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install'
+                    sh 'ln ${WORKSPACE}/install/lib/libssl.so ${WORKSPACE}/install/lib/libssl_1.1_put.so'
+                    sh 'ln ${WORKSPACE}/install/lib/libcrypto.so ${WORKSPACE}/install/lib/libcrypto_1.1_put.so'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=openssl-put',
+                        'DEST=/web/stage']) {
+                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
         }
     }
-    stage('build') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib']) {
-            sh 'make'
-        }
-    }
-    stage('findcall_floss') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib']) {
-            sh 'findcall_floss || echo "Never mind"'
-        }
-    }
-    stage('test') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib']) {
-            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
-        }
-    }
-    stage('install') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib']) {
-            sh 'make install'
-        }
-    }
-    stage('deploy') {
-        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                '_RLD_LIB_PATH=:/usr/local/lib',
-                'BASENAME=openssl-put',
-                'DEST=/web/stage']) {
-            sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
+
