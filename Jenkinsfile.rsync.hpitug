@@ -21,7 +21,7 @@ pipeline {
                 		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
                 doGenerateSubmoduleConfigurations: false, extensions: [
                     [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 60, shallow: true],
+                    [$class: 'CloneOption', timeout: 60, shallow: false],
                     [$class: 'CheckoutOption', timeout: 60],
                     ],
                 userRemoteConfigs: [[url: 'git://git.samba.org/rsync.git']]])

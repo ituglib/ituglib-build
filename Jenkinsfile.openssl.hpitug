@@ -27,7 +27,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh './Configure nonstop-nse --prefix=${PWD}/install --openssldir=${PWD}/install no-dynamic-engine --with-rand-seed=egd'
+                    sh './Configure nonstop-nse --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
                 }
             }
         }
@@ -60,8 +60,6 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make install'
-                    sh 'ln ${WORKSPACE}/install/lib/libssl.so ${WORKSPACE}/install/lib/libssl_1.1.so'
-                    sh 'ln ${WORKSPACE}/install/lib/libcrypto.so ${WORKSPACE}/install/lib/libcrypto_1.1.so'
                 }
             }
         }
@@ -71,7 +69,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl',
                         'DEST=/web/stage']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local-ssl1.1/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
