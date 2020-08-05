@@ -1,4 +1,4 @@
-/* Curl - Paste this fileinto a Pipeline */
+/* Curl with SSL 1.1 Pipeline */
 
 pipeline {
     agent any
@@ -42,7 +42,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl=/usr/local-ssl1.1/ssl --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
@@ -97,7 +97,7 @@ pipeline {
             }
         }
         stage('deploy') {
-            steps {
+            steps {z
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl-ssl1.1',
