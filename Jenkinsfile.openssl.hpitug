@@ -55,11 +55,28 @@ pipeline {
                 }
             }
         }
+        stage('deploy_src') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=openssl',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make install'
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
         }
@@ -69,7 +86,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl',
                         'DEST=/web/stage']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/lib:/usr/local-ssl1.1/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local-ssl1.1/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
