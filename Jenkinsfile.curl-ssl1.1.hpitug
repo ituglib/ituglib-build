@@ -1,4 +1,4 @@
-/* Curl with SSL 1.1 Pipeline */
+/* Curl SSL 1.1 Jenkins Pipeline */
 
 pipeline {
     agent any
@@ -113,4 +113,3 @@ pipeline {
         }
     }
 }
-

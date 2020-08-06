@@ -1,4 +1,4 @@
-/* Curl - Paste this fileinto a Pipeline */
+/* Curl SSL 1.0 Jenkins Pipeline */
 
 pipeline {
     agent any
@@ -33,7 +33,7 @@ pipeline {
         stage('buildconf') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh './buildconf'
                 }
             }
@@ -41,7 +41,7 @@ pipeline {
         stage('config') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
         stage('findcall_floss') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
             }
@@ -66,7 +66,7 @@ pipeline {
         stage('test') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -74,8 +74,8 @@ pipeline {
         stage('deploy_src') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=curl',
                         'DEST=/web/stage']) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
                         tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
@@ -100,7 +100,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
+                        'BASENAME=curl',
                         'DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
@@ -113,4 +113,3 @@ pipeline {
         }
     }
 }
-
