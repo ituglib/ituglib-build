@@ -42,7 +42,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1" conf_script_floss_cc --with-ssl --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
