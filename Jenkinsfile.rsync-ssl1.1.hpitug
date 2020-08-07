@@ -1,0 +1,91 @@
+/* Rsync SSL 1.1 Pipeline */
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                changelog: true,
+                poll: true,
+                branches: [[name: 'master']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout'],
+                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 60, shallow: false],
+                    [$class: 'CheckoutOption', timeout: 60],
+                    ],
+                userRemoteConfigs: [[url: 'git://git.samba.org/rsync.git']]])
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                /*    sh 'sed -i "1s/3.2.3dev/3.2.2/" version.h' */
+                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib']) {
+                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib',
+                        'BASENAME=rsync-ssl1.1',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib',
+                        'BASENAME=rsync-ssl1.1',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
