@@ -1,4 +1,4 @@
-/* OpenSSL 1.1 CGNAC1 Jenkinsfile Pipeline */
+/* OpenSSL 1.1.1 TNS/X Pipeline */
 
 pipeline {
     agent any
@@ -90,8 +90,9 @@ pipeline {
     post {
         always {
             mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+        success {
             cleanWs()
         }
     }
 }
-

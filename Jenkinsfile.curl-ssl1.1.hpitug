@@ -1,4 +1,4 @@
-/* Curl SSL 1.1 Jenkins Pipeline */
+/* OpenSSL 1.1 PUT - Jenkins Pipeline */
 
 pipeline {
     agent any
@@ -12,45 +12,29 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                branches: [[name: '*/ituglib_release']],
+                branches: [[name: '*/nonstop_port']],
                 extensions: [
-                    [$class: 'CleanBeforeCheckout'],
-                    [$class: 'CloneOption', timeout: 60, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 60]],
-                userRemoteConfigs: [[url: '/home/git/curl']]])
-            }
-        }
-        stage('fix_version') {
-            steps {
-                sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh include/curl/curlver.h LIBCURL_VERSION -DEV && sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh include/curl/curlver.h LIBCURL_TIMESTAMP "\\[unreleased\\]" `date +%Y-%m-%d`'
-            }
-        }
-        stage('link_shtool') {
-            steps {
-                sh 'ln -s /usr/local/bin/shtool shtool'
-            }
-        }
-        stage('buildconf') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh './buildconf'
-                }
+                    [$class: 'CleanBeforeCheckout']],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 120, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 120],
+                    ],
+                userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
             }
         }
         stage('config') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/local/lib" conf_script_floss_cc --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh './Configure nonstop-nse_put --prefix=/usr/local-ssl1.1_put --openssldir=/usr/local-ssl1.1_put/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
                 }
             }
         }
         stage('build') {
             steps {
-                withEnv(['PREFIX=/usr/local',
-                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -58,33 +42,16 @@ pipeline {
         stage('findcall_floss') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'findcall_floss'
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Nevermind" '
                 }
             }
         }
         stage('test') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'make check || echo "Tests failed but expected"'
-                }
-            }
-        }
-        stage('deploy_src') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
-                        'DEST=/web/stage']) {
-                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
-                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
-                            --exclude="*.o" \
-                            --exclude="*.a" \
-                            --exclude="*.so" \
-                            --exclude=".git*" \
-                            --exclude="./.git/*" \
-                            .'
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
                 }
             }
         }
@@ -100,9 +67,9 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
+                        'BASENAME=openssl-put',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_put/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -113,3 +80,4 @@ pipeline {
         }
     }
 }
+
