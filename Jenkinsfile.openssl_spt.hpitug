@@ -59,9 +59,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make install'
-                    sh 'ln ${WORKSPACE}/install/lib/libssl.so ${WORKSPACE}/install/lib/libssl_1.1_spt.so'
-                    sh 'ln ${WORKSPACE}/install/lib/libcrypto.so ${WORKSPACE}/install/lib/libcrypto_1.1_spt.so'
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
         }
@@ -82,4 +80,3 @@ pipeline {
         }
     }
 }
-
