@@ -12,7 +12,7 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                branches: [[name: '*/nonstop_port']],
+                branches: [[name: '*/ituglib_release']],
                 extensions: [
                     [$class: 'CleanBeforeCheckout']],
                 doGenerateSubmoduleConfigurations: false, extensions: [
