@@ -1,0 +1,93 @@
+/* Git with OpenSSL 1.1 Jenkins Pipeline for TNS/X */
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                changelog: true,
+                poll: true,
+                branches: [[name: 'maint']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout'],
+                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 60, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 60],
+                    ],
+                userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh '/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS="-g -O2 -Winline -I/home/ituglib/randall/openssl-1.1/include" LDFLAGS="-L/home/ituglib/randall/openssl-1.1/lib" SHELL=/usr/coreutils/bin/bash'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring floss reports"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh '/usr/coreutils/bin/make -k test TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git_ssl_1.1',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git_ssl_1.1',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git_ssl_1.1',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
