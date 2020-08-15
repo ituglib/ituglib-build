@@ -70,7 +70,6 @@ pipeline {
                         'BASENAME=openssl-put',
                         'DEST=/home/ituglib/randall/stage']) {
                     sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_put/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}usr/local-ssl1.1_put/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-                    sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
         }
@@ -83,6 +82,7 @@ pipeline {
                         'REMOTE=randall@ituglib-nskos.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
         }
