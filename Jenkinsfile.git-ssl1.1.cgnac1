@@ -57,7 +57,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git_ssl_1.1',
                         'DEST=install']) {
-                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O0 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
                 }
             }
         }
