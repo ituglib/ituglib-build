@@ -59,7 +59,7 @@ pipeline {
         stage('deploy') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=curl-ssl1.1',
                         'DEST=/home/ituglib/randall/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
