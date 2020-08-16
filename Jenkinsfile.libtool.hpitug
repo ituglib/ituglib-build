@@ -1,63 +1,92 @@
-# Paste the rest of this file into a standard Pipeline project to
-# build/test/stage libtool.
-# Also set Discard old builds, typically log rotation to 2
-# Poll SCM something useful, like H/10 * * * *
+/* Libtool pipeline for TNS/E */
 
-node {
-    lock(resource: 'libtool-test-environment') {
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
         stage('checkout') {
-            checkout([$class: 'GitSCM',
-            branches: [[name: '*/ituglib_release']],
-            extensions: [
-                [$class: 'CleanBeforeCheckout']],
-            userRemoteConfigs: [[url: '/home/git/libtool']]])
+            steps {
+                checkout([$class: 'GitSCM',
+                branches: [[name: '*/ituglib_release2']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout']],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 60, shallow: true],
+                    [$class: 'CheckoutOption', timeout: 60],
+                    ],
+                userRemoteConfigs: [[url: '/home/git/libtool']]])
+            }
         }
-        stage('boolstrap') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh './bootstrap'
+        stage('bootstrap') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh './bootstrap'
+                    sh 'autoconf'
+                    sh 'automake'
+                }
             }
         }
         stage('config') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib',
-                    'PREFIX=/usr/local']) {
-                sh 'conf_script_floss_cc'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c99 -Wnowarn=770,317" LIBS="-lrld" conf_script_floss_cc'
+                }
             }
         }
         stage('build') {
-            withEnv(['PREFIX=/usr/local',
-                    'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh 'make'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
             }
         }
         stage('findcall_floss') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh 'findcall_floss'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss'
+                }
             }
         }
         stage('test') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib']) {
-                sh 'make check || echo "This is expected to fail"'
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check || echo "This is expected to fail"'
+                }
             }
         }
-        stage('deploy_src') {
-            withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                    '_RLD_LIB_PATH=:/usr/local/lib',
-                    'BASENAME=libtool',
-                    'DEST=/web/stage']) {
-                sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
-                    tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
-                        --exclude="*.o" \
-                        --exclude="*.a" \
-                        --exclude="*.so" \
-                        --exclude=".git*" \
-                        --exclude="./.git/*" \
-                        .'
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
             }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=libtool',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/libtool" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
