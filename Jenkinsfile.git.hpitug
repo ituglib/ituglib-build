@@ -1,5 +1,3 @@
-/* Git - Jenkins Pipeline */
-
 pipeline {
     agent any
     options {
@@ -17,8 +15,8 @@ pipeline {
                 branches: [[name: 'maint']],
                 extensions: [
                     [$class: 'CleanBeforeCheckout'],
-                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
-                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                        [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                                recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
                 doGenerateSubmoduleConfigurations: false, extensions: [
                     [$class: 'CleanCheckout'],
                     [$class: 'CloneOption', timeout: 120, shallow: true],
@@ -60,6 +58,7 @@ pipeline {
                         'BASENAME=git',
                         'DEST=install']) {
                     sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
         }
@@ -69,7 +68,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }
         }
@@ -80,4 +79,3 @@ pipeline {
         }
     }
 }
-

@@ -1,4 +1,4 @@
-/* Git - Jenkins Pipeline */
+/* Git - Jenkins Pipeline - TNS/X */
 
 pipeline {
     agent any
@@ -59,6 +59,7 @@ pipeline {
                         'BASENAME=git',
                         'DEST=install']) {
                     sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
         }
@@ -80,7 +81,7 @@ pipeline {
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=randall@ituglib-nskos.xid.com',
                         'REMOTE_DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
@@ -93,4 +94,3 @@ pipeline {
         }
     }
 }
-

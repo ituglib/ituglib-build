@@ -58,6 +58,7 @@ pipeline {
                         'BASENAME=git-ssl1.1',
                         'DEST=install']) {
                     sh 'make install DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/openssl/include -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
         }
@@ -79,7 +80,7 @@ pipeline {
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=randall@ituglib-nskos.xid.com',
                         'REMOTE_DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
