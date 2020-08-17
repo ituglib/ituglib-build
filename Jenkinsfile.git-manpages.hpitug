@@ -1,0 +1,36 @@
+/* Git ManPages Jenkins Pipeline */
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                changelog: true,
+                poll: true,
+                branches: [[name: 'master']],
+                extensions: [
+                    [$class: 'CleanBeforeCheckout'],
+                        [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                                recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                doGenerateSubmoduleConfigurations: false, extensions: [
+                    [$class: 'CleanCheckout'],
+                    [$class: 'CloneOption', timeout: 120, shallow: false],
+                    [$class: 'CheckoutOption', timeout: 120],
+                    ],
+                userRemoteConfigs: [[url: 'https://github.com/gitster/git-manpages.git']]])
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}

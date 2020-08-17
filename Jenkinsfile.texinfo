@@ -1,0 +1,3 @@
+/* Texinfo - deprecated */
+rm -f ./config.status; \
+conf_script_floss_cc
