@@ -6,7 +6,7 @@
  */
 import hudson.model.*;
 import java.sql.*;
-@Library('ituglib-stage') _
+@Library('ituglib_stage') _
 
 def publishSource() {
 	NormalQualifiedPackageEngine engine = new NormalQualifiedPackageEngine();
