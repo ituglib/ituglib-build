@@ -18,10 +18,10 @@ class JdbcLoader {
    }
 
    public Connection getConnection() {
-      //File localFile = new File(JDBC_MX_TAR);
-      // echo "Attempting to use "+localFile.toString();
+      File localFile = new File(JDBC_MX_TAR);
+      echo "Attempting to use ${localFile}";
       // Use the groovy script's classLoader to add the jar file at runtime.
-      //this.class.classLoader.rootLoader.addURL(localFile.toURI().toURL());
+      this.class.classLoader.rootLoader.addURL(localFile.toURI().toURL());
 
       // Now register the driver.
       Class.forName(JDBC_DRIVER);
