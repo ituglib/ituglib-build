@@ -4,6 +4,7 @@ import hudson.model.*;
 import java.io.*;
 import java.sql.*;
 import java.util.regex.*;
+import org.ituglib.deploy.*;
 
 abstract class AbstractPackageEngine {
    boolean debug = System.getenv("DEBUG") != null;
