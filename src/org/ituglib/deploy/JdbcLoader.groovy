@@ -28,6 +28,10 @@ class JdbcLoader {
 		}
 		// Use the groovy script's classLoader to add the jar file at
 		// runtime.
+		String uri = localFile.toURI().toString();
+		echo "My uri is ${uri}";
+		String url = localFile.toURI().toURL().toString();
+		echo "My url is ${url}";
 		this.class.classLoader.rootLoader.addURL(
 			localFile.toURI().toURL());
 
