@@ -4,6 +4,7 @@ package org.ituglib.deploy;
 
 import hudson.model.*;
 import java.io.*;
+import java.net.*;
 import java.sql.*;
 import java.util.regex.*;
 
@@ -23,7 +24,17 @@ class JdbcLoader {
 		// runtime.
 		URI uri = localFile.toURI();
 		URL url = uri.toURL();
-		this.class.classLoader.rootLoader.addURL("file:///usr/tandem/jdbcMx/current/lib/jdbcMx.jar");
+		if (url == null) {
+			echo "url is null";
+		}
+
+		if (this.class.classLoader == null) {
+			echo "classLoader is null";
+		}
+		if (this.class.classLoader.rootLoader == null) {
+			echo "rootLoader is null";
+		}
+		this.class.classLoader.rootLoader.addURL(url);
 
 		// Now register the driver.
 		Class.forName(JDBC_DRIVER);
