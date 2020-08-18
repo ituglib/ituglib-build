@@ -19,15 +19,13 @@ abstract class AbstractPackageEngine {
    String suffix;
    String type;
    String packageName;
-   String workspace;
+   String workspace = System.getenv("WORKSPACE");
    String url;
    String nonstopExtensions;
    String dependencies;
    String readmeFile;
    int readmeDirKeyValue = 2; // Hard coded value for the readme folder
    String targetShell = String.format('sh package.stage.target', workspace);
-   String patternString = null;
-   Pattern pattern = null;
    String schema;
    Connection connection;
 
@@ -36,13 +34,6 @@ abstract class AbstractPackageEngine {
    abstract String archivePattern();
 
    abstract String targetPattern(String version);
-
-   public AbstractPackageEngine() {
-	workspace = System.getenv("WORKSPACE");
-
-	this.patternString = archivePattern();
-	this.pattern = Pattern.compile(patternString);
-   }
 
    public void setStaging(String value) {
 	this.staging = value;
@@ -114,6 +105,7 @@ abstract class AbstractPackageEngine {
 
       int packageCount = 0;
 
+      Pattern pattern = Pattern.compile(archivePattern());
       for (File archive : new File(staging).listFiles()) {
          Matcher matcher = pattern.matcher(archive.getName());
          if (matcher.matches()) {
