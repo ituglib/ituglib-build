@@ -12,8 +12,8 @@ import hudson.model.*;
 import java.sql.*;
 import org.ituglib.deploy.*;
 
-def call(String package = 'human') {
-        echo "Hello, ${name}"
+def call(String packageName = 'human') {
+        echo "Hello, ${packageName}"
         echo "Hello, "+GlobalVars.foo
 
 	//NormalQualifiedPackageEngine engine = new NormalQualifiedPackageEngine();
