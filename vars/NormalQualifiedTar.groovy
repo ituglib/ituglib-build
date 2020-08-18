@@ -19,19 +19,19 @@ def call(String packageName = 'unknown', String prefix = '',
 
 	NormalQualifiedPackageEngine engine =
 		new NormalQualifiedPackageEngine();
-	engine.setBasename(packageName);
-	engine.setPrefix(prefix);
-	engine.setSuffix(suffix);
-	engine.setNonstopExtensions(nonstopExtensions);
-	engine.setDependencies(dependencies);
-	engine.setReadmeFile(readmeFile);
+	engine.updateBasename(packageName);
+	engine.updatePrefix(prefix);
+	engine.updateSuffix(suffix);
+	engine.updateNonstopExtensions(nonstopExtensions);
+	engine.updateDependencies(dependencies);
+	engine.updateReadmeFile(readmeFile);
 	//JdbcLoader loader = new JdbcLoader();
 
 	//String schema = System.getenv("SCHEMA");
-	//engine.setSchema(schema);
+	//engine.updateSchema(schema);
 
 	//Connection connection = loader.getConnection();
-	//engine.setConnection(connection);
+	//engine.set(connection);
 
 	//engine.execute();
 	//connection.close();

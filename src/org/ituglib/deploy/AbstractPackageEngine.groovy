@@ -40,54 +40,54 @@ abstract class AbstractPackageEngine {
 	workspace = System.getenv("WORKSPACE");
    }
 
-   public void setStaging(String value) {
+   public void updateStaging(String value) {
 	this.staging = value;
    }
 
-   public void setSuffix(String value) {
+   public void updateSuffix(String value) {
 	this.suffix = value;
    }
 
-   public void setType(String value) {
+   public void updateType(String value) {
 	this.type = value;
    }
 
-   public void setUrl(String value) {
+   public void updateUrl(String value) {
 	this.url = value;
    }
 
-   public void setDependencies(String value) {
+   public void updateDependencies(String value) {
 	this.dependencies = value;
    }
 
-   public void setNonstopExtensions(String value) {
+   public void updateNonstopExtensions(String value) {
 	this.nonstopExtensions = value;
    }
 
-   public void setReadmeFile(String value) {
+   public void updateReadmeFile(String value) {
 	this.readmeFile = value;
    }
 
-   public void setPrefix(String value) {
+   public void updatePrefix(String value) {
 	prefix = value;
 	packageName = prefix == null ? basename : prefix + basename;
    }
 
-   public void setBasename(String value) {
+   public void updateBasename(String value) {
 	basename = value;
 	packageName = prefix == null ? basename : prefix + basename;
    }
 
-   public void setDestination(String value) {
+   public void updateDestination(String value) {
 	this.destination = value;
 	this.destinationDirectory = new File(destination);
    }
 
-   public void setConnection(Connection connection) {
+   public void updateConnection(Connection connection) {
       this.connection = connection;
    }
 
-   public void setSchema(String schema) {
+   public void updateSchema(String schema) {
       this.schema = schema;
    }
 
