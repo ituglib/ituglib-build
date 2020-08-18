@@ -17,8 +17,10 @@ def call(String packageName = 'unknown', String prefix = '',
 	String dependencies = null, String readmeFile = null) {
         echo "Hello, ${packageName} and " + GlobalVars.foo;
 
+	try {
 	NormalQualifiedPackageEngine engine =
 		new NormalQualifiedPackageEngine();
+	echo "Returned from constructor";
 	engine.updateBasename(packageName);
 	engine.updatePrefix(prefix);
 	engine.updateSuffix(suffix);
@@ -35,5 +37,8 @@ def call(String packageName = 'unknown', String prefix = '',
 
 	//engine.execute();
 	//connection.close();
+	} catch (Throwable t) {
+		t.printStackTrace();
+	}
 }
 
