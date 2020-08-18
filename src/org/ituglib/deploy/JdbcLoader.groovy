@@ -23,7 +23,7 @@ class JdbcLoader {
 		// runtime.
 		URI uri = localFile.toURI();
 		URL url = uri.toURL();
-		this.class.classLoader.rootLoader.addURL(url);
+		this.class.classLoader.rootLoader.addURL("file:///usr/tandem/jdbcMx/current/lib/jdbcMx.jar");
 
 		// Now register the driver.
 		Class.forName(JDBC_DRIVER);
