@@ -10,6 +10,10 @@ import org.ituglib.deploy.AbstractPackageEngine;
 
 class NormalQualifiedPackageEngine extends AbstractPackageEngine {
 
+   public NormalQualifiedPackageEngine) {
+	println 'Made the Normal constructor';
+   }
+
    String getName() {
       return "Packaging simple with qualified version strategy preserving archive name";
    }
