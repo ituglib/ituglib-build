@@ -15,28 +15,28 @@ import org.ituglib.deploy.*;
 def call(String packageName = 'unknown', String prefix = '',
 	String suffix = '', String nonstopExtensions = null,
 	String dependencies = null, String readmeFile = null) {
-        echo "Hello, ${packageName} and " + GlobalVars.foo;
+        //echo "Hello, ${packageName} and " + GlobalVars.foo;
+	echo "Running deploy for ${packageName}"
 
 	try {
 	NormalQualifiedPackageEngine engine =
 		new NormalQualifiedPackageEngine();
-	echo "Returned from constructor";
 	engine.updateBasename(packageName);
 	engine.updatePrefix(prefix);
 	engine.updateSuffix(suffix);
 	engine.updateNonstopExtensions(nonstopExtensions);
 	engine.updateDependencies(dependencies);
 	engine.updateReadmeFile(readmeFile);
-	//JdbcLoader loader = new JdbcLoader();
+	JdbcLoader loader = new JdbcLoader();
 
-	//String schema = System.getenv("SCHEMA");
-	//engine.updateSchema(schema);
+	String schema = System.getenv("SCHEMA");
+	engine.updateSchema(schema);
 
-	//Connection connection = loader.getConnection();
-	//engine.set(connection);
+	Connection connection = loader.getConnection();
+	engine.set(connection);
 
 	//engine.execute();
-	//connection.close();
+	connection.close();
 	} catch (Throwable t) {
 		t.printStackTrace();
 	}
