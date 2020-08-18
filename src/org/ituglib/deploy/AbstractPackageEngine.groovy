@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.regex.*;
 import org.ituglib.deploy.*;
 
+package org.ituglib.deploy;
+
 abstract class AbstractPackageEngine {
    boolean debug = System.getenv("DEBUG") != null;
    String taskLabel = "[PackageEngine] ";

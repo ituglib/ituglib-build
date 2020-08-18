@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.regex.*;
 import org.ituglib.deploy.AbstractPackageEngine;
 
+package org.ituglib.deploy;
+
 class NormalQualifiedPackageEngine extends AbstractPackageEngine {
 
    public NormalQualifiedPackageEngine() {

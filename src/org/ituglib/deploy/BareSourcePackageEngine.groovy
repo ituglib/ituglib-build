@@ -6,6 +6,8 @@ import java.sql.*;
 import java.util.regex.*;
 import org.ituglib.deploy.AbstractPackageEngine;
 
+package org.ituglib.deploy;
+
 class BareSourcePackageEngine extends AbstractPackageEngine {
 
    public BaseSourcePackageEngine(String schema, Connection connection) {

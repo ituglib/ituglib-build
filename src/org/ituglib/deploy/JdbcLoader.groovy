@@ -5,6 +5,8 @@ import java.io.*;
 import java.sql.*;
 import java.util.regex.*;
 
+package org.ituglib.deploy;
+
 class JdbcLoader {
 
    static private final String JDBC_MX_TAR =

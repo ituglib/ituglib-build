@@ -4,6 +4,8 @@ import hudson.model.*;
 import java.io.*;
 import java.sql.*;
 
+package org.ituglib.deploy;
+
 class Packages {
    String schema;
    Connection connection;
