@@ -1,12 +1,12 @@
 #!/usr/bin/env groovy
 
+package org.ituglib.deploy;
+
 import hudson.model.*;
 import java.io.*;
 import java.sql.*;
 import java.util.regex.*;
 import org.ituglib.deploy.AbstractPackageEngine;
-
-package org.ituglib.deploy;
 
 class PlatformPackageEngine extends AbstractPackageEngine {
 

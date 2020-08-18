@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
+package org.ituglib.deploy;
+
 import hudson.model.*;
 import java.io.*;
 import java.sql.*;
-
-package org.ituglib.deploy;
 
 class Repackage {
    String taskName = "[" + this.getClass().getSimpleName() + "] ";
