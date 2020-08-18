@@ -66,10 +66,10 @@ abstract class AbstractPackageEngine {
 	this.nonstopExtensions = nonstopExtensions;
 	this.dependencies = dependencies;
 	this.readmeFile = readmeFile;
-	File destinationDirectory = new File(destination);
+	destinationDirectory = new File(destination);
 
-	String packageName = prefix == null ? basename : prefix + basename;
-	String workspace = System.getenv("WORKSPACE");
+	packageName = prefix == null ? basename : prefix + basename;
+	workspace = System.getenv("WORKSPACE");
 
 	this.patternString = archivePattern();
 	this.pattern = Pattern.compile(patternString);
