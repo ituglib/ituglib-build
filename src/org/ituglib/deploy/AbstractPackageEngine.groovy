@@ -38,42 +38,53 @@ abstract class AbstractPackageEngine {
    abstract String targetPattern(String version);
 
    public AbstractPackageEngine() {
-	echo "Cannot use default AbstractPackageEngine constructor";
-	System.exit(1);
-   }
-
-   public AbstractPackageEngine(String basename) {
-	this(baseName, null, null, null, null, null, null, null, null, null);
-   }
-
-   public AbstractPackageEngine(String basename, String prefix, String suffix,
-		String nonstopExtensions, String dependencies) {
-	this(baseName, prefix, suffix, destination, staging, type, url,
-		nonstopExtensions, dependencies, null);
-   }
-
-   public AbstractPackageEngine(String basename, String prefix, String suffix,
-		String destination, String staging, String type, String url,
-		String nonstopExtensions, String dependencies,
-		String readmeFile) {
-	this.basename = basename;
-	this.staging = staging;
-	this.destination = destination;
-	this.prefix = prefix;
-	this.suffix = suffix;
-	this.type = type;
-	this.url = url;
-	this.nonstopExtensions = nonstopExtensions;
-	this.dependencies = dependencies;
-	this.readmeFile = readmeFile;
-	destinationDirectory = new File(destination);
-
-	packageName = prefix == null ? basename : prefix + basename;
 	workspace = System.getenv("WORKSPACE");
 
 	this.patternString = archivePattern();
 	this.pattern = Pattern.compile(patternString);
-	File destinationDirectory = new File(destination);
+   }
+
+   public void setStaging(String value) {
+	this.staging = value;
+   }
+
+   public void setSuffix(String value) {
+	this.suffix = value;
+   }
+
+   public void setType(String value) {
+	this.type = value;
+   }
+
+   public void setUrl(String value) {
+	this.url = value;
+   }
+
+   public void setDependencies(String value) {
+	this.dependencies = value;
+   }
+
+   public void setNonstopExtensions(String value) {
+	this.nonstopExtensions = value;
+   }
+
+   public void setReadmeFile(String value) {
+	this.readmeFile = value;
+   }
+
+   public void setPrefix(String value) {
+	prefix = value;
+	packageName = prefix == null ? basename : prefix + basename;
+   }
+
+   public void setBasename(String value) {
+	basename = value;
+	packageName = prefix == null ? basename : prefix + basename;
+   }
+
+   public void setDestination(String value) {
+	this.destination = value;
+	this.destinationDirectory = new File(destination);
    }
 
    public void setConnection(Connection connection) {

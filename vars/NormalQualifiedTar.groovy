@@ -18,8 +18,13 @@ def call(String packageName = 'unknown', String prefix = '',
         echo "Hello, ${packageName} and " + GlobalVars.foo;
 
 	NormalQualifiedPackageEngine engine =
-		new NormalQualifiedPackageEngine(packageName, prefix,
-			suffix, nonstopExtensions, dependencies, readmeFile);
+		new NormalQualifiedPackageEngine();
+	engine.setBasename(packageName);
+	engine.setPrefix(prefix);
+	engine.setSuffix(suffix);
+	engine.setNonstopExtensions(nonstopExtensions);
+	engine.setDependencies(dependencies);
+	engine.setReadmeFile(readmeFile);
 	//JdbcLoader loader = new JdbcLoader();
 
 	//String schema = System.getenv("SCHEMA");
