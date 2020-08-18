@@ -10,6 +10,7 @@ import org.ituglib.deploy.*;
 
 abstract class AbstractPackageEngine {
    boolean debug = System.getenv("DEBUG") != null;
+   boolean dryRun = false;
    String taskLabel = "[PackageEngine] ";
    String basename;
    String staging;
@@ -38,6 +39,10 @@ abstract class AbstractPackageEngine {
    public AbstractPackageEngine() {
 	println "Abstract initialized";
 	workspace = System.getenv("WORKSPACE");
+   }
+
+   public void updateDryRun(boolean value) {
+	this.dryRun = value;
    }
 
    public void updateStaging(String value) {
@@ -118,6 +123,10 @@ abstract class AbstractPackageEngine {
             String version = matcher.group(1);
             String compression = matcher.group(2);
             Repackage repackager = new Repackage(archive, version, compression);
+	    if (dryRun) {
+		println "Would use "+archive;
+		break;
+	    }
             File temp = new File("/tmp/"+basename);
             repackager.decompress(temp);
             repackager.chown(temp);

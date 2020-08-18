@@ -35,9 +35,13 @@ def call(String packageName = 'unknown', String prefix = '',
 	Connection connection = loader.getConnection();
 	engine.set(connection);
 
-	//engine.execute();
+	engine.setDryRun(System.getenv("DRYRUN") != null);
+	engine.execute();
 	connection.close();
+
+	echo "Completed deploy for ${packageName} without exception"
 	} catch (Throwable t) {
+		echo t.getLocalizedMessage();
 		t.printStackTrace();
 	}
 }
