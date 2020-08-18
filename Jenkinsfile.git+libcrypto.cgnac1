@@ -60,6 +60,7 @@ pipeline {
                         'DEST=install']) {
                     sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
                     sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local/lib || echo "Ignore"'
                     sh 'cp /usr/local-ssl1.1/lib/libcrypto.so ${WORKSPACE}/install/usr/local/lib'
                 }
             }
