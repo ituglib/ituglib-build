@@ -16,7 +16,7 @@ def call(String packageName = 'human') {
         echo "Hello, ${packageName}"
         echo "Hello, "+GlobalVars.foo
 
-	//NormalQualifiedPackageEngine engine = new NormalQualifiedPackageEngine();
+	NormalQualifiedPackageEngine engine = new NormalQualifiedPackageEngine();
 	//JdbcLoader loader = new JdbcLoader();
 
 	//String schema = System.getenv("SCHEMA");
