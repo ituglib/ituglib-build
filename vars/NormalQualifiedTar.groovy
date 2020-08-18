@@ -43,7 +43,7 @@ def call(String packageName = 'unknown', String prefix = '',
 	} catch (Throwable t) {
 		echo t.getLocalizedMessage();
 		for (StackTraceElement element : t.getStackTrace()) {
-			echo element.toString
+			echo element.toString();
 		}
 	}
 }
