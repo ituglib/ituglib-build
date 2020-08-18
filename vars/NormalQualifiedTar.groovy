@@ -42,7 +42,9 @@ def call(String packageName = 'unknown', String prefix = '',
 	echo "Completed deploy for ${packageName} without exception"
 	} catch (Throwable t) {
 		echo t.getLocalizedMessage();
-		t.printStackTrace();
+		StringWriter sw = new StringWriter();
+		t.printStackTrace(sw);
+		echo sw.toString();
 	}
 }
 
