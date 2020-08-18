@@ -18,7 +18,6 @@ def call(String packageName = 'unknown', String prefix = '',
         //echo "Hello, ${packageName} and " + GlobalVars.foo;
 	echo "Running deploy for ${packageName}"
 
-	try {
 	NormalQualifiedPackageEngine engine =
 		new NormalQualifiedPackageEngine();
 	engine.updateBasename(packageName);
@@ -40,11 +39,5 @@ def call(String packageName = 'unknown', String prefix = '',
 	connection.close();
 
 	echo "Completed deploy for ${packageName} without exception"
-	} catch (Throwable t) {
-		echo t.getLocalizedMessage();
-		for (StackTraceElement element : t.getStackTrace()) {
-			echo element.toString();
-		}
-	}
 }
 
