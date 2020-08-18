@@ -12,11 +12,14 @@ import hudson.model.*;
 import java.sql.*;
 import org.ituglib.deploy.*;
 
-def call(String packageName = 'human') {
-        echo "Hello, ${packageName}"
-        echo "Hello, "+GlobalVars.foo
+def call(String packageName = 'unknown', String prefix = '',
+	String suffix = '', String nonstopExtensions = null,
+	String dependencies = null, String readmeFile = null) {
+        echo "Hello, ${packageName} and " + GlobalVars.foo;
 
-	NormalQualifiedPackageEngine engine = new NormalQualifiedPackageEngine();
+	NormalQualifiedPackageEngine engine =
+		new NormalQualifiedPackageEngine(packageName, prefix,
+			suffix, nonstopExtensions, dependencies, readmeFile);
 	//JdbcLoader loader = new JdbcLoader();
 
 	//String schema = System.getenv("SCHEMA");

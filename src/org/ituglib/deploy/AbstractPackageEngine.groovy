@@ -11,19 +11,19 @@ import org.ituglib.deploy.*;
 abstract class AbstractPackageEngine {
    boolean debug = System.getenv("DEBUG") != null;
    String taskLabel = "[PackageEngine] ";
-   String basename = System.getenv("BASENAME");
-   String staging = System.getenv("DIST");
-   String destination = System.getenv("DEST");
-   File destinationDirectory = new File(destination);
-   String prefix = System.getenv("PREFIX");
-   String suffix = System.getenv("SUFFIX");
-   String type = System.getenv("TYPE");
-   String packageName = prefix == null ? basename : prefix + basename;
-   String workspace = System.getenv("WORKSPACE");
-   String url = System.getenv("URL");
-   String nonstopExtensions = System.getenv("NONSTOP_EXTENSIONS");
-   String dependencies = System.getenv("DEPENDENCIES");
-   String readmeFile = System.getenv("README_FILE");
+   String basename;
+   String staging;
+   String destination;
+   File destinationDirectory;
+   String prefix;
+   String suffix;
+   String type;
+   String packageName;
+   String workspace;
+   String url;
+   String nonstopExtensions;
+   String dependencies;
+   String readmeFile;
    int readmeDirKeyValue = 2; // Hard coded value for the readme folder
    String targetShell = String.format('sh package.stage.target', workspace);
    String patternString = null;
@@ -38,9 +38,42 @@ abstract class AbstractPackageEngine {
    abstract String targetPattern(String version);
 
    public AbstractPackageEngine() {
-      this.patternString = archivePattern();
-      this.pattern = Pattern.compile(patternString);
-      File destinationDirectory = new File(destination);
+	echo "Cannot use default AbstractPackageEngine constructor";
+	System.exit(1);
+   }
+
+   public AbstractPackageEngine(String basename) {
+	this(baseName, null, null, null, null, null, null, null, null, null);
+   }
+
+   public AbstractPackageEngine(String basename, String prefix, String suffix,
+		String nonstopExtensions, String dependencies) {
+	this(baseName, prefix, suffix, destination, staging, type, url,
+		nonstopExtensions, dependencies, null);
+   }
+
+   public AbstractPackageEngine(String basename, String prefix, String suffix,
+		String destination, String staging, String type, String url,
+		String nonstopExtensions, String dependencies,
+		String readmeFile) {
+	this.basename = basename;
+	this.staging = staging;
+	this.destination = destination;
+	this.prefix = prefix;
+	this.suffix = suffix;
+	this.type = type;
+	this.url = url;
+	this.nonstopExtensions = nonstopExtensions;
+	this.dependencies = dependencies;
+	this.readmeFile = readmeFile;
+	File destinationDirectory = new File(destination);
+
+	String packageName = prefix == null ? basename : prefix + basename;
+	String workspace = System.getenv("WORKSPACE");
+
+	this.patternString = archivePattern();
+	this.pattern = Pattern.compile(patternString);
+	File destinationDirectory = new File(destination);
    }
 
    public void setConnection(Connection connection) {

@@ -10,7 +10,11 @@ import org.ituglib.deploy.AbstractPackageEngine;
 
 class NormalQualifiedPackageEngine extends AbstractPackageEngine {
 
-   public NormalQualifiedPackageEngine() {
+   public NormalQualifiedPackageEngine(String basename, String prefix,
+		String suffix, String nonstopExtensions, String dependencies,
+		String readmeFile) {
+        super(baseName, prefix, suffix, destination, staging, type, url,
+                nonstopExtensions, dependencies, readmeFile);
    }
 
    String getName() {
