@@ -19,7 +19,7 @@ abstract class AbstractPackageEngine {
    String suffix;
    String type;
    String packageName;
-   String workspace = System.getenv("WORKSPACE");
+   String workspace;
    String url;
    String nonstopExtensions;
    String dependencies;
@@ -34,6 +34,11 @@ abstract class AbstractPackageEngine {
    abstract String archivePattern();
 
    abstract String targetPattern(String version);
+
+   public AbstractPackageEngine() {
+	println "Abstract initialized";
+	workspace = System.getenv("WORKSPACE");
+   }
 
    public void setStaging(String value) {
 	this.staging = value;
