@@ -1,5 +1,5 @@
 test -z "${VERSION_PATH}" && \
-	export VERSION=`${WORKSPACE}/nano --version | fgrep 'nano, version' | \
+	export VERSION=`${WORKSPACE}/src/nano --version | fgrep 'nano, version' | \
 		sed '1,$s/.*nano, version \(.*\)$/\1/'` \
  || \
 	export VERSION=`${VERSION_PATH} --version | fgrep 'nano, version' | \
