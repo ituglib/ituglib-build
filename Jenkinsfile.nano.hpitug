@@ -23,7 +23,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local/include/ncurses" conf_script_floss_cc --prefix=/usr/local'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local/include/ncurses" conf_script_floss_cc --prefix=/usr/local --enable-utf8'
                 }
             }
         }
