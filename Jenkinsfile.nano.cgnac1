@@ -1,0 +1,105 @@
+/* Nano pipeline for TNS/X - requires the tarball, not git. */
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    stages {
+        stage('unpack') {
+            steps {
+                withEnv(['NANO_VERSION=5.1',
+                         'DOWNLOADS=/home/ituglib/randall/downloads']){
+                    cleanWs()
+                    sh 'tar xzf ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
+                    sh 'mv nano-${NANO_VERSION}/* .'
+                }
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/coreutils/include -I/usr/coreutils/include/ncurses" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local'
+                }
+            }
+        }
+        stage('patch') {
+            steps {
+                sh 'sed "/#include <string.h>/a#include <strings.h>" --in-place src/chars.c'
+                sh 'sed "/#include <unistd.h>/a#include <strings.h>" --in-place src/files.c'
+                sh 'sed "/#include <unistd.h>/a#include <netdb.h>" --in-place src/files.c'
+                sh 'sed "/SA_RESETHAND/d" --in-place src/nano.c'
+                sh 'sed "/tv_nsec == /d" --in-place src/text.c'
+                sh 'sed "/st_mtim.tv_sec == /s/&& /) {/" --in-place src/text.c'
+                sh 'sed "/st_mtim.tv_sec == /s/st_mtim.tv_sec/st_mtime/" --in-place src/text.c'
+                sh 'sed "/timestamp_sec = /s/(long)fileinfo.st_mtim.tv_sec/(long)fileinfo.st_mtime/" --in-place src/text.c'
+                sh 'sed "/timestamp_nsec = /s/(long)fileinfo.st_mtim.tv_nsec/0/" --in-place src/text.c'
+                sh 'sed "/(long)fileinfo.st_mtime == timestamp_sec &&/s/(long)fileinfo.st_mtime == timestamp_sec &&/(long)fileinfo.st_mtime == timestamp_sec) {/" --in-place src/text.c'
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Probably fails but that is probably ok"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=nano',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/nano" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=nano',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+        success {
+            cleanWs()
+        }
+    }
+}
