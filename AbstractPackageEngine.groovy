@@ -5,6 +5,7 @@ import java.util.regex.*;
 
 abstract class AbstractPackageEngine {
    boolean debug = System.getenv("DEBUG") != null;
+   boolean noUnstage = System.getenv("NOUNSTAGE") != null;
    String taskLabel = "[PackageEngine] ";
    String basename = System.getenv("BASENAME");
    String staging = System.getenv("DIST");
@@ -120,7 +121,11 @@ abstract class AbstractPackageEngine {
             }
             connection.commit();
             repackager.clean(temp);
-            repackager.clean(archive);
+            if (noUnstage) {
+		println "Kept "+archive.getName();
+            } else {
+                repackager.clean(archive);
+            }
          }
       }
       if (packageCount < 1) {
