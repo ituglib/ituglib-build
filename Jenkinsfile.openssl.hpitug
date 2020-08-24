@@ -1,12 +1,10 @@
-/* OpenSSL 1.1 - Jenkins Pipeline */
-
 pipeline {
     agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '2'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H * * * *')
     }
     stages {
         stage('checkout') {
@@ -14,28 +12,45 @@ pipeline {
                 checkout([$class: 'GitSCM',
                 branches: [[name: '*/ituglib_release']],
                 extensions: [
-                    [$class: 'CleanBeforeCheckout']],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
+                    [$class: 'CleanBeforeCheckout'],
                     [$class: 'CloneOption', timeout: 120, shallow: true],
                     [$class: 'CheckoutOption', timeout: 120],
                     ],
-                userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
+                userRemoteConfigs: [[url: '/home/git/openssl']]])
             }
         }
         stage('config') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh './Configure nonstop-nse --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
+                    sh './config --prefix=/usr/local shared'
+                }
+            }
+        }
+        stage('fix_version') {
+            steps {
+                withEnv([]) {
+                    sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh Makefile "^VERSION=" -dev'
+                    sh 'sh ${WORKSPACE}/../Ituglib_Build/unsetdev.sh crypto/opensslv.h "OPENSSL_VERSION_TEXT" -dev'
+                    sh 'echo "Should report no -dev entries" && fgrep -R -e "-dev" .'
+                }
+            }
+        }
+        stage('make_depend') {
+            steps {
+                withEnv(['PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make depend'
                 }
             }
         }
         stage('build') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PREFIX=/usr/local',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make'
+                    sh 'make LDFLAGS=-lrld'
                 }
             }
         }
@@ -51,7 +66,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
+                    sh 'make test'
                 }
             }
         }
@@ -60,15 +75,9 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl',
-                        'DEST=/web/stage']) {
-                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
-                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
-                            --exclude="*.o" \
-                            --exclude="*.a" \
-                            --exclude="*.so" \
-                            --exclude=".git*" \
-                            --exclude="./.git/*" \
-                            .'
+                        'DEST=/web/stage',
+                        'SRC_EXCLUDES=-not -path "CVS/*" -not -path "*/CVS/*" -not -name CVS -not -name .cvsignore -not -name STATUS -not -name TABLE']) {
+                    sh '. ${WORKSPACE}/../Ituglib_Build/dist.info && bash ${WORKSPACE}/../Ituglib_Build/package.src.std'
                 }
             }
         }
@@ -76,7 +85,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                    sh 'make install INSTALL_PREFIX=${WORKSPACE}/install'
                 }
             }
         }
@@ -86,7 +95,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl',
                         'DEST=/web/stage']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local-ssl1.1/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -97,4 +106,3 @@ pipeline {
         }
     }
 }
-
