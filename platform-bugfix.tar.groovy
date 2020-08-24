@@ -33,7 +33,7 @@ if (System.getenv("TYPE") == null) {
 }
 
 
-PlatformBugfixPackageEngine engine = new PlatformBugFixPackageEngine();
+PlatformBugfixPackageEngine engine = new PlatformBugfixPackageEngine();
 JdbcLoader loader = new JdbcLoader();
 
 String schema = System.getenv("SCHEMA");
