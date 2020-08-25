@@ -18,7 +18,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -40,7 +40,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -62,7 +62,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -84,7 +84,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -106,7 +106,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -128,7 +128,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -150,7 +150,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -172,7 +172,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'

@@ -18,10 +18,10 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only']) {
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
             }
@@ -38,10 +38,10 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only']) {
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
             }
@@ -58,10 +58,10 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only']) {
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
             }
@@ -78,10 +78,10 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only']) {
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
             }

@@ -37,7 +37,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-7.70.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -59,7 +59,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-7.70.1-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -81,7 +81,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-7.70.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -103,7 +103,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-7.70.1-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'

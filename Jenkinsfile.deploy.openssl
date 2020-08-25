@@ -38,7 +38,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -60,7 +60,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -82,7 +82,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -104,7 +104,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -127,7 +127,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -149,7 +149,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -171,7 +171,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
@@ -193,7 +193,7 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08 and above only',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
