@@ -9,6 +9,7 @@ class PlatformVersionPackageEngine extends AbstractPackageEngine {
    String specificVersion = System.getenv("VERSION");
 
    public PlatformVersionPackageEngine() {
+      specificVersion = System.getenv("VERSION");
       if (debug)
          println "PlatformVersionPackageEngine loaded";
    }
