@@ -113,7 +113,9 @@ abstract class AbstractPackageEngine {
                versions.insertNewVersion(versionKey, packageName, packageKey, version, url);
                println taskLabel+"New version entry created for "+version;
             } else {
-               println taskLabel+"Found version "+version+" in the database";
+               versions.updateExistingVersion(versionKey, packageName, packageKey, version, url);
+               println taskLabel+"Updated version "+version+" in the database";
+
             }
             
             FileSet fileset = new FileSet(schema, connection);

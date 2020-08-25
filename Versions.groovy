@@ -84,6 +84,44 @@ class Versions {
       statement.executeUpdate();
       statement.close();
    }
+   public void updateExistingVersion(int versionKey,
+                                String packageName, int packageKey,
+                                String version, String url) {
+      String UPDATE_VERSION = "UPDATE "+schema+".versions SET version_name=?,version_number=?,url=?,NONSTOP_EXTENSIONS=?,DEPENDENCIES=?,README_FILE=?,README_DIR_KEY=? WHERE version_key=? AND package_key=?";
+      PreparedStatement statement = connection.prepareStatement(UPDATE_VERSION);
+      int i=1;
+      statement.setString(i++,packageName+"-"+version);
+      statement.setString(i++,version);
+      if (url == null) {
+         statement.setNull(i++,Types.VARCHAR);
+      } else {
+         statement.setString(i++,url);
+      }
+      if (nonstopExtensions == null) {
+         statement.setNull(i++,Types.VARCHAR);
+      } else {
+         statement.setString(i++,nonstopExtensions);
+      }
+      if (dependencies == null) {
+         statement.setNull(i++,Types.VARCHAR);
+      } else {
+         statement.setString(i++,dependencies);
+      }
+      if (readmeFile == null) {
+         statement.setNull(i++,Types.VARCHAR);
+      } else {
+         statement.setString(i++,readmeFile);
+      }
+      if (readmeDirKeyValue >= 0) {
+         statement.setNull(i++,Types.INTEGER);
+      } else {
+         statement.setString(i++,readmeDirKeyValue);
+      }
+      statement.setInt(i++,versionKey);
+      statement.setInt(i++,packageKey);
+      statement.executeUpdate();
+      statement.close();
+   }
    void setNonstopExtensions(String value) {
       nonstopExtensions = value;
       if (debug) {
