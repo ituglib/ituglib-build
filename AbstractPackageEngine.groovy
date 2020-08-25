@@ -99,7 +99,9 @@ abstract class AbstractPackageEngine {
             versions.setNonstopExtensions(nonstopExtensions);
             versions.setDependencies(dependencies);
             versions.setReadmeFile(readmeFile);
-            versions.setReadmeDirKeyValue(readmeDirKeyValue);
+            if (readmeFile != null) {
+               versions.setReadmeDirKeyValue(readmeDirKeyValue);
+            }
 
             int versionKey = versions.getKey(packageKey, version);
             if (versionKey < 0) {

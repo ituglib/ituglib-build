@@ -73,12 +73,9 @@ class Versions {
       }
       if (readmeFile == null) {
          statement.setNull(8,Types.VARCHAR);
-      } else {
-         statement.setString(8,readmeFile);
-      }
-      if (readmeDirKeyValue >= 0) {
          statement.setNull(9,Types.INTEGER);
       } else {
+         statement.setString(8,readmeFile);
          statement.setString(9,readmeDirKeyValue);
       }
       statement.executeUpdate();
@@ -109,12 +106,9 @@ class Versions {
       }
       if (readmeFile == null) {
          statement.setNull(i++,Types.VARCHAR);
-      } else {
-         statement.setString(i++,readmeFile);
-      }
-      if (readmeDirKeyValue >= 0) {
          statement.setNull(i++,Types.INTEGER);
       } else {
+         statement.setString(i++,readmeFile);
          statement.setString(i++,readmeDirKeyValue);
       }
       statement.setInt(i++,versionKey);
