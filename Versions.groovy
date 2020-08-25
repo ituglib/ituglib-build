@@ -3,6 +3,7 @@ import java.io.*;
 import java.sql.*;
 
 class Versions {
+   boolean debug = System.getenv("DEBUG") != null;
    String schema;
    Connection connection;
    String nonstopExtensions;
@@ -85,15 +86,27 @@ class Versions {
    }
    void setNonstopExtensions(String value) {
       nonstopExtensions = value;
+      if (debug) {
+         println "Extensions="+value;
+      }
    }
    void setDependencies(String value) {
       dependencies = value;
+      if (debug) {
+         println "Dependencies="+value;
+      }
    }
    void setReadmeFile(String value) {
       readmeFile = value;
+      if (debug) {
+         println "Readme="+value;
+      }
    }
    void setReadmeDirKeyValue(int value) {
       readmeDirKeyValue = value;
+      if (debug) {
+         println "ReadmeDirKeyValue="+value;
+      }
    }
 }
 

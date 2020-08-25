@@ -37,6 +37,9 @@ abstract class AbstractPackageEngine {
 
    public AbstractPackageEngine() {
       this.patternString = archivePattern();
+      if (debug) {
+         println "Using pattern "+this.patternString;
+      }
       this.pattern = Pattern.compile(patternString);
       File destinationDirectory = new File(destination);
       this.taskLabel = getTaskLabel();
@@ -70,8 +73,14 @@ abstract class AbstractPackageEngine {
       int packageCount = 0;
 
       for (File archive : new File(staging).listFiles()) {
+         if (debug) {
+            println "Checking "+archive.getName();
+         }
          Matcher matcher = pattern.matcher(archive.getName());
          if (matcher.matches()) {
+            if (debug) {
+               println "Matched";
+            }
             packageCount++;
             String version = matcher.group(1);
             String compression = matcher.group(2);
