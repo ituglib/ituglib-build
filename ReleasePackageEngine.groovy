@@ -12,6 +12,10 @@ class ReleasePackageEngine extends AbstractPackageEngine {
       return "Packaging release strategy from -release suffix to "+suffix;
    }
 
+   String getTaskLabel() {
+      return "[ReleasePackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^-]*)" + "-release.tar.(.*)";
    }

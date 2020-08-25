@@ -16,6 +16,10 @@ class PlatformPackageEngine extends AbstractPackageEngine {
       return "Packaging platform release strategy from -release"+suffix+" to "+suffix;
    }
 
+   String getTaskLabel() {
+      return "[PlatformPackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^s+-]*)" + "-release"+suffix+".tar.(.*)";
    }

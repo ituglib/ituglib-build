@@ -12,6 +12,10 @@ class ReleaseQualifiedPackageEngine extends AbstractPackageEngine {
       return "Packaging release with qualified version strategy preserving archive name";
    }
 
+   String getTaskLabel() {
+      return "[ReleaseQualifiedPackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^-]*-[^-]*)" + "-release.tar.(.*)";
    }

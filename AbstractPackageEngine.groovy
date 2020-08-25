@@ -33,10 +33,13 @@ abstract class AbstractPackageEngine {
 
    abstract String targetPattern(String version);
 
+   abstract public getTaskLabel();
+
    public AbstractPackageEngine() {
       this.patternString = archivePattern();
       this.pattern = Pattern.compile(patternString);
       File destinationDirectory = new File(destination);
+      this.taskLabel = getTaskLabel();
    }
 
    public void setConnection(Connection connection) {

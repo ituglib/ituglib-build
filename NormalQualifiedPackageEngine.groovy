@@ -12,6 +12,10 @@ class NormalQualifiedPackageEngine extends AbstractPackageEngine {
       return "Packaging simple with qualified version strategy preserving archive name";
    }
 
+   String getTaskLabel() {
+      return "[NormalQualifiedPackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^-]*-[^-]*)" + suffix + ".tar.(.*)";
    }

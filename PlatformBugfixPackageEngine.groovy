@@ -16,6 +16,10 @@ class PlatformBugfixPackageEngine extends AbstractPackageEngine {
       return "Packaging platform bugfix release strategy from 2-gitno-release"+suffix+" to "+suffix;
    }
 
+   String getTaskLabel() {
+      return "[PlatformBugfixPackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^s+]*)" + "-release"+suffix+".tar.(.*)";
    }

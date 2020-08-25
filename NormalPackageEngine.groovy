@@ -12,6 +12,10 @@ class NormalPackageEngine extends AbstractPackageEngine {
       return "Packaging simple strategy preserving archive name";
    }
 
+   String getTaskLabel() {
+      return "[NormalPackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^-]*)" + suffix + ".tar.(.*)";
    }

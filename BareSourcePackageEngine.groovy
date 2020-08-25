@@ -14,6 +14,10 @@ class BareSourcePackageEngine extends AbstractPackageEngine {
       return "Packaging simple strategy from non-suffix to "+suffix;
    }
 
+   String getTaskLabel() {
+      return "[BaseSourcePackageEngine] ";
+   }
+
    String archivePattern() {
       return Pattern.quote(packageName) + "-([^-]*)" + ".tar.(.*)";
    }
