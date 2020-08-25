@@ -6,10 +6,9 @@ import java.util.regex.*;
 class PlatformVersionPackageEngine extends AbstractPackageEngine {
 
    boolean debug = System.getenv("DEBUG") != null;
-   String specificVersion = System.getenv("VERSION");
+   String specificVersion;
 
    public PlatformVersionPackageEngine() {
-      specificVersion = System.getenv("VERSION");
       if (debug)
          println "PlatformVersionPackageEngine loaded";
    }
@@ -23,6 +22,10 @@ class PlatformVersionPackageEngine extends AbstractPackageEngine {
    }
 
    String archivePattern() {
+      specificVersion = System.getenv("VERSION");
+      if (debug) {
+         println "Specified VERSION as "+specificVersion;
+      }
       return Pattern.quote(packageName) + "-(" + specificVersion + ")" + "-release"+suffix+".tar.(.*)";
    }
 
