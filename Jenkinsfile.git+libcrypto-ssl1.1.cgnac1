@@ -62,6 +62,7 @@ pipeline {
                     sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install prefix=${PREFIX} GIT_MAN_REF=HEAD'
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl1.1/lib || echo "Ignore"'
                     sh 'cp -p /usr/local-ssl1.1/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
+                    sh 'cp -p /usr/local-ssl1.1/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
                 }
             }
         }
