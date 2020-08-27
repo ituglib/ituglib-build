@@ -49,10 +49,14 @@ pipeline {
                 sh 'printf "/progress_implementation/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/progress.c'
                 sh 'printf "/queue_element/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/recur.c'
                 sh 'printf "/total_downloaded_bytes/\n.-1\ni\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/retr.c'
+                sh 'printf "/struct scheme_data/\ni\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/url.c'
                 sh 'printf "/memfatal/\n.-1\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/utils.c'
                 sh 'printf "/The log file/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/warc.c'
                 sh 'printf "/test_all_from/\ni\n#undef printf\n#define rpl_printf printf\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed fuzz/main.c'
                 sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_css_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_ftpls_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_netrc_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_options_fuzzer.c'
             }
         }
         stage('build') {
