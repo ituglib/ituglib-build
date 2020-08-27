@@ -3,7 +3,7 @@ test -z "${VERSION_PATH}" && \
 		grep '^GNU Wget ' | \
 		sed '1,$s/GNU Wget \([^ ]*\) .*/\1/'` \
  || \
-	export VERSION=`${VERSION_PATH} | \
+	export VERSION=`${VERSION_PATH} --version | \
 		grep '^GNU Wget ' | \
 		sed '1,$s/GNU Wget \([^ ]*\) .*/\1/'`
 echo "Packaging wget version ${VERSION}"
