@@ -1,4 +1,4 @@
-/* Rsync SSL 1.1 Pipeline */
+/* Rsync for OpenSSL 1.1.x */
 
 pipeline {
     agent any
@@ -58,14 +58,14 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make test'
                 }
             }
         }
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=rsync-ssl1.1',
                         'DEST=install']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
@@ -77,15 +77,29 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1:/usr/local/lib',
                         'BASENAME=rsync-ssl1.1',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=rsync-ssl1.1',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
         }
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            cleanWs()
         }
     }
 }
