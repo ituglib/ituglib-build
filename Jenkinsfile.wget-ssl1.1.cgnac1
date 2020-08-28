@@ -1,15 +1,12 @@
-/* Wget Pipeline for TNS/E - requires the tarball, not git. */
+/* WGet with OpenSSL 1.1.1 */
 
 pipeline {
     agent any
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '2'))
-    }
     stages {
         stage('unpack') {
             steps {
                 withEnv(['WGET_VERSION=1.20.3',
-                         'DOWNLOADS=/home/downloads']){
+                         'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz'
                     sh 'mv wget-${WGET_VERSION}/* .'
@@ -20,7 +17,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local/include -L/usr/local/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc  --with-ssl=openssl'
+                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl1.1/include -L/usr/local-ssl1.1/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=openssl'
                 }
             }
         }
@@ -83,32 +80,17 @@ pipeline {
         stage('test') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
-                }
-            }
-        }
-        stage('deploy_src') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=wget',
-                        'DEST=/web/stage']) {
-                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
-                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
-                            --exclude="*.o" \
-                            --exclude="*.a" \
-                            --exclude="*.so" \
-                            --exclude=".git*" \
-                            --exclude="./.git/*" \
-                            .'
                 }
             }
         }
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=install']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -116,17 +98,30 @@ pipeline {
         stage('deploy') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=wget',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
         }
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
