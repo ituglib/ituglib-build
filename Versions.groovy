@@ -109,7 +109,7 @@ class Versions {
          statement.setNull(i++,Types.INTEGER);
       } else {
          statement.setString(i++,readmeFile);
-         statement.setString(i++,readmeDirKeyValue);
+         statement.setInt(i++,readmeDirKeyValue);
       }
       statement.setInt(i++,versionKey);
       statement.setInt(i++,packageKey);
