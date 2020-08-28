@@ -46,7 +46,7 @@ pipeline {
                 }
             }
         }
-        stage('nse') {
+        stage('nse-ssl1.1') {
             steps {
                 lock('wget-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
