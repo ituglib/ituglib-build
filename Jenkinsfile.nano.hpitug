@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('unpack') {
             steps {
-                withEnv(['NANO_VERSION=5.1',
+                withEnv(['NANO_VERSION=5.2',
                          'DOWNLOADS=/home/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
