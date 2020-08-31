@@ -25,6 +25,25 @@ pipeline {
                 }
             }
         }
+        stage('src-ssl1.1') {
+            steps {
+                lock('openssh-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssh-ssl1.1',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-src',
+                            'TYPE=src']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy normal.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nse') {
             steps {
                 lock('openssh-deploy') {
