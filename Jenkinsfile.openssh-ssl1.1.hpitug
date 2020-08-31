@@ -1,4 +1,4 @@
-/* OpenSSH - Jenkins Pipeline */
+/* OpenSSH for SSL 1.1 - Jenkins Pipeline */
 
 pipeline {
     agent any
