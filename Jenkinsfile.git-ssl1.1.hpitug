@@ -58,9 +58,11 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=git-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
                         'DEST=install']) {
                     sh 'make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
                     sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                 }
             }
         }
@@ -69,8 +71,9 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=git-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }
         }
