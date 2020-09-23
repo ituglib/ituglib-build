@@ -76,7 +76,7 @@ class Versions {
          statement.setNull(9,Types.INTEGER);
       } else {
          statement.setString(8,readmeFile);
-         statement.setString(9,readmeDirKeyValue);
+         statement.setInt(9,readmeDirKeyValue);
       }
       statement.executeUpdate();
       statement.close();
