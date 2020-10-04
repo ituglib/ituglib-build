@@ -30,7 +30,7 @@ else
 fi
 
 rm -f ${GHOME}/${PAK_LIST} ${GHOME}/${PAK_FILE}
-cp ${MANIFEST_FILE} ${GHOME}/${PAK_LIST}
+cp ${ITUGLIB_BUILD}/${MANIFEST_FILE} ${GHOME}/${PAK_LIST}
 
 PWD=${INSTALL_LOCATION} gtacl -c "pak -purge ${PAK_FILE},@${PAK_LIST},listall"
 
