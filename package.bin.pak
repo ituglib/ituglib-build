@@ -39,6 +39,7 @@ PWD=${INSTALL_LOCATION} gtacl -c "pak -purge ${PAK_FILE},@${PAK_LIST},listall"
 if [ "$?" != 0 ]; then
 	exit 1
 fi
+rm -f ${GHOME}/${PAK_LIST} ${GHOME}/${PAK_FILE}
 echo "Created ${RELEASENAME}.tar.gz"
 mv /tmp/${RELEASENAME}.tar.gz ${DEST}
 if [ "$?" != 0 ]; then
