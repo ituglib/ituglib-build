@@ -2,7 +2,7 @@ test -z "${VERSION_PATH}" && \
 	export VERSION=`${WORKSPACE}/make --version | grep '^GNU Make' | \
 		sed '1,$s/GNU Make \(.*\)/\1/'` \
  || \
-	export VERSION=`${VERSION_PATH} --version | grep '^GNU Make' | \
+	export VERSION=`gtacl -p ${VERSION_PATH} --version | grep '^GNU Make' | \
 		sed '1,$s/GNU Make \(.*\)/\1/'`
 echo "Packaging GNU make version ${VERSION}"
 
