@@ -29,21 +29,26 @@ else
 	export PATH_PREFIX=${ITUGLIB_BUILD}
 fi
 
+env
+
 rm -f ${GHOME}/${PAK_LIST} ${GHOME}/${PAK_FILE}
 cp ${ITUGLIB_BUILD}/${MANIFEST_FILE} ${GHOME}/${PAK_LIST}
 
 PWD=${INSTALL_LOCATION} gtacl -c "pak -purge ${PAK_FILE},@${PAK_LIST},listall"
 
-(cd ${INSTALL_LOCATION} && tar -cvf - ${PAK_FILE}) | \
-        gzip --best > /tmp/${RELEASENAME}.tar.gz
+rm -f ${GHOME}/${PAK_LIST}
+
+cp ${GHOME}/${PAK_FILE} /tmp/${RELEASENAME}.pak.bin
+if [ "$?" != 0]; then
+	exit 1
+fi
+
+rm -f ${GHOME}/${PAK_FILE}
+
+echo "Created ${RELEASENAME}.pak.bin"
+mv /tmp/${RELEASENAME}.pak.bin ${DEST}
 if [ "$?" != 0 ]; then
 	exit 1
 fi
-rm -f ${GHOME}/${PAK_LIST} ${GHOME}/${PAK_FILE}
-echo "Created ${RELEASENAME}.tar.gz"
-mv /tmp/${RELEASENAME}.tar.gz ${DEST}
-if [ "$?" != 0 ]; then
-	exit 1
-fi
-echo "Moved /tmp/${RELEASENAME}.tar.gz to $DEST"
+echo "Moved /tmp/${RELEASENAME}.pak.bin to $DEST"
 
