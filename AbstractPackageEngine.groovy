@@ -45,6 +45,10 @@ abstract class AbstractPackageEngine {
       this.taskLabel = getTaskLabel();
    }
 
+   public AbstractRepackage getRepackager(File archive, String version, String compression) {
+      return new Repackage(archive, version, compression);
+   }
+
    public void setConnection(Connection connection) {
       this.connection = connection;
    }
@@ -84,7 +88,7 @@ abstract class AbstractPackageEngine {
             packageCount++;
             String version = matcher.group(1);
             String compression = matcher.group(2);
-            Repackage repackager = new Repackage(archive, version, compression);
+            AbstractRepackage repackager = getRepackager(archive, version, compression);
             File temp = new File("/tmp/"+basename);
             repackager.decompress(temp);
             repackager.chown(temp);
