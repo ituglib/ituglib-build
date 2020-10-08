@@ -25,7 +25,7 @@ class RepackagePak extends AbstractRepackage {
    }
 
    public void chown(File target) {
-      String command = "sudo gtacl -c 'fup give jenktemp.*,0,0'";
+      String command = "sudo gtacl -c 'fup /IN [#MYTERM]/ give jenktemp.*,255,255'";
 
       println taskName+command
       Process process = command.execute();
@@ -39,7 +39,8 @@ class RepackagePak extends AbstractRepackage {
    }
 
    public void chgrp(File target) {
-      String command = 'sudo fup secure jenktemp.*,"NUNU"'
+      String command = "sudo gtacl -c 'fup /IN [#MYTERM]/ secure jenktemp.*,'"+
+         '"NUNU"';
 
       println taskName+command
       Process process = command.execute();
@@ -65,7 +66,17 @@ class RepackagePak extends AbstractRepackage {
    }
 
    public void clean(File target) {
-      println taskName+' No need to clean up';
+      String command = 'sudo rm -rf ' +
+         target.getAbsolutePath();
+
+      println taskName+command
+      Process process = command.execute();
+      int result = process.waitFor();
+      println taskName+process.text;
+      if (result != 0) {
+         println taskName+'rm reported '+result;
+         System.exit(result);
+      }
    }
 }
 
