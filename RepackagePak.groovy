@@ -25,31 +25,28 @@ class RepackagePak extends AbstractRepackage {
    }
 
    public void chown(File target) {
-      String command = "sudo gtacl -c 'fup /IN [#MYTERM]/ give jenktemp.*,255,255'";
+      String command = "sh give.sh SUPER.SUPER";
 
       println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
       println taskName+process.text;
       if (result != 0) {
-         println taskName+'fup give reported '+result;
-         println taskName+'result ignored';
-         /* System.exit(result); */
+         println taskName+'give reported '+result;
+         System.exit(result);
       }
    }
 
    public void chgrp(File target) {
-      String command = "sudo gtacl -c 'fup /IN [#MYTERM]/ secure jenktemp.*,'"+
-         '"NUNU"';
+      String command = "sh secure.sh NCNC";
 
       println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
       println taskName+process.text;
       if (result != 0) {
-         println taskName+'fup secure reported '+result;
-         println taskName+'result ignored';
-         /* System.exit(result); */
+         println taskName+'secure reported '+result;
+         System.exit(result);
       }
    }
 
