@@ -18,7 +18,7 @@ pipeline {
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
                         doGenerateSubmoduleConfigurations: false, submoduleCfg: [],
-                    userRemoteConfigs: [[url: '/home/git/ituglib-build.git']]])
+                    userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
             }
         }
     }
