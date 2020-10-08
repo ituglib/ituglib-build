@@ -2,34 +2,64 @@ import hudson.model.*;
 import java.io.*;
 import java.sql.*;
 
-class Repackage extends AbstractRepackage {
+class RepackagePak extends AbstractRepackage {
 
-   public Repackage(File archive, String version, String compression) {
-      super(archive, version, compression);
+   public RepackagePak(File archive, String version, String compression) {
+      this.archive = archive;
+      this.version = version;
+      this.compression = compression;
    }
 
    public void decompress(File target) {
-      println taskName+' Nothing to do with '+target.getAbsolutePath();
-   }
-
-   public void chown(File target) {
-      println taskName+' Not using chown';
-   }
-
-   public void chgrp(File target) {
-      println taskName+' Not using chgrp';
-   }
-
-   public void recompress(File source, File target) {
       String command = null;
-      if (compression.equals("gz")) {
-         command = "mv " + source.getAbsolutePath() + " " + target.getAbsolutePath();
-      }
+      if (compression.equals("bin"))
+         command = 'sh unpak.sh ' + archive;
+      println taskName+command
       Process process = command.execute();
       int result = process.waitFor();
       println taskName+process.text;
       if (result != 0) {
-         println taskName+'mv reported '+result;
+         println taskName+'unpak reported '+result;
+         System.exit(result);
+      }
+   }
+
+   public void chown(File target) {
+      String command = "sudo gtacl -c 'fup give jenktemp.*,0,0'";
+
+      println taskName+command
+      Process process = command.execute();
+      int result = process.waitFor();
+      println taskName+process.text;
+      if (result != 0) {
+         println taskName+'fup give reported '+result;
+         println taskName+'result ignored';
+         /* System.exit(result); */
+      }
+   }
+
+   public void chgrp(File target) {
+      String command = 'sudo fup secure jenktemp.*,"NUNU"'
+
+      println taskName+command
+      Process process = command.execute();
+      int result = process.waitFor();
+      println taskName+process.text;
+      if (result != 0) {
+         println taskName+'fup secure reported '+result;
+         println taskName+'result ignored';
+         /* System.exit(result); */
+      }
+   }
+
+   public void recompress(File source, File target) {
+      String command = null;
+      command = "sh pak.sh "+target.getAbsolutePath();
+      Process process = command.execute();
+      int result = process.waitFor();
+      println taskName+process.text;
+      if (result != 0) {
+         println taskName+'pak reported '+result;
          System.exit(result);
       }
    }

@@ -5,7 +5,9 @@ import java.sql.*;
 class Repackage extends AbstractRepackage {
 
    public Repackage(File archive, String version, String compression) {
-      super(archive, version, compression);
+      this.archive = archive;
+      this.version = version;
+      this.compression = compression;
    }
 
    public void decompress(File target) {

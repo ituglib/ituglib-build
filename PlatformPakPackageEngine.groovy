@@ -21,15 +21,14 @@ class PlatformPakPackageEngine extends AbstractPackageEngine {
    }
 
    String archivePattern() {
-      return Pattern.quote(packageName) + "-([^s+-]*)" + "-release"+suffix+".tar.(.*)";
+      return Pattern.quote(packageName) + "-([^s+-]*)" + "-release"+suffix+".pak.(.*)";
    }
 
    String targetPattern(String version) {
       return packageName + '-' + version + suffix + ".pak.bin";
    }
 
-   public AbstractRepackage getRepackager(File archive, String version, String c
-ompression) {
+   public AbstractRepackage getRepackager(File archive, String version, String compression) {
       return new RepackagePak(archive, version, compression);
    }
 

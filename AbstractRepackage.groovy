@@ -2,15 +2,13 @@ import hudson.model.*;
 import java.io.*;
 import java.sql.*;
 
-class AbstractRepackage {
+abstract class AbstractRepackage {
    String taskName = "[" + this.getClass().getSimpleName() + "] ";
    File archive;
    String version;
    String compression;
-   public Repackage(File archive, String version, String compression) {
-      this.archive = archive;
-      this.version = version;
-      this.compression = compression;
+
+   public AbstractRepackage() {
    }
 
    abstract public void decompress(File target);
