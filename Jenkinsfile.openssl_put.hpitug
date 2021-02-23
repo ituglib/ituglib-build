@@ -20,7 +20,7 @@ pipeline {
                     [$class: 'CloneOption', timeout: 120, shallow: true],
                     [$class: 'CheckoutOption', timeout: 120],
                     ],
-                userRemoteConfigs: [[url: '/home/git/openssl.1.1.1_nsk']]])
+                userRemoteConfigs: [[url: 'https://github.com/ituglib/openssl.git']]])
             }
         }
         stage('config') {
