@@ -1,8 +1,12 @@
-test -z "${VERSION_PATH}" && \
-	export VERSION=`grep '^VERSION=' ${WORKSPACE}/Makefile | sed '1,$s/VERSION=//'`\
- || \
-	export VERSION=`${VERSION_PATH} version | fgrep OpenSSL | \
-		sed '1,$s/OpenSSL \([^ ]*\) .*$/\1/'`
+if [ "${VERSION_PATH}" = "" ]; then
+	. VERSION.dat
+else
+	. ${VERSION_PATH}/VERSION.dat
+fi
+if [ "${PRE_RELEASE-TAG}" = "" ]; then
+	export VERSION=${MAJOR}.${MINOR}.${PATCH}
+else
+	export VERSION=${MAJOR}.${MINOR}.${PATCH}-${PRE_RELEASE_TAG}
+fi
 echo "Packaging OpenSSL (PUT) version ${VERSION}"
-
 
