@@ -38,7 +38,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl1.1/openssl/include" LDFLAGS="-L/usr/local-ssl1.1/lib" conf_script_floss_cc --with-ssl=/usr/local-ssl1.1 --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wnowarn=2040 -I/usr/local-ssl1.1/openssl/include" LDFLAGS="-L/usr/local-ssl1.1/lib" conf_script_floss_cc --with-ssl=/usr/local-ssl1.1 --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
@@ -89,7 +89,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl3.0/openssl/include" LDFLAGS="-L/usr/local-ssl3.0/lib" conf_script_floss_cc --with-ssl=/usr/local-ssl3.0 --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wnowarn=2040 -I/usr/local-ssl3.0/openssl/include" LDFLAGS="-L/usr/local-ssl3.0/lib" conf_script_floss_cc --with-ssl=/usr/local-ssl3.0 --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
@@ -140,7 +140,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local/openssl/include" LDFLAGS="-L/usr/local/lib" conf_script_floss_cc --with-ssl=/usr/local --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wnowarn=2040 -I/usr/local/openssl/include" LDFLAGS="-L/usr/local/lib" conf_script_floss_cc --with-ssl=/usr/local --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
             }
         }
