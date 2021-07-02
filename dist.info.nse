@@ -5,6 +5,10 @@
 #	exit 1
 #fi
 
+if [ "${PRODUCT_BASE_VERSION}" != "" ]; then
+	echo "Loading ${WORKSPACE}/../Ituglib_Build/${BASENAME}-${PRODUCT_BASE_VERSION}.dist"
+	. ${WORKSPACE}/../Ituglib_Build/${BASENAME}-${PRODUCT_BASE_VERSION}.dist
+else
 #if [ -f ${WORKSPACE}/../../Ituglib_Build/${BASENAME}.dist ]; then
 	echo "Loading ${WORKSPACE}/../Ituglib_Build/${BASENAME}.dist"
 	. ${WORKSPACE}/../Ituglib_Build/${BASENAME}.dist
