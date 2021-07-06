@@ -13,6 +13,7 @@ else
 	echo "Loading ${WORKSPACE}/../Ituglib_Build/${BASENAME}.dist"
 	. ${WORKSPACE}/../Ituglib_Build/${BASENAME}.dist
 #fi
+fi
 
 export NAME=${BASENAME}-${VERSION}
 export LIST=${NAME}.bin.list
