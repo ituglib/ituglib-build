@@ -3,28 +3,41 @@
 pipeline {
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '2'))
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H H H * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                changelog: true,
-                poll: true,
-                branches: [[name: 'maint']],
-                extensions: [
-                    [$class: 'CleanBeforeCheckout'],
+                    changelog: true,
+                    poll: true,
+                    branches: [[name: 'maint'],[name: 'master']],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 120, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 120],
-                    ],
-                userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/git/git.git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
             }
         }
         stage('build') {

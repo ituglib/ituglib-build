@@ -12,15 +12,28 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                branches: [[name: 'master']],
-                extensions: [
-                    [$class: 'CleanBeforeCheckout']],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 120, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 120],
-                    ],
-                userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                    branches: [[name: 'master']],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout']],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
             }
         }
         stage('Unthreaded') {

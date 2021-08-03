@@ -6,25 +6,38 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '2'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H H H * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                changelog: true,
-                poll: true,
-                branches: [[name: 'maint']],
-                extensions: [
-                    [$class: 'CleanBeforeCheckout'],
-                	[$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
-                		recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 60, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 60],
-                    ],
-                userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                    changelog: true,
+                    poll: true,
+                    branches: [[name: 'master']],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout'],
+                	    [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                		    recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 60, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 60],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
             }
         }
         stage('build') {
@@ -59,7 +72,7 @@ pipeline {
                         'BASENAME=git+libcrypto',
                         'DEST=install']) {
                     sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
-                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'make quick-install-man prefix=${PREFIX} MAN_REPO=${WORKSPACE}/../git_manpages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local/lib || echo "Ignore"'
                     sh 'cp -p /usr/local/lib/libcrypto.so ${WORKSPACE}/install/usr/local/lib'
                     sh 'cp -p /usr/local/lib/libssl.so ${WORKSPACE}/install/usr/local/lib'
@@ -82,7 +95,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git+libcrypto',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'

@@ -3,28 +3,41 @@
 pipeline {
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '2'))
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H H H * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                changelog: true,
-                poll: true,
-                branches: [[name: 'maint']],
-                extensions: [
-                    [$class: 'CleanBeforeCheckout'],
+                    changelog: true,
+                    poll: true,
+                    branches: [[name: 'maint'],[name: 'master']],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
                                 recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 120, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 120],
-                    ],
-                userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
             }
         }
         stage('build') {
@@ -61,7 +74,7 @@ pipeline {
                         'BASENAME=git+libcrypto-ssl1.1',
                         'DEST=install']) {
                     sh 'make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
-                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages prefix=${PREFIX} DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl1.1/lib || echo "Ignore"'
                     sh 'cp -p /usr/local-ssl1.1/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
                     sh 'cp -p /usr/local-ssl1.1/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
