@@ -13,7 +13,7 @@ pipeline {
                 checkout([$class: 'GitSCM',
                     changelog: true,
                     poll: true,
-                    branches: [[name: 'maint']],
+                    branches: [[name: 'maint'], [name: 'master']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                 	    [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
