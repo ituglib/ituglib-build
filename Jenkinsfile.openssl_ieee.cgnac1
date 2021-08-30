@@ -1,4 +1,4 @@
-/* OpenSSL 1.1 SPT - Jenkins Pipeline TNS/X */
+/* OpenSSL 1.1.1 TNS/X Pipeline */
 
 pipeline {
     agent any
@@ -21,13 +21,13 @@ pipeline {
                     [$class: 'CheckoutOption', timeout: 120],
                     ],
                 userRemoteConfigs: [[url: 'https://github.com/ituglib/openssl.git']]])
-            }            
+            }
         }
         stage('config') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl1.1_spt --openssldir=/usr/local-ssl1.1_spt/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+                    sh './Configure nonstop-nsx_ieee --prefix=/usr/local-ssl1.1ieee --openssldir=/usr/local-ssl1.1ieee/ssl no-dynamic-engine --with-rand-seed=egd'
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'findcall_floss || echo "Nevermind" '
+                    sh 'findcall_floss'
                 }
             }
         }
@@ -67,9 +67,9 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=openssl-spt',
+                        'BASENAME=openssl-ieee',
                         'DEST=/home/ituglib/randall/stage']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local-ssl1.1ieee/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1ieee/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=openssl-spt',
+                        'BASENAME=openssl-ieee',
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {

@@ -51,7 +51,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test || echo "Nevermind"'
+                    sh 'make test || echo "Nevermind"'
                 }
             }
         }
@@ -79,7 +79,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl-spt',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
