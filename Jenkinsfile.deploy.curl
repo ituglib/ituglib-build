@@ -6,7 +6,7 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
-        stage('src') {
+/*        stage('src') {
             steps {
                 lock('curl-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
@@ -24,7 +24,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
         stage('nse') {
             steps {
                 lock('curl-deploy') {
@@ -37,9 +37,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=curl_install-7.70.1.html']) {
+                            'README_FILE=curl_install-7.78.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -59,9 +59,31 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=curl_install-7.70.1-ssl.html']) {
+                            'README_FILE=curl_install-7.78.0-ssl.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nse-ssl3.0') {
+            steps {
+                lock('curl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=curl-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=curl_install-7.78.0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -81,9 +103,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=curl_install-7.70.1.html']) {
+                            'README_FILE=curl_install-7.78.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -103,9 +125,31 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=curl_install-7.70.1-ssl.html']) {
+                            'README_FILE=curl_install-7.78.0-ssl.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl3.0') {
+            steps {
+                lock('curl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=curl-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=curl_install-7.78.0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
