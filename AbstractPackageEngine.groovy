@@ -78,7 +78,7 @@ abstract class AbstractPackageEngine {
 
       for (File archive : new File(staging).listFiles()) {
          if (debug) {
-            println "Checking "+archive.getName();
+            println "Checking "+archive.getName()+" for match with "+pattern;
          }
          Matcher matcher = pattern.matcher(archive.getName());
          if (matcher.matches()) {
