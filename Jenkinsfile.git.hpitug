@@ -1,3 +1,5 @@
+/* Git Jenkins Pipeline */
+
 pipeline {
     agent any
     options {
@@ -12,7 +14,8 @@ pipeline {
                 checkout([$class: 'GitSCM',
                     changelog: true,
                     poll: true,
-                    branches: [[name: 'maint'],[name: 'master']],
+                    //branches: [[name: 'maint'], [name: 'master']],
+                    branches: [[name: 'master']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
@@ -22,7 +25,7 @@ pipeline {
                         [$class: 'CloneOption', timeout: 120, shallow: true],
                         [$class: 'CheckoutOption', timeout: 120],
                         ],
-                    userRemoteConfigs: [[url: 'https://github.com/git/git']]])
+                    userRemoteConfigs: [[url: 'https://github.com/git/git.git']]])
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
@@ -35,6 +38,175 @@ pipeline {
                             [$class: 'IgnoreNotifyCommit'],
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+                dir('../Git_ManPages') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'master']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/gitster/git-manpages.git']]])
+                }
+            }
+        }
+        stage('build-3.0') {
+            steps {
+                withEnv(['GIT_DIST=/web/stage',
+                        'PREFIX=/usr/local-ssl3.0',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS='-g -O2 -Winline -I/usr/local-ssl3.0/include' LDFLAGS=-L/usr/local-ssl3.0/lib SHELL=/usr/coreutils/bin/bash"
+                }
+            }
+        }
+        stage('findcall_floss-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring results"'
+                }
+            }
+        }
+        stage('test-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh '/usr/coreutils/bin/make -k test V=1 CFLAGS="-g -O2 -Winline -I/usr/local-ssl3.0/include" LDFLAGS=-L/usr/local-ssl3.0/lib  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+                }
+            }
+        }
+        stage('install-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git-ssl3.0',
+                        'PREFIX=/usr/local-ssl3.0',
+                        'DEST=install']) {
+                    sh 'make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl3.0/include" LDFLAGS=-L/usr/local-ssl3.0/lib '
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local'
+                }
+            }
+        }
+        stage('deploy-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=git-ssl3.0',
+                        'PREFIX=/usr/local-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('install-3.0-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.0',
+                        'PREFIX=/usr/local-ssl3.0',
+                        'DEST=install']) {
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.0/lib'
+                    sh 'cp -p /usr/local-ssl3.0/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
+                    sh 'cp -p /usr/local-ssl3.0/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
+                }
+            }
+        }
+        stage('deploy-3.0-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.0',
+                        'PREFIX=/usr/local-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('build-1.1') {
+            steps {
+                withEnv(['GIT_DIST=/web/stage',
+                        'PREFIX=/usr/local-ssl1.1',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS='-g -O2 -Winline -I/usr/local-ssl1.1/include' LDFLAGS=-L/usr/local-ssl1.1/lib SHELL=/usr/coreutils/bin/bash"
+                }
+            }
+        }
+        stage('findcall_floss-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring results"'
+                }
+            }
+        }
+/*
+        stage('test-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                    sh '/usr/coreutils/bin/make -k test V=1 CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo "Git Test FAILURE, however t9001 and t9020 always fail"'
+                }
+            }
+        }
+*/
+        stage('install-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
+                        'DEST=install']) {
+                    sh 'make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
+                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local'
+                }
+            }
+        }
+        stage('deploy-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('install-1.1-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
+                        'DEST=install']) {
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl1.1/lib'
+                    sh 'cp -p /usr/local-ssl1.1/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
+                    sh 'cp -p /usr/local-ssl1.1/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl1.1/lib'
+                }
+            }
+        }
+        stage('deploy-1.1-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl1.1',
+                        'PREFIX=/usr/local-ssl1.1',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }
         }
@@ -81,8 +253,32 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local/" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
+            }
+        }
+        stage('install-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto',
+                        'PREFIX=/usr/local',
+                        'DEST=install']) {
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local/lib'
+                    sh 'cp -p /usr/local/lib/libcrypto.so ${WORKSPACE}/install/usr/local/lib'
+                    sh 'cp -p /usr/local/lib/libssl.so ${WORKSPACE}/install/usr/local/lib'
+                }
+            }
+        }
+        stage('deploy-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto',
+                        'PREFIX=/usr/local',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+               }
             }
         }
     }
