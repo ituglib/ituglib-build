@@ -190,7 +190,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl1.1',
                         'DEST=install']) {
                     sh 'make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS="-g -O2 -Winline -I/usr/local-ssl1.1/include" LDFLAGS=-L/usr/local-ssl1.1/lib '
-                    sh 'make quick-install-man MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'make quick-install-man prefix=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
         }
@@ -288,4 +288,77 @@ pipeline {
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'PREFIX=/usr/local',
+                        'BASENAME=git',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                    sh 'make quick-install-man prefix=${PREFIX} MAN_REPO=${WORKSPACE}/../git_manpages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+        stage('install-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git+libcrypto',
+                        'DEST=install']) {
+                   sh 'mkdir -p ${WORKSPACE}/install/usr/local/lib'
+                   sh 'cp -p /usr/local/lib/libcrypto.so ${WORKSPACE}/install/usr/local/lib'
+                   sh 'cp -p /usr/local/lib/libssl.so ${WORKSPACE}/install/usr/local/lib'
+                }
+            }
+        }
+        stage('deploy-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git+libcrypto',
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=git+libcrypto',
+                        'DEST=/home/ituglib/randall/stage',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
 }
