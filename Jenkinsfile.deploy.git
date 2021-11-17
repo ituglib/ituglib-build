@@ -6,13 +6,13 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
-        stage('nse') {
+        stage('nse-ssl3.0') {
             steps {
                 lock('git-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=git',
+                            'BASENAME=git-ssl3.0',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -20,7 +20,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0.html']) {
+                            'README_FILE=git_install-2-28-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -28,13 +28,13 @@ pipeline {
                 }
             }
         }
-        stage('nse-crypto') {
+        stage('nse-crypto-ssl3.0') {
             steps {
                 lock('git-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=git+libcrypto',
+                            'BASENAME=git+libcrypto-ssl3.0',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -94,7 +94,7 @@ pipeline {
                 }
             }
         }
-        stage('nsx') {
+        stage('nse') {
             steps {
                 lock('git-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
@@ -104,8 +104,8 @@ pipeline {
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
-                            'SUFFIX=-nsx',
-                            'TYPE=TNS/X',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=git_install-2-28-0.html']) {
@@ -116,13 +116,57 @@ pipeline {
                 }
             }
         }
-        stage('nsx-crypto') {
+        stage('nse-crypto') {
             steps {
                 lock('git-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=git+libcrypto',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl3.0') {
+            steps {
+                lock('git-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=git-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-crypto-ssl3.0') {
+            steps {
+                lock('git-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=git+libcrypto-ssl3.0',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -137,8 +181,8 @@ pipeline {
                     }
                 }
             }
-        }
-        stage('nsx-ssl1.1') {
+       }
+       stage('nsx-ssl1.1') {
             steps {
                 lock('git-deploy') {
                     withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
@@ -167,6 +211,50 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=git+libcrypto-ssl1.1',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+       }
+       stage('nsx') {
+            steps {
+                lock('git-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=git',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=git_install-2-28-0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-crypto') {
+            steps {
+                lock('git-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=git+libcrypto',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
