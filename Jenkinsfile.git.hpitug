@@ -15,7 +15,7 @@ pipeline {
                     changelog: true,
                     poll: true,
                     //branches: [[name: 'maint'], [name: 'master']],
-                    branches: [[name: 'master']],
+                    branches: [[name: 'maint']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
@@ -216,6 +216,8 @@ pipeline {
                         'PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
                     sh "/usr/coreutils/bin/make prefix=${PREFIX} SHELL=/usr/coreutils/bin/bash"
                 }
             }
