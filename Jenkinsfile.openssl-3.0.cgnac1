@@ -12,7 +12,7 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: 'openssl-3.0.1']],
+                    branches: [[name: 'refs/tags/openssl-3.0.1']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
