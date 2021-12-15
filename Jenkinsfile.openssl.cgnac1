@@ -79,7 +79,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=openssl',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
