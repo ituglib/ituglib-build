@@ -87,7 +87,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl3.0',
                         'BASENAME=git-ssl3.0',
                         'DEST=install']) {
-                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install prefix=${PREFIX} CFLAGS="-g -O2 -Winline -I/usr/local-ssl3.0_32/openssl/include -I/usr/local-ssl3.0/include" LDFLAGS="-L/usr/local-ssl3.0_32/lib -L /usr/local-ssl3.0/lib"'
+                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install prefix=${PREFIX} CFLAGS="-g -O2 -Winline -I/usr/local-ssl3.0/openssl/include -I/usr/local-ssl3.0/include" LDFLAGS="-L/usr/local-ssl3.0/lib -L /usr/local-ssl3.0/lib"'
                     sh 'make quick-install-man prefix=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
