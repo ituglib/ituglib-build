@@ -25,7 +25,7 @@ pipeline {
         }
         stage('unpack') {
             steps {
-                withEnv(['CURL_VERSION=7.79.1',
+                withEnv(['CURL_VERSION=7.81.0',
                          'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
