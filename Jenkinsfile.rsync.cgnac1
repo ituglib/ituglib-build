@@ -1,10 +1,11 @@
-# Paste the rest of this file into a standard Pipeline project to
-# build/test/stage rsync.
-# Also set Discard old builds, typically log rotation to 2
-# Poll SCM something useful, H/2 1,4,8,12,15,19 * * *
-
 pipeline {
     agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+    }
+    triggers {
+        pollSCM('H H * * *')
+    }
     stages {
         stage('checkout') {
             steps {
@@ -30,7 +31,7 @@ pipeline {
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                 /*    sh 'sed -i "1s/3.2.3dev/3.2.2/" version.h' */
-                    sh 'CFLAGS="-c99" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99 -Wnowarn=734" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
         }
@@ -47,7 +48,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'findcall_floss'
+                    sh 'findcall_floss || echo "Ignoring floss errors"'
                 }
             }
         }
@@ -85,9 +86,9 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=rsync',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=randall@ituglib-nskos.xid.com',
+                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
-                    sh 'if [ `echo $VERSION | grep ".*dev"` ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
@@ -96,7 +97,7 @@ pipeline {
     post {
         always {
             mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            cleanWs()
         }
     }
 }
-
