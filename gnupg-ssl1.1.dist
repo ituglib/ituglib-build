@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/src/curl --version | grep '^gpg (GnuPG) ' | \
+		sed '1,$s/gpg (GnuPG) \([^ ]*\)$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | grep '^gpg (GnuPG) ' | \
+		sed '1,$s/gpg (GnuPG) \([^ ]*\)$/\1/'`
+echo "Packaging GnuPG version ${VERSION}"
+
