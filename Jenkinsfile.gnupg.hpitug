@@ -1,4 +1,6 @@
-/* GnuPG pipeline for TNS/X - requires the tarball, not git. */
+/* GnuPG pipeline for TNS/E - requires the tarball, not git. */
+/* The tarball is custom for NonStop and has mods. These are shipped is a src distro. */
+/* Change the version wherever it appears. */
 
 pipeline {
     agent any
@@ -26,10 +28,30 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(['GNUPG_VERSION=1.4.23',
-                         'DOWNLOADS=/home/ituglib/randall/downloads']){
+                         'DOWNLOADS=/home/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz'
                     sh 'mv gnupg-${GNUPG_VERSION}/* .'
+                }
+            }
+        }
+        stage('src') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib',
+                        'BASENAME=gnupg',
+                        'GNUPG_VERSION=1.4.23',
+                        'DEST=/web/stage']) {
+                    sh 'CFLAGS="-c99" CFLAGS="-D_XOPEN_SOURCE -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local/include" LDFLAGS="-L/usr/local/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-libcurl=/usr/local --with-tar=/usr/coreutils/bin/tar'
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${GNUPG_VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.lo" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
                 }
             }
         }
@@ -73,26 +95,13 @@ pipeline {
                 }
             }
         }
-        stage('package') {
+        stage('deploy') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=gnupg',
-                        'DEST=/home/ituglib/randall/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-                }
-            }
-        }
-        stage('remote') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=gnupg',
-                        'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
-                        'REMOTE_DEST=/web/stage']) {
-                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                    sh 'rm ${DEST}/${BASENAME}-*'
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -138,26 +147,13 @@ pipeline {
                 }
             }
         }
-        stage('package-ssl1.1') {
+        stage('deploy-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=gnupg-ssl1.1',
-                        'DEST=/home/ituglib/randall/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-                }
-            }
-        }
-        stage('remote-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=gnupg-ssl1.1',
-                        'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
-                        'REMOTE_DEST=/web/stage']) {
-                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                    sh 'rm ${DEST}/${BASENAME}-*'
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -183,7 +179,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'findcall_floss || echo "findcall_floss fails, but we ignore this"'
+                    sh 'findcall_floss'
                 }
             }
         }
@@ -203,36 +199,20 @@ pipeline {
                 }
             }
         }
-        stage('package-ssl3.0') {
+        stage('deploy-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=gnupg-ssl3.0',
-                        'DEST=/home/ituglib/randall/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-                }
-            }
-        }
-        stage('remote-ssl3.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=gnupg-ssl3.0',
-                        'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
-                        'REMOTE_DEST=/web/stage']) {
-                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                    sh 'rm ${DEST}/${BASENAME}-*'
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
-        }
-        success {
-            cleanWs()
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
