@@ -79,7 +79,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=gnupg-ssl1.1',
                         'DEST=/home/ituglib/randall/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/gpg" &pg& . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
