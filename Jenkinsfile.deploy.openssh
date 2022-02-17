@@ -56,8 +56,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22+ and OpenSSL 1.0.2',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 1.0.2',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -77,8 +78,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22+ and OpenSSL 1.1.1',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 1.1.1',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -98,8 +100,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22+ and OpenSSL 1.0.2',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 1.0.2',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -119,8 +122,9 @@ pipeline {
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22+ and OpenSSL 1.1.1',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 1.1.1',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
