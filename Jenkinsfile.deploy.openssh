@@ -88,6 +88,28 @@ pipeline {
                 }
             }
         }
+        stage('nse-ssl3.0') {
+            steps {
+                lock('openssh-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssh-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 3.0',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-3.0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nsx') {
             steps {
                 lock('openssh-deploy') {
@@ -125,6 +147,28 @@ pipeline {
                             'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 1.1.1',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssh_install-1.1.1.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl3.0') {
+            steps {
+                lock('openssh-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssh-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L20.10/J06.22+ and OpenSSL 3.0',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssh_install-3.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
