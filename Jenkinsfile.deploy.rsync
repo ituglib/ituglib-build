@@ -46,6 +46,26 @@ pipeline {
                 }
             }
         }
+        stage('nse-ssl3.0') {
+            steps {
+                lock('rsync-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=rsync-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nsx') {
             steps {
                 lock('rsync-deploy') {
@@ -73,6 +93,26 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync-ssl1.1',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                            ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl3.0') {
+            steps {
+                lock('rsync-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=rsync-ssl3.0',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
