@@ -1,5 +1,7 @@
 /* Combined Curl pipeline for TNS/E - requires the tarball, not git. */
 
+def downloadVersion
+
 pipeline {
     agent any
     options {
@@ -7,6 +9,17 @@ pipeline {
         skipDefaultCheckout()
     }
     stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Curl Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
         stage('ituglib') {
             steps {
                 dir('../Ituglib_Build') {
@@ -26,7 +39,7 @@ pipeline {
         }
         stage('unpack') {
             steps {
-                withEnv(['CURL_VERSION=7.81.0',
+                withEnv(["CURL_VERSION=${downloadVersion}",
                          'DOWNLOADS=/home/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
@@ -60,7 +73,7 @@ pipeline {
         }
         stage('test-ssl1.1') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local-ssl1.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }

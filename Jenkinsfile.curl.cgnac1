@@ -1,11 +1,24 @@
 /* Curl pipeline for TNS/X - requires the tarball, not git. */
 
+def downloadVersion
+
 pipeline {
     agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '2'))
     }
     stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Curl Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
         stage('ituglib') {
             steps {
                 dir('../Ituglib_Build') {
@@ -25,7 +38,7 @@ pipeline {
         }
         stage('unpack') {
             steps {
-                withEnv(['CURL_VERSION=7.81.0',
+                withEnv(["CURL_VERSION=${downloadVersion}",
                          'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
@@ -99,7 +112,7 @@ pipeline {
         stage('config-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0_32/lib:/usr/local/lib']) {
                     sh 'make clean'
                     sh 'rm -rf ${WORKSPACE}/install'
                     sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/local-ssl3.0/openssl/include" LDFLAGS="-L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
