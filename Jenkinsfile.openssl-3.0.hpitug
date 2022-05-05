@@ -1,5 +1,7 @@
 /* OpenSSL 3.0 TNS/E Pipeline. Unthreaded.*/
-/* This pipeline is under development. */
+
+def buildVersion
+
 pipeline {
     agent any
     options {
@@ -9,10 +11,21 @@ pipeline {
         pollSCM('H H H H *')
     }
     stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
+                        ])
+                    buildVersion = userInput
+                }
+            }
+        }
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: 'refs/tags/openssl-3.0.1']],
+                    branches: [[name: "refs/tags/openssl-${buildVersion}"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
