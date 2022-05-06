@@ -1,5 +1,7 @@
 /* Git Jenkins Pipeline */
 
+def buildBranch
+
 pipeline {
     agent any
     options {
@@ -9,13 +11,23 @@ pipeline {
         pollSCM('H H H * *')
     }
     stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Git branch to build', name: 'input'),
+                        ])
+                    buildBranch = userInput
+                }
+            }
+        }
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
                     changelog: true,
                     poll: true,
-                    //branches: [[name: 'maint'], [name: 'master']],
-                    branches: [[name: 'maint']],
+                    branches: [[name: "${buildBranch}"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
