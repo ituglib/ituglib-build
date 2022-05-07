@@ -1,6 +1,7 @@
 /* Git Jenkins Pipeline */
 
 def buildBranch
+def runTests
 
 pipeline {
     agent any
@@ -13,12 +14,16 @@ pipeline {
     stages {
         stage('setup') {
             steps {
-			    script {
-                    def userInput = input(id: 'userInput', message: 'Build Settings?',
-                        parameters: [
-                            string(defaultValue: '', description: 'Git branch to build', name: 'input'),
-                        ])
-                    buildBranch = userInput
+				timeout(time: 120, unit: 'SECONDS') {
+				    script {
+	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+	                        parameters: [
+	                            string(defaultValue: '', description: 'Git branch to build', name: 'branch'),
+	                            booleanParam(defaultValue: true, description: 'Run tests', name: 'tests'),
+	                        ])
+	                    buildBranch = userInput.branch
+	                    runTests = userInput.tests
+	                }
                 }
             }
         }
@@ -85,6 +90,11 @@ pipeline {
             }
         }
         stage('test-3.0') {
+        	when {
+        		expression {
+        			return runTests;
+        		}
+        	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
