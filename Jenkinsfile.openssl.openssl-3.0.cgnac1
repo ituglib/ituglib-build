@@ -47,6 +47,14 @@ pipeline {
                 }
             }
         }
+        stage('cleanup') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                }
+            }
+        }
     }
     post {
         always {
