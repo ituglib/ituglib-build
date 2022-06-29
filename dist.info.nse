@@ -21,4 +21,7 @@ export SRCINSTALL=/tmp/${NAME}
 export SRCFILE=${PREFIX}${NAME}-src.tar
 export NSETAR=${PREFIX}${NAME}-nse.tar
 export RELEASENAME=${NAME}-release-nse
+if [ "$DOWNLOAD_VERSION" != "" ]; then
+	export VERSION=$DOWNLOAD_VERSION
+fi
 echo Loaded
