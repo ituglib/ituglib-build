@@ -3,86 +3,308 @@
 pipeline {
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '2'))
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     triggers {
-        pollSCM('H H * * *')
+        pollSCM('H H H * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                branches: [[name: '*/ituglib_release']],
-                extensions: [
-                    [$class: 'CleanBeforeCheckout']],
-                doGenerateSubmoduleConfigurations: false, extensions: [
-                    [$class: 'CleanCheckout'],
-                    [$class: 'CloneOption', timeout: 120, shallow: true],
-                    [$class: 'CheckoutOption', timeout: 120],
-                    ],
-                userRemoteConfigs: [[url: 'https://github.com/ituglib/openssl.git']]])
-            }
-        }
-        stage('config') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh './Configure nonstop-nsx --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
+                    branches: [[name: "*/ituglib_release"]],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout']],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+	                userRemoteConfigs: [[url: 'https://github.com/ituglib/openssl.git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
             }
         }
-        stage('build') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make'
+        stage('Unthreaded') {
+            stages() {
+                stage('config') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+		                    sh './Configure nonstop-nsx --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
+                        }
+                    }
+                }
+                stage('build') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('findcall') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                        }
+                    }
+                }
+                stage('install') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib64:/usr/local/lib',
+                                'BASENAME=openssl',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
                 }
             }
         }
-        stage('findcall_floss') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'findcall_floss'
+        stage('PUT') {
+            stages() {
+                stage('config-put') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+		                    sh './Configure nonstop-nsx_put --prefix=/usr/local-ssl1.1_put --openssldir=/usr/local-ssl1.1_put/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+                        }
+                    }
+                }
+                stage('build-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('findcall-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                        }
+                    }
+                }
+                stage('install-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_put/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('deploy-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                                'BASENAME=openssl-put',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_put/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-put',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
                 }
             }
         }
-        stage('test') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make test || echo "Nevermind"'
+        stage('SPT') {
+            stages() {
+                stage('config-spt') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+		                    sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl1.1_spt --openssldir=/usr/local-ssl1.1_spt/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+                        }
+                    }
+                }
+                stage('build-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('findcall-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                        }
+                    }
+                }
+                stage('install-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('deploy-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                                'BASENAME=openssl-spt',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-spt',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
                 }
             }
         }
-        stage('install') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
+        stage('IEEE') {
+            stages() {
+                stage('config-ieee') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+		                    sh './Configure nonstop-nsx_ieee --prefix=/usr/local-ssl1.1ieee --openssldir=/usr/local-ssl1.1ieee/ssl no-dynamic-engine --with-rand-seed=egd'
+                        }
+                    }
                 }
-            }
-        }
-        stage('deploy') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=openssl',
-                        'DEST=/home/ituglib/randall/stage']) {
-                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local-ssl1.1/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                stage('build-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
                 }
-            }
-        }
-        stage('remote') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=openssl',
-                        'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
-                        'REMOTE_DEST=/web/stage']) {
-                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                    sh 'rm ${DEST}/${BASENAME}-*'
+                stage('findcall-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                        }
+                    }
+                }
+                stage('install-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                        }
+                    }
+                }
+                stage('deploy-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1ieee/lib:/usr/local/lib',
+                                'BASENAME=openssl-ieee',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1ieee/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-ieee',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
                 }
             }
         }
