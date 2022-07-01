@@ -1,4 +1,4 @@
-/* OpenSSL 3.0 TNS/E Pipeline. Unthreaded.*/
+/* OpenSSL 3.0 TNS/E Pipeline Complete. */
 
 def buildVersion
 
@@ -68,7 +68,7 @@ pipeline {
                         }
                     }
                 }
-                stage('findcall_floss') {
+                stage('findcall') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -107,7 +107,7 @@ pipeline {
         }
         stage('unthreaded-32') {
             stages() {
-                stage('config') {
+                stage('config-32') {
                     steps() {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -116,7 +116,7 @@ pipeline {
                         }
                     }
                 }
-                stage('build') {
+                stage('build-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -124,7 +124,7 @@ pipeline {
                         }
                     }
                 }
-                stage('findcall_floss') {
+                stage('findcall-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -132,7 +132,7 @@ pipeline {
                         }
                     }
                 }
-                stage('test') {
+                stage('test-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -140,7 +140,7 @@ pipeline {
                         }
                     }
                 }
-                stage('install') {
+                stage('install-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -149,7 +149,7 @@ pipeline {
                         }
                     }
                 }
-                stage('deploy') {
+                stage('deploy-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
@@ -164,7 +164,7 @@ pipeline {
         }
         stage('PUT') {
             stages() {
-                stage('config') {
+                stage('config-put') {
                     steps() {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -173,7 +173,7 @@ pipeline {
                         }
                     }
                 }
-                stage('build') {
+                stage('build-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -181,7 +181,7 @@ pipeline {
                         }
                     }
                 }
-                stage('findcall_floss') {
+                stage('findcall-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -189,7 +189,7 @@ pipeline {
                         }
                     }
                 }
-                stage('test') {
+                stage('test-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -197,7 +197,7 @@ pipeline {
                         }
                     }
                 }
-                stage('install') {
+                stage('install-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -205,7 +205,7 @@ pipeline {
                         }
                     }
                 }
-                stage('deploy') {
+                stage('deploy-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
@@ -220,7 +220,7 @@ pipeline {
         }
         stage('SPT') {
             stages() {
-                stage('config') {
+                stage('config-spt') {
                     steps() {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -229,7 +229,7 @@ pipeline {
                         }
                     }
                 }
-                stage('build') {
+                stage('build-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -237,7 +237,7 @@ pipeline {
                         }
                     }
                 }
-                stage('findcall_floss') {
+                stage('findcall-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -245,7 +245,7 @@ pipeline {
                         }
                     }
                 }
-                stage('test') {
+                stage('test-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -253,7 +253,7 @@ pipeline {
                         }
                     }
                 }
-                stage('install') {
+                stage('install-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -261,7 +261,7 @@ pipeline {
                         }
                     }
                 }
-                stage('deploy') {
+                stage('deploy-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',

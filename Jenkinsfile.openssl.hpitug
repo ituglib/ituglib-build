@@ -200,60 +200,6 @@ pipeline {
 		            }
 		        }
             }
-        stage('IEEE') {
-            stages() {
-                stage('config-ieee') {
-                    steps() {
-                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                                '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'git clean -dxf'
-		                    sh './Configure nonstop-nsx_ieee --prefix=/usr/local-ssl1.1ieee --openssldir=/usr/local-ssl1.1ieee/ssl no-dynamic-engine --with-rand-seed=egd'
-                        }
-                    }
-                }
-                stage('build-ieee') {
-                    steps {
-                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                                '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L16.05"'
-                        }
-                    }
-                }
-                stage('floss-ieee') {
-                    steps {
-                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                                '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'findcall_floss || echo "might fail"'
-                        }
-                    }
-                }
-                stage('test-ieee') {
-                    steps {
-                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                                '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
-                        }
-                    }
-                }
-                stage('install-ieee') {
-                    steps {
-                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                                '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                        }
-                    }
-                }
-		        stage('deploy-ieee') {
-		            steps {
-		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=:/usr/local/lib',
-		                        'BASENAME=openssl-ieee',
-		                        'DEST=/web/stage']) {
-		                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-		                }
-		            }
-		        }
-            }
         }
     }
     post {
