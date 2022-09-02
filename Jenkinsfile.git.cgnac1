@@ -130,7 +130,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -167,7 +167,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -232,7 +232,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -270,7 +270,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -335,7 +335,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -370,7 +370,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=git+libcrypto',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=29284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
                     sh 'rm ${DEST}/${BASENAME}-*'
