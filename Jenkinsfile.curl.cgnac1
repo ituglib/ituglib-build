@@ -49,7 +49,7 @@ pipeline {
         stage('config-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib']) {
                     sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --prefix=/usr/local-ssl1.1'
                 }
             }
@@ -57,7 +57,7 @@ pipeline {
         stage('build-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib']) {
                     sh 'make'
                 }
             }
@@ -65,7 +65,7 @@ pipeline {
         stage('findcall_floss-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib']) {
                     sh 'findcall_floss'
                 }
             }
@@ -73,7 +73,7 @@ pipeline {
         stage('test-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -81,7 +81,7 @@ pipeline {
         stage('install-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -89,7 +89,7 @@ pipeline {
         stage('package-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl1.1',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -100,7 +100,7 @@ pipeline {
         stage('remote-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
@@ -113,8 +113,9 @@ pipeline {
         stage('config-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0_32/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib']) {
                     sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
                     sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/local-ssl3.0/openssl/include" LDFLAGS="-L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
@@ -123,7 +124,7 @@ pipeline {
         stage('build-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib']) {
                     sh 'make'
                 }
             }
@@ -131,7 +132,7 @@ pipeline {
         stage('findcall_floss-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
             }
@@ -139,7 +140,7 @@ pipeline {
         stage('test-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -147,7 +148,7 @@ pipeline {
         stage('install-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -155,7 +156,7 @@ pipeline {
         stage('package-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib',
                         'BASENAME=curl-ssl3.0',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -166,7 +167,7 @@ pipeline {
         stage('remote-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
@@ -179,8 +180,9 @@ pipeline {
         stage('config-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
                     sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/local/openssl/include" LDFLAGS="-L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
                 }
@@ -189,7 +191,7 @@ pipeline {
         stage('build-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -197,7 +199,7 @@ pipeline {
         stage('findcall_floss-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
             }
@@ -205,7 +207,7 @@ pipeline {
         stage('test-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -213,7 +215,7 @@ pipeline {
         stage('install-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -221,7 +223,7 @@ pipeline {
         stage('package-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib',
                         'BASENAME=curl',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -232,7 +234,7 @@ pipeline {
         stage('remote-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl',
                         'DEST=/home/ituglib/randall/stage',
                         'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
