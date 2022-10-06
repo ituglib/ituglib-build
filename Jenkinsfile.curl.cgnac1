@@ -46,6 +46,14 @@ pipeline {
                 }
             }
         }
+        /* TODO:
+         * 64-bit Curl build sample for OpenSSL 3.0. Still need to output /lib64 and /bin64
+         * _RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64 \
+         *    CFLAGS="-c99 -no-floss -Wlp64" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl3.0/include -Wlp64" \
+         *    LDFLAGS="-L/usr/local-ssl3.0/lib64 -L/usr/local/lib -Wlp64" \
+         *    conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 \
+         *    --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --
+         */
         stage('config-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
