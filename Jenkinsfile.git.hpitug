@@ -18,7 +18,7 @@ pipeline {
 				    script {
 	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
 	                        parameters: [
-	                            string(defaultValue: '', description: 'Git branch to build', name: 'branch'),
+	                            string(defaultValue: '', description: 'Git version to build', name: 'branch'),
 	                            booleanParam(defaultValue: true, description: 'Run tests', name: 'tests'),
 	                        ])
 	                    buildBranch = userInput.branch
@@ -32,7 +32,7 @@ pipeline {
                 checkout([$class: 'GitSCM',
                     changelog: true,
                     poll: true,
-                    branches: [[name: "${buildBranch}"]],
+                    branches: [[name: "refs/tags/v${buildBranch}"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
@@ -48,7 +48,7 @@ pipeline {
                         branches: [[name: 'main']],
                         extensions: [
                             [$class: 'CleanBeforeCheckout']],
-                        doGenerateSubmoduleConfigurations: false, extensions: [
+                        doGenerateSubmoduleConfigurations: false, extensions: [-
                             [$class: 'CleanCheckout'],
                             [$class: 'CloneOption', timeout: 120, shallow: true],
                             [$class: 'CheckoutOption', timeout: 120],
