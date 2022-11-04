@@ -151,6 +151,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -161,7 +162,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -173,6 +174,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl-put',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -183,7 +185,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -195,6 +197,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl-spt',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -205,7 +208,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -336,6 +339,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -346,7 +350,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -358,6 +362,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl-ieee',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -368,7 +373,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -380,6 +385,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl-put',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -390,7 +396,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }
@@ -402,6 +408,7 @@ pipeline {
                             '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=openssl-spt',
+                            'VERSION=1\\.1\\.1[a-z]*',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
                             'SCHEMA=ITUG.OPENLIB',
@@ -412,7 +419,7 @@ pipeline {
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
             }

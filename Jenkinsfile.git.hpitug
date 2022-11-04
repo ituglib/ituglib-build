@@ -48,7 +48,7 @@ pipeline {
                         branches: [[name: 'main']],
                         extensions: [
                             [$class: 'CleanBeforeCheckout']],
-                        doGenerateSubmoduleConfigurations: false, extensions: [-
+                        doGenerateSubmoduleConfigurations: false, extensions: [
                             [$class: 'CleanCheckout'],
                             [$class: 'CloneOption', timeout: 120, shallow: true],
                             [$class: 'CheckoutOption', timeout: 120],
