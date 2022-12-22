@@ -38,7 +38,7 @@ class Repackage {
    }
 
    public void chown(File target) {
-      String command = 'sudo chown -R super.super ' + 
+      String command = 'sudo chown -R super.super:SUPER ' + 
          target.getAbsolutePath();
 
       println taskName+command
@@ -52,6 +52,7 @@ class Repackage {
    }
 
    public void chgrp(File target) {
+   /*
       String command = 'sudo chgrp -R SUPER ' + 
          target.getAbsolutePath();
 
@@ -62,7 +63,7 @@ class Repackage {
       if (result != 0) {
          println taskName+'chgrp reported '+result;
          System.exit(result);
-      }
+      }*/
    }
 
    public void recompress(File source, File target) {
