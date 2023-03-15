@@ -56,7 +56,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips'
+                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips no-egd'
                         }
                     }
                 }
@@ -80,7 +80,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
                         }
                     }
                 }
@@ -88,8 +88,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -126,7 +126,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips'
+                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips no-egd'
                         }
                     }
                 }
@@ -150,7 +150,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
                         }
                     }
                 }
@@ -158,8 +158,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -196,7 +196,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips no-egd "-D_REENTRANT"'
                         }
                     }
                 }
@@ -220,7 +220,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
                         }
                     }
                 }
@@ -228,8 +228,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -266,7 +266,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips no-egd "-D_REENTRANT"'
                         }
                     }
                 }
@@ -290,7 +290,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "will fail at 80-test_cmp_http"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
                         }
                     }
                 }
@@ -298,8 +298,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
