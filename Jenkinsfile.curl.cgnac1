@@ -50,7 +50,7 @@ pipeline {
                 withEnv(["CURL_VERSION=${downloadVersion}",
                          'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
-                    sh 'Building ${downloadVersion} to ${destinationHost}'
+                    sh 'echo "Building ${downloadVersion} to ${destinationHost}"'
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
                 }
