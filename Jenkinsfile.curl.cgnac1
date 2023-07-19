@@ -120,7 +120,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "Distributing to ${REMOTE}"' 
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
@@ -188,7 +188,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "Distributing to ${REMOTE}"' 
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
@@ -256,7 +256,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "Distributing to ${REMOTE}"' 
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
