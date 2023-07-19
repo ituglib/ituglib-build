@@ -48,9 +48,10 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(["CURL_VERSION=${downloadVersion}",
+                		 "DESTINATION=${destinationHost}",
                          'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
-                    sh 'echo "Building ${downloadVersion} to ${destinationHost}"'
+                    sh 'echo "Building ${CURL_VERSION} to ${DESTINATION}"'
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
                 }
