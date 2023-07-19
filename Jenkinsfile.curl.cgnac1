@@ -111,7 +111,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@12.238.63.163',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -178,7 +178,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local-ssl1.1/lib',
                         'BASENAME=curl-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@12.238.63.163',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
@@ -245,7 +245,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=49284 randall@itug-lib.xid.com',
+                        'REMOTE=-oPort=49284 randall@12.238.63.163',
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
