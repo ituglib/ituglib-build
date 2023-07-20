@@ -17,7 +17,7 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '', description: 'Curl Version', name: 'input'),
-                            string(defaultValue: '12.238.63.163', description: 'Deploy Host (itug-lib.xid.com)', name: 'deploy'),
+                            string(defaultValue: 'itug-lib.xid.com', description: 'Deploy Host (12.238.63.163)', name: 'deploy'),
                             string(defaultValue: '49284', description: 'Deploy Host Port', name: 'port'),
                             string(defaultValue: 'randall', description: 'Deploy User', name: 'user'),
                         ])
