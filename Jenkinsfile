@@ -1,4 +1,4 @@
-/* Ituglib_Build - Paste into this Pipeline Project Name. */
+/* Ituglib_Build - Paste into this Pipeline Project Name in Each Jenkins Instance. */
 
 pipeline {
     agent any
@@ -12,7 +12,7 @@ pipeline {
         stage('refresh') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: '*/master']],
+                    branches: [[name: '*/main']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
