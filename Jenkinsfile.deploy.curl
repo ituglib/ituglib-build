@@ -9,8 +9,8 @@ pipeline {
 /*        stage('src') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl',
                             'DIST=/web/stage',
@@ -19,7 +19,7 @@ pipeline {
                             'SUFFIX=-src',
                             'TYPE=src']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy normal.tar.groovy'
                     }
                 }
@@ -28,8 +28,8 @@ pipeline {
         stage('nse') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl',
                             'DIST=/web/stage',
@@ -41,7 +41,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -50,8 +50,8 @@ pipeline {
         stage('nse-ssl1.1') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl-ssl1.1',
                             'DIST=/web/stage',
@@ -63,7 +63,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -72,8 +72,8 @@ pipeline {
         stage('nse-ssl3.0') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl-ssl3.0',
                             'DIST=/web/stage',
@@ -85,7 +85,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -94,8 +94,8 @@ pipeline {
         stage('nsx') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl',
                             'DIST=/web/stage',
@@ -107,7 +107,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -116,8 +116,8 @@ pipeline {
         stage('nsx-ssl1.1') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl-ssl1.1',
                             'DIST=/web/stage',
@@ -129,7 +129,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -138,8 +138,8 @@ pipeline {
         stage('nsx-ssl3.0') {
             steps {
                 lock('curl-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=curl-ssl3.0',
                             'DIST=/web/stage',
@@ -151,7 +151,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=curl_install-8.2.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
                     }
                 }
@@ -160,7 +160,7 @@ pipeline {
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
