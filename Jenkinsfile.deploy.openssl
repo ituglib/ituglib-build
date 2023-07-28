@@ -19,7 +19,7 @@ pipeline {
                             'SUFFIX=-src',
                             'TYPE=src']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy normal.tar.groovy'
                     }
                 }
@@ -42,7 +42,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -66,7 +66,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -90,7 +90,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -114,7 +114,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -138,7 +138,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -162,7 +162,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -186,7 +186,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -210,7 +210,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -234,7 +234,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -257,7 +257,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -280,7 +280,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -303,7 +303,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -326,7 +326,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.0.2.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -350,7 +350,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -374,7 +374,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -398,7 +398,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -422,7 +422,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.1.0-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -446,7 +446,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -470,7 +470,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -494,7 +494,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -518,7 +518,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-3.0.0-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -541,7 +541,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -564,7 +564,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -587,7 +587,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-put.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -610,7 +610,7 @@ pipeline {
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=openssl_install-1.1.1-spt.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-version.tar.groovy'
                     }
                 }
@@ -619,7 +619,7 @@ pipeline {
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }

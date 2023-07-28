@@ -21,9 +21,9 @@ pipeline {
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'README_FILE=gmake_install.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.pak.groovy'
-                        sh 'sudo rm -f /G/data01/jenkins/gmake /G/data01/jenkins/temppak'
+                        sh 'sudo rm -f /G/data05/jenkins/gmake /G/data05/jenkins/temppak'
                     }
                 }
             }
@@ -43,9 +43,9 @@ pipeline {
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'README_FILE=gmake_install.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.pak.groovy'
-                        sh 'sudo rm -f /G/data01/jenkins/gmake /G/data01/jenkins/temppak'
+                        sh 'sudo rm -f /G/data05/jenkins/gmake /G/data05/jenkins/temppak'
                     }
                 }
             }
@@ -53,7 +53,7 @@ pipeline {
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }

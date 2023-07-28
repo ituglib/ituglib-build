@@ -6,7 +6,7 @@ import java.util.regex.*;
 class JdbcLoader {
 
    static private final String JDBC_MX_TAR =
-      "/usr/tandem/jdbcMx/current/lib/jdbcMx.jar";
+      "/usr/tandem/jdbcMx/T1275L38/lib/jdbcMx.jar"; // Should be curent not T1275L38
    static private final String JDBC_DRIVER = 
       "com.tandem.sqlmx.SQLMXDriver";
 
