@@ -1,0 +1,270 @@
+/* WGet pipeline for TNS/V - requires the tarball, not git. */
+
+def downloadVersion
+
+pipeline {
+    agent any
+    stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '1.20.3', description: 'WGet Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
+        stage('ituglib') {
+            steps {
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('unpack') {
+            steps {
+                withEnv(["WGETL_VERSION=${downloadVersion}",
+               			 'WGET_URL_PREFIX=https://ftp.gnu.org/gnu/wget/',
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                    cleanWs()
+                    sh 'test -f ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz || wget --insecure ${WGET_URL_PREFIX}wget-${WGET_VERSION}.tar.gz -o ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz'
+                    sh 'tar xzf ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz'
+                    sh 'mv wget-${WGET_VERSION}/* .'
+                }
+            }
+        }
+        stage('patch') {
+            steps {
+                sh 'sed "/#  error/s/.*/   return \\\"wget\\\";/" -i lib/getprogname.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/cookies.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/css-url.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/ftp-basic.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/hash.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/html-parse.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/html-url.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/http.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/netrc.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/recur.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/utils.c'
+                sh 'printf "/#ifndef _/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef vfprintf\n#define rpl_vfprintf vfprintf\n.\nw\n" | ed lib/error.c'
+                sh 'printf "/static void/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed lib/getopt.c'
+                sh 'printf "/static void/\ni\n#undef fputs\n#define rpl_fputs fputs\n.\nw\n" | ed lib/getpass.c'
+                sh 'printf "/sock_write/\n.-2\na\n#undef write\n#define rpl_write write\n.\nw\n" | ed src/connect.c'
+                sh 'printf "/convert_links/\ni\n#undef putc\n#define rpl_fputc putc\n#undef fputs\n#define rpl_fputs fputs\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/convert.c'
+                sh 'printf "/cookie_jar_save/\n.-1\ni\n#undef fputc\n#define rpl_fputc fputc\n#undef fputs\n#define rpl_fputs fputs\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/cookies.c'
+                sh 'printf "/yy_init_globals/\ni\n#undef fwrite\n#define rpl_fwrite fwrite\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/css_.c'
+                sh 'printf "/Converts symbolic permissions/\ni\n#undef fputc\n#define rpl_fputc fputc\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/ftp-ls.c'
+                sh 'printf "/struct hsts_store/\ni\n#undef fputs\n#define rpl_fputs fputs\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/hsts.c'
+                sh 'printf "/Forward decls./\ni\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/http.c'
+                sh 'printf "/CMD_DECLARE/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/init.c'
+                sh 'printf "/static struct log_ln/\ni\n#undef fputs\n#define rpl_fputs fputs\n#undef fwrite\n#define rpl_fwrite fwrite\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef vfprintf\n#define rpl_vfprintf vfprintf\n.\nw\n" | ed src/log.c'
+                sh 'printf "/const char.*exec_name/\ni\n#undef printf\n#define rpl_printf printf\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef fputs\n#define rpl_fputs fputs\n.\nw\n" | ed src/main.c'
+                sh 'printf "/parse_netrc/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/netrc.c'
+                sh 'printf "/progress_implementation/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/progress.c'
+                sh 'printf "/queue_element/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/recur.c'
+                sh 'printf "/total_downloaded_bytes/\n.-1\ni\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/retr.c'
+                sh 'printf "/struct scheme_data/\ni\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/url.c'
+                sh 'printf "/memfatal/\n.-1\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/utils.c'
+                sh 'printf "/The log file/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/warc.c'
+                sh 'printf "/test_all_from/\ni\n#undef printf\n#define rpl_printf printf\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed fuzz/main.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_css_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_ftpls_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_netrc_fuzzer.c'
+                sh 'sed "/dlsym (RTLD_NEXT/s/dlsym (RTLD_NEXT/dlsym ((dlHandle)RTLD_NEXT/" -i fuzz/wget_options_fuzzer.c'
+            }
+        }
+        stage('config-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl3.0/include -L/usr/local-ssl3.0/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.0',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=wget-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('config-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl1.1/include -L/usr/local-ssl1.1/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local/include -L/usr/local/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc  --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('deploy_src') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=wget',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=wget',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+        success {
+            cleanWs()
+        }
+    }
+}
