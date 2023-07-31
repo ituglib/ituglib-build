@@ -9,8 +9,8 @@ pipeline {
         stage('nse') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync',
                             'DIST=/web/stage',
@@ -20,7 +20,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -29,8 +29,8 @@ pipeline {
         stage('nse-ssl1.1') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync-ssl1.1',
                             'DIST=/web/stage',
@@ -40,7 +40,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -49,8 +49,8 @@ pipeline {
         stage('nse-ssl3.0') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync-ssl3.0',
                             'DIST=/web/stage',
@@ -60,7 +60,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -69,8 +69,8 @@ pipeline {
         stage('nsx') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync',
                             'DIST=/web/stage',
@@ -80,7 +80,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -89,8 +89,8 @@ pipeline {
         stage('nsx-ssl1.1') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync-ssl1.1',
                             'DIST=/web/stage',
@@ -100,7 +100,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -109,8 +109,8 @@ pipeline {
         stage('nsx-ssl3.0') {
             steps {
                 lock('rsync-deploy') {
-                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=rsync-ssl3.0',
                             'DIST=/web/stage',
@@ -120,7 +120,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../../Ituglib_Build/workspace" && \
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform-bugfix.tar.groovy'
                     }
                 }
@@ -129,7 +129,7 @@ pipeline {
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage HPITUG] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
     }
 }
