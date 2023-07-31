@@ -17,7 +17,7 @@ class PlatformPakPackageEngine extends AbstractPackageEngine {
    }
 
    String getTaskLabel() {
-      return "[PlatformPackageEngine] ";
+      return "[PlatformPakPackageEngine] ";
    }
 
    String archivePattern() {
@@ -26,6 +26,10 @@ class PlatformPakPackageEngine extends AbstractPackageEngine {
 
    String targetPattern(String version) {
       return packageName + '-' + version + suffix + ".pak.bin";
+   }
+
+   boolean isChgrpFirst() {
+      return true;
    }
 
    public AbstractRepackage getRepackager(File archive, String version, String compression) {

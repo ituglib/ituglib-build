@@ -23,5 +23,9 @@ class NormalPackageEngine extends AbstractPackageEngine {
    String targetPattern(String version) {
       return packageName + '-' + version + suffix + ".tar.gz";
    }
+
+   boolean isChgrpFirst() {
+      return false;
+   }
 }
 

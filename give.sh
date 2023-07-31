@@ -2,7 +2,7 @@
 
 echo "Changing archive content ownership to \"$1\""
 
-echo sudo gtacl -p /G/system/system/fup give "jenktemp.*,$1"
-sudo gtacl -p /G/system/system/fup give "jenktemp.*,$1"
+echo chown super.super:SUPER /G/data05/jenktemp/*
+chown super.super:SUPER /G/data05/jenktemp/*
 
 exit $?

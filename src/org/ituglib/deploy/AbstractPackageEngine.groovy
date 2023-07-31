@@ -129,8 +129,13 @@ abstract class AbstractPackageEngine {
 	    }
             File temp = new File("/tmp/"+basename);
             repackager.decompress(temp);
-            repackager.chown(temp);
-            repackager.chgrp(temp);
+            if (isChgrpFirst()) {
+               repackager.chgrp(temp);
+               repackager.chown(temp);
+            } else {
+               repackager.chown(temp);
+               repackager.chgrp(temp);
+            }
             String newPatternString = targetPattern(version);
             repackager.setCompression("gz");
             File tarFile = new File(destinationDirectory, newPatternString);

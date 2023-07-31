@@ -34,6 +34,8 @@ abstract class AbstractPackageEngine {
    abstract String targetPattern(String version);
 
    abstract public getTaskLabel();
+   
+   abstract boolean isChgrpFirst();
 
    public AbstractPackageEngine() {
       this.patternString = archivePattern();
@@ -91,8 +93,14 @@ abstract class AbstractPackageEngine {
             AbstractRepackage repackager = getRepackager(archive, version, compression);
             File temp = new File("/tmp/"+basename);
             repackager.decompress(temp);
-            repackager.chown(temp);
-            repackager.chgrp(temp);
+            if (isChgrpFirst()) {
+               println "Using chgrp first";
+               repackager.chgrp(temp);
+               repackager.chown(temp);
+            } else {
+               repackager.chown(temp);
+               repackager.chgrp(temp);
+            }
             String newPatternString = targetPattern(version);
             repackager.setCompression("gz");
             File tarFile = new File(destinationDirectory, newPatternString);
