@@ -1,4 +1,4 @@
-* Curl pipeline for TNS/X - requires the tarball, not git. */
+/* Curl pipeline for TNS/V - requires the tarball, not git. */
 
 def downloadVersion
 
@@ -40,8 +40,10 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(["CURL_VERSION=${downloadVersion}",
-                         'DOWNLOADS=/home/downloads']){
+               			 'CURL_URL_PREFIX=https://curl.se/download/',
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
                     cleanWs()
+                    sh 'test -f ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz || curl --insecure ${CURL_URL_PREFIX}curl-${CURL_VERSION}.tar.gz -o ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
                 }

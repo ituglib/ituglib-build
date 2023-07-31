@@ -1,6 +1,7 @@
 /* Nano pipeline for TNS/V - requires the tarball, not git. */
 
 def downloadVersion
+def downloadSeries
 
 pipeline {
     agent any
@@ -15,8 +16,10 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '', description: 'Nano Version', name: 'input'),
+                            string(defaultValue: 'v7', description: 'Nano Series', name: 'series'),
                         ])
-                    downloadVersion = userInput
+                    downloadVersion = userInput.input
+                    downloadSeries = userInput.series
                 }
             }
         }
@@ -40,8 +43,10 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(["NANO_VERSION=${downloadVersion}",
-                         'DOWNLOADS=/home/randall/downloads']){
+                         "NANO_URL_PREFIX=https://www.nano-editor.org/dist/${downloadSeries}/",
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
                     cleanWs()
+                    sh 'test -f ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz || curl --insecure ${NANO_URL_PREFIX}nano-${NANO_VERSION}.tar.gz -o ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
                     sh 'mv nano-${NANO_VERSION}/* .'
                 }
