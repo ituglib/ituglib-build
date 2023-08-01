@@ -1,26 +1,54 @@
 /* Nano pipeline for TNS/E - requires the tarball, not git. */
 
+def downloadVersion
+def downloadSeries
+
 pipeline {
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '2'))
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+        skipDefaultCheckout()
     }
     stages {
-        stage('unpack') {
+        stage('setup') {
             steps {
-                withEnv(['NANO_VERSION=5.2',
-                         'DOWNLOADS=/home/ituglib/randall/downloads']){
-                    cleanWs()
-                    sh 'tar xzf ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
-                    sh 'mv nano-${NANO_VERSION}/* .'
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Nano Version', name: 'input'),
+                            string(defaultValue: 'v7', description: 'Nano Series', name: 'series'),
+                        ])
+                    downloadVersion = userInput.input
+                    downloadSeries = userInput.series
                 }
             }
         }
-        stage('config') {
+        stage('ituglib') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WRVU=J06.20 -I/usr/coreutils/include -I/usr/coreutils/include/ncurses" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local'
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('unpack') {
+            steps {
+                withEnv(["NANO_VERSION=${downloadVersion}",
+                         "NANO_URL_PREFIX=https://www.nano-editor.org/dist/${downloadSeries}/",
+                         'DOWNLOADS=/home/ituglib/randall/downloads']){
+                    cleanWs()
+                    sh 'test -f ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz || curl --insecure ${NANO_URL_PREFIX}nano-${NANO_VERSION}.tar.gz -o ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
+                    sh 'tar xzf ${DOWNLOADS}/nano-${NANO_VERSION}.tar.gz'
+                    sh 'mv nano-${NANO_VERSION}/* .'
                 }
             }
         }
@@ -62,6 +90,14 @@ pipeline {
   				sh "sed 's/~~/\"/g' --in-place lib/getprogname.c"
   				sh "sed 's/memory_full ()//g' --in-place lib/alloca.c"
   				sh 'echo "Patches applied"'
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WRVU=J06.20 -Wextensions -I/usr/coreutils/include -I/usr/coreutils/include/ncurses" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local'
+                }
             }
         }
         stage('build') {
