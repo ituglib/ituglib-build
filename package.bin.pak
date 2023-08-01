@@ -50,5 +50,10 @@ mv /tmp/${RELEASENAME}.pak.bin ${DEST}
 if [ "$?" != 0 ]; then
 	exit 1
 fi
+echo "chmod +rw ${RELEASENAME}.pak.bin"
+chmod +rw ${RELEASENAME}.pak.bin
+if [ "$?" != 0 ]; then
+	exit 1
+fi
 echo "Moved /tmp/${RELEASENAME}.pak.bin to $DEST"
 

@@ -2,6 +2,9 @@
 
 def downloadVersion
 def downloadSeries
+def destinationUser
+def destinationHost
+def destinationPort
 
 pipeline {
     agent any
@@ -17,9 +20,15 @@ pipeline {
                         parameters: [
                             string(defaultValue: '', description: 'Nano Version', name: 'input'),
                             string(defaultValue: 'v7', description: 'Nano Series', name: 'series'),
+                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
+                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
+                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
                         ])
                     downloadVersion = userInput.input
                     downloadSeries = userInput.series
+                    destinationUser = userInput.user
+                    destinationHost = userInput.host
+                    destinationPort = userInput.port
                 }
             }
         }
@@ -96,7 +105,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WRVU=J06.20 -Wextensions -I/usr/coreutils/include -I/usr/coreutils/include/ncurses" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WRVU=J06.22 -Wextensions -I/usr/coreutils/include -I/usr/coreutils/include/ncurses" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local'
                 }
             }
         }
@@ -148,7 +157,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=nano',
                         'DEST=/home/ituglib/randall/stage',
-                        'REMOTE=-oPort=49284 randall@tcmvns.tcmsupport.com',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
