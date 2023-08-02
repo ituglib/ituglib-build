@@ -1,4 +1,4 @@
-/* OpenSSL 1.1.1 TNS/V Pipeline */
+/* OpenSSL 1.1.1 TNS/X Pipeline */
 
 pipeline {
     agent any
@@ -43,7 +43,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-		                    sh './Configure nonstop-nsx --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
+		                    sh './Configure nonstop-nse --prefix=/usr/local-ssl1.1 --openssldir=/usr/local-ssl1.1/ssl no-dynamic-engine --with-rand-seed=egd'
                         }
                     }
                 }
@@ -51,7 +51,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L16.05"'
+                            sh 'make CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -75,20 +75,33 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
-		        stage('deploy') {
-		            steps {
-		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=:/usr/local/lib',
-		                        'BASENAME=openssl',
-		                        'DEST=/web/stage']) {
-		                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-		                }
-		            }
-		        }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                                'BASENAME=openssl',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=49284 ituglib.randall@tcmvns.tcmsupport.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
+                }
             }
         }
         stage('PUT') {
@@ -98,7 +111,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-		                    sh './Configure nonstop-nsx_put --prefix=/usr/local-ssl1.1_put --openssldir=/usr/local-ssl1.1_put/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+		                    sh './Configure nonstop-nse_put --prefix=/usr/local-ssl1.1_put --openssldir=/usr/local-ssl1.1_put/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
                         }
                     }
                 }
@@ -106,7 +119,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L16.05"'
+                            sh 'make CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -130,20 +143,33 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_put/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_put/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
-		        stage('deploy-put') {
-		            steps {
-		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=/usr/local/lib',
-		                        'BASENAME=openssl-put',
-		                        'DEST=/web/stage']) {
-		                    sh 'export _RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_put/lib:${_RLD_LIB_PATH} && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_put/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-		                }
-		            }
-		        }
+                stage('deploy-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                                'BASENAME=openssl-put',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_put/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-put',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=49284 ituglib.randall@tcmvns.tcmsupport.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
+                }
             }
         }
         stage('SPT') {
@@ -153,7 +179,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-		                    sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl1.1_spt --openssldir=/usr/local-ssl1.1_spt/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
+		                    sh './Configure nonstop-nse_spt_floss --prefix=/usr/local-ssl1.1_spt --openssldir=/usr/local-ssl1.1_spt/ssl no-dynamic-engine threads "-D_REENTRANT" --with-rand-seed=egd'
                         }
                     }
                 }
@@ -161,7 +187,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L16.05"'
+                            sh 'make CFLAGS="-I/usr/local/include -WRVU=J06.20"'
                         }
                     }
                 }
@@ -185,20 +211,33 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
-		        stage('deploy-spt') {
-		            steps {
-		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=:/usr/local/lib',
-		                        'BASENAME=openssl-spt',
-		                        'DEST=/web/stage']) {
-		                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1_spt/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-		                }
-		            }
-		        }
+                stage('deploy-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                                'BASENAME=openssl-spt',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-spt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-spt',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=49284 ituglib.randall@tcmvns.tcmsupport.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
+                }
             }
         }
         stage('IEEE') {
@@ -208,7 +247,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-		                    sh './Configure nonstop-nsx_ieee --prefix=/usr/local-ssl1.1ieee --openssldir=/usr/local-ssl1.1ieee/ssl no-dynamic-engine --with-rand-seed=egd'
+		                    sh './Configure nonstop-nse_ieee --prefix=/usr/local-ssl1.1ieee --openssldir=/usr/local-ssl1.1ieee/ssl no-dynamic-engine --with-rand-seed=egd'
                         }
                     }
                 }
@@ -216,7 +255,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L16.05"'
+                            sh 'make CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -240,26 +279,39 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
-		        stage('deploy-ieee') {
-		            steps {
-		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=:/usr/local/lib',
-		                        'BASENAME=openssl-ieee',
-		                        'DEST=/web/stage']) {
-		                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-		                }
-		            }
-		        }
+                stage('deploy-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=/usr/local-ssl1.1ieee/lib:/usr/local/lib',
+                                'BASENAME=openssl-ieee',
+                                'DEST=/home/ituglib/randall/stage']) {
+                            sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1ieee/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+                stage('remote-ieee') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-ieee',
+                                'DEST=/home/ituglib/randall/stage',
+                                'REMOTE=-oPort=49284 ituglib.randall@tcmvns.tcmsupport.com',
+                                'REMOTE_DEST=/web/stage']) {
+                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*'
+                        }
+                    }
+                }
             }
         }
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins NSBLDE4] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
         success {
             cleanWs()
