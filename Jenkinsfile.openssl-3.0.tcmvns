@@ -56,7 +56,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips no-egd'
+                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips'
                         }
                     }
                 }
@@ -113,7 +113,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips no-egd'
+                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu enable-fips'
                         }
                     }
                 }
@@ -170,7 +170,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips no-egd "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
                         }
                     }
                 }
@@ -227,7 +227,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips no-egd "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_spt_floss --prefix=/usr/local-ssl3.0 --openssldir=/usr/local-ssl3.0/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
                         }
                     }
                 }

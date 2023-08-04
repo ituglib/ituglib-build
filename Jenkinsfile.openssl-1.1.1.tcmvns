@@ -247,10 +247,10 @@ pipeline {
 		        stage('deploy-ieee') {
 		            steps {
 		                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-		                        '_RLD_LIB_PATH=:/usr/local/lib',
+		                        "_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib",
 		                        'BASENAME=openssl-ieee',
 		                        'DEST=/web/stage']) {
-		                    sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl1.1ieee/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1_spt/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+		                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1ieee/bin/openssl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
 		                }
 		            }
 		        }
