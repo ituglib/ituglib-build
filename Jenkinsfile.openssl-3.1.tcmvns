@@ -100,7 +100,7 @@ pipeline {
                                 'BASENAME=openssl',
                                 'PRODUCT_BASE_VERSION=3.1',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
@@ -157,7 +157,7 @@ pipeline {
                                 'BASENAME=openssl-32',
                                 'PRODUCT_BASE_VERSION=3.1',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
@@ -214,7 +214,7 @@ pipeline {
                                 'BASENAME=openssl-put',
                                 'PRODUCT_BASE_VERSION=3.1',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
@@ -271,7 +271,7 @@ pipeline {
                                 'BASENAME=openssl-spt',
                                 'PRODUCT_BASE_VERSION=3.1',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib-spt:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib-spt:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
