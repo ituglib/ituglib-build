@@ -263,6 +263,29 @@ pipeline {
                 }
             }
         }
+        stage('nse-1.1.x-ieee') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl-ieee',
+                            'VERSION=1\\.1\\.1[a-z]*',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=J06.20 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-1.1.1.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nse-1.1.x-put') {
             steps {
                 lock('openssl-deploy') {
