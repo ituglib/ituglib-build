@@ -29,6 +29,10 @@ class PlatformVersionPackageEngine extends AbstractPackageEngine {
       return Pattern.quote(packageName) + "-(" + specificVersion + ")" + "-release"+suffix+".tar.(.*)";
    }
 
+   boolean isChgrpFirst() {
+      return false;
+   }
+
    String targetPattern(String version) {
       return packageName + '-' + version + suffix + ".tar.gz";
    }
