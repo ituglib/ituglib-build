@@ -17,7 +17,7 @@ pipeline {
 			    script {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
-                            string(defaultValue: '', description: 'Nano Version', name: 'input'),
+                            string(defaultValue: '', description: 'Curl Version', name: 'input'),
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
                             string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
                             string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
