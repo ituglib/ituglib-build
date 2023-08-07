@@ -4,13 +4,17 @@ def downloadVersion
 
 pipeline {
     agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        skipDefaultCheckout()
+    }
     stages {
         stage('setup') {
             steps {
 			    script {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
-                            string(defaultValue: '1.20.3', description: 'WGet Version', name: 'input'),
+                            string(defaultValue: '1.21.4', description: 'WGet Version', name: 'input'),
                         ])
                     downloadVersion = userInput
                 }
@@ -35,7 +39,7 @@ pipeline {
         }
         stage('unpack') {
             steps {
-                withEnv(["WGETL_VERSION=${downloadVersion}",
+                withEnv(["WGET_VERSION=${downloadVersion}",
                			 'WGET_URL_PREFIX=https://ftp.gnu.org/gnu/wget/',
                          'DOWNLOADS=/home/jenkinsbuild/downloads']){
                     cleanWs()
@@ -133,7 +137,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=wget-ssl3.0',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -186,7 +190,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=wget-ssl1.1',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -254,7 +258,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=wget',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
