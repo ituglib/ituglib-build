@@ -13,12 +13,14 @@ pipeline {
     stages {
         stage('setup') {
             steps {
-			    script {
-                    def userInput = input(id: 'userInput', message: 'Build Settings?',
-                        parameters: [
-                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
-                        ])
-                    buildVersion = userInput
+				timeout(time: 120, unit: 'SECONDS') {
+				    script {
+	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+	                        parameters: [
+	                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
+	                        ])
+	                    buildVersion = userInput
+	                }
                 }
             }
         }

@@ -16,18 +16,20 @@ pipeline {
     stages {
         stage('setup') {
             steps {
-			    script {
-                    def userInput = input(id: 'userInput', message: 'Build Settings?',
-                        parameters: [
-                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
-                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
-                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
-                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
-                        ])
-                    buildVersion = userInput.input
-                    destinationUser = userInput.user
-                    destinationHost = userInput.host
-                    destinationPort = userInput.port
+				timeout(time: 120, unit: 'SECONDS') {
+				    script {
+	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+	                        parameters: [
+	                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
+	                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
+	                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
+	                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
+	                        ])
+	                    buildVersion = userInput.input
+	                    destinationUser = userInput.user
+	                    destinationHost = userInput.host
+	                    destinationPort = userInput.port
+	                }
                 }
             }
         }
