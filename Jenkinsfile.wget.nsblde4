@@ -13,7 +13,7 @@ pipeline {
 			    script {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
-                            string(defaultValue: '1.21.4', description: 'WGet Version', name: 'input'),
+                            string(defaultValue: '1.20.3', description: 'WGet Version', name: 'input'),
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
                             string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
                             string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
@@ -46,7 +46,7 @@ pipeline {
             steps {
                 withEnv(["WGET_VERSION=${downloadVersion}",
                			 'WGET_URL_PREFIX=https://ftp.gnu.org/gnu/wget/',
-                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                         'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz || curl --insecure ${WGET_URL_PREFIX}wget-${WGET_VERSION}.tar.gz -o ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/wget-${WGET_VERSION}.tar.gz'
@@ -139,18 +139,18 @@ pipeline {
         stage('package-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=wget-ssl3.0',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
         stage('remote-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=curl-ssl3.0',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.0',
                         'DEST=/home/ituglib/randall/stage',
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
@@ -164,6 +164,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'rm -rf "${WORKSPACE}/install"'
                     sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl1.1/include -L/usr/local-ssl1.1/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=openssl'
                 }
             }
@@ -205,10 +206,10 @@ pipeline {
         stage('package-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=wget-ssl1.1',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -216,7 +217,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
+                        'BASENAME=wget-ssl1.1',
                         'DEST=/home/ituglib/randall/stage',
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
@@ -230,6 +231,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'rm -rf "${WORKSPACE}/install"'
                     sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local/include -L/usr/local/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc  --with-ssl=openssl'
                 }
             }
@@ -271,7 +273,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=wget',
-                        'DEST=/web/stage']) {
+                        'DEST=/home/ituglib/randall/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
@@ -292,7 +294,7 @@ pipeline {
     }
     post {
         always {
-            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins NSBLDE4] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
         success {
             cleanWs()

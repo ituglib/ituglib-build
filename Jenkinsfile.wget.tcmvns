@@ -14,7 +14,7 @@ pipeline {
 			    script {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
-                            string(defaultValue: '1.21.4', description: 'WGet Version', name: 'input'),
+                            string(defaultValue: '1.20.3', description: 'WGet Version', name: 'input'),
                         ])
                     downloadVersion = userInput
                 }
@@ -121,6 +121,23 @@ pipeline {
                 }
             }
         }
+        stage('deploy_src-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
         stage('install-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -134,10 +151,10 @@ pipeline {
         stage('deploy-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=wget-ssl3.0',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -146,6 +163,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'rm -rf "${WORKSPACE}/install"'
                     sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl1.1/include -L/usr/local-ssl1.1/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=openssl'
                 }
             }
@@ -174,6 +192,23 @@ pipeline {
                 }
             }
         }
+        stage('deploy_src-1.1') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl1.1',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
         stage('install-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -187,10 +222,10 @@ pipeline {
         stage('deploy-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=wget-ssl1.1',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -199,6 +234,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'rm -rf "${WORKSPACE}/install"'
                     sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local/include -L/usr/local/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc  --with-ssl=openssl'
                 }
             }
@@ -230,7 +266,7 @@ pipeline {
         stage('deploy_src') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local/lib',
                         'BASENAME=wget',
                         'DEST=/web/stage']) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
@@ -255,10 +291,10 @@ pipeline {
         stage('deploy') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local/lib',
                         'BASENAME=wget',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/usr/local" && export VERSION_PATH="${INSTALL_LOCATION}/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
