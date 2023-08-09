@@ -17,10 +17,10 @@ pipeline {
 				    script {
 	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
 	                        parameters: [
-	                            string(defaultValue: '', description: 'RSync ref to build', name: 'branch'),
+	                            string(defaultValue: '', description: 'RSync ref to build', name: 'version'),
 	                            booleanParam(defaultValue: true, description: 'Run tests', name: 'tests'),
 	                        ])
-	                    buildVersion = userInput.branch
+	                    buildVersion = userInput.version
 	                    runTests = userInput.tests
 	                }
                 }
@@ -62,7 +62,7 @@ pipeline {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99 -Wnowarn=734" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/coreutils/include" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
         }
@@ -122,7 +122,7 @@ pipeline {
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
-                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl1.1/include -I/usr/coreutils/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
         }
@@ -182,7 +182,7 @@ pipeline {
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
-                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl3.0/include" LDFLAGS="-L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl3.0/include -I/usr/coreutils/include" LDFLAGS="-L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
         }
