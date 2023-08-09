@@ -203,7 +203,7 @@ pipeline {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/local/openssl/include" LDFLAGS="-L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/local/openssl/include" LDFLAGS="-L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl'
                 }
             }
         }
