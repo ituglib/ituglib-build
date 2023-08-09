@@ -47,50 +47,6 @@ pipeline {
                 }
             }
         }
-        stage('nse-ssl1.1') {
-            steps {
-                lock('gnupg-deploy') {
-                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=gnupg-ssl1.1',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
-                            'SCHEMA=ITUG.OPENLIB',
-                            'SUFFIX=-nse',
-                            'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=gnupg_install-1.4.23-ssl.html']) {
-                        sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
-                    }
-                }
-            }
-        }
-        stage('nse-ssl3.0') {
-            steps {
-                lock('gnupg-deploy') {
-                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=gnupg-ssl3.0',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
-                            'SCHEMA=ITUG.OPENLIB',
-                            'SUFFIX=-nse',
-                            'TYPE=TNS/E',
-                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=gnupg_install-1.4.23-ssl3.0.html']) {
-                        sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
-                    }
-                }
-            }
-        }
         stage('nsx') {
             steps {
                 lock('gnupg-deploy') {
@@ -106,50 +62,6 @@ pipeline {
                             'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
                             'README_FILE=gnupg_install-1.4.23.html']) {
-                        sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
-                    }
-                }
-            }
-        }
-        stage('nsx-ssl1.1') {
-            steps {
-                lock('gnupg-deploy') {
-                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=gnupg-ssl1.1',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
-                            'SCHEMA=ITUG.OPENLIB',
-                            'SUFFIX=-nsx',
-                            'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=gnupg_install-1.4.23-ssl.html']) {
-                        sh 'sudo rm -rf /tmp/${BASENAME}'
-                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
-                            ${GROOVY_PATH}/groovy platform.tar.groovy'
-                    }
-                }
-            }
-        }
-        stage('nsx-ssl3.0') {
-            steps {
-                lock('gnupg-deploy') {
-                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
-                            'BASENAME=gnupg-ssl3.0',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
-                            'SCHEMA=ITUG.OPENLIB',
-                            'SUFFIX=-nsx',
-                            'TYPE=TNS/X',
-                            'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=gnupg_install-1.4.23-ssl3.0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
