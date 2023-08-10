@@ -2,7 +2,7 @@
 
 def localStaging
 def jdbcMxLibrary
-def groovyPath
+def groovyRoot
 
 pipeline {
     agent any
@@ -17,7 +17,7 @@ pipeline {
                 	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
                 	localStaging = "${LOCAL_STAGING}"
                 	jdbcMxLibrary = "${JDBCMX_LIB}"
-                	groovyPath="${GROOVY_PATH}"
+                	groovyRoot="${GROOVY_ROOT}"
                 }
     		}
     	}
@@ -26,7 +26,7 @@ pipeline {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
-                            "GROOVY_PATH=${groovyPath}",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
@@ -45,7 +45,7 @@ pipeline {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
-                            "GROOVY_PATH=${groovyPath}",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
@@ -67,7 +67,7 @@ pipeline {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
-                            "GROOVY_PATH=${groovyPath}",
+                            "GROOVY_PATH=${groovyPath}/bin",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
