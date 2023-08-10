@@ -1,6 +1,8 @@
 /* GnuPG pipeline for TNS/V - requires the tarball, not git. */
 
 def downloadVersion
+def localStaging
+def localDownloads
 
 pipeline {
     agent any
@@ -34,13 +36,19 @@ pipeline {
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                	localDownloads = "${LOCAL_DOWNLOADS}"
+                }
             }
         }
         stage('unpack') {
             steps {
                 withEnv(["GNUPG_VERSION=${downloadVersion}",
                			 'GNUPG_URL_PREFIX=https://gnupg.org/ftp/gcrypt/gnupg/',
-                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                         "DOWNLOADS=${localDownloads}"]){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz || gnupg --insecure ${GNUPG_URL_PREFIX}gnupg-${GNUPG_VERSION}.tar.gz -o ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz'
@@ -97,7 +105,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         "VERSION=${downloadVersion}",
                         'BASENAME=gnupg',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
                         tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
                             --exclude="*.o" \
@@ -122,7 +130,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=gnupg',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
@@ -175,7 +183,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=gnupg-ssl3.0',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
@@ -227,7 +235,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=gnupg-ssl1.1',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/gpg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }

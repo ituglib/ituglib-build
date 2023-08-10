@@ -4,6 +4,9 @@ def downloadVersion
 def destinationUser
 def destinationHost
 def destinationPort
+def destinationTarget
+def localStaging
+def localDownloads
 
 pipeline {
     agent any
@@ -17,14 +20,8 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '1.4.23', description: 'GnuPG Version', name: 'version'),
-                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
-                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
-                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
                         ])
-                    downloadVersion = userInput.version
-                    destinationUser = userInput.user
-                    destinationHost = userInput.host
-                    destinationPort = userInput.port
+                    downloadVersion = userInput
                 }
             }
         }
@@ -46,7 +43,12 @@ pipeline {
                 script {
                 	load "../Ituglib_Build/Jenkinsfile.globals.all"
                 	load "../Ituglib_Build/Jenkinsfile.globals.nse"
-                	sh "env"
+                	destinationUser = "${DEPLOY_USER}"
+                	destinationHost = "${DEPLOY_HOST}"
+                	destinationPort = "${DEPLOY_PORT}"
+                	destinationTarget = "${DEPLOY_TARGET}"
+                	localStaging = "${LOCAL_STAGING}"
+                	localDownloads = "${LOCAL_DOWNLOADS}"
                 }
             }
         }
@@ -54,7 +56,7 @@ pipeline {
             steps {
                 withEnv(["GNUPG_VERSION=${downloadVersion}",
                			 'GNUPG_URL_PREFIX=https://gnupg.org/ftp/gcrypt/gnupg/',
-                         'DOWNLOADS=/home/ituglib/randall/downloads']){
+                         "DOWNLOADS=${localDownloads}"]){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz || curl --insecure ${GNUPG_URL_PREFIX}gnupg-${GNUPG_VERSION}.tar.gz -o ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/gnupg-${GNUPG_VERSION}.tar.gz'
@@ -112,7 +114,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         "VERSION=${downloadVersion}",
                         'BASENAME=gnupg',
-                        'DEST=/home/ituglib/randall/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
                         tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
                             --exclude="*.o" \
@@ -138,7 +140,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib',
                         'BASENAME=gnupg',
                         "DOWNLOAD_VERSION=$downloadVersion",
-                        'DEST=/home/ituglib/randall/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/gnupg" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
@@ -148,9 +150,9 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=gnupg',
-                        'DEST=/home/ituglib/randall/stage',
+                        "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
-                        'REMOTE_DEST=/web/stage']) {
+                        "REMOTE_DEST=${destinationTarget}"]) {
                     sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
                     sh 'rm ${DEST}/${BASENAME}-*'
                 }
