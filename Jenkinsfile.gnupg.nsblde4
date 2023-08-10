@@ -43,6 +43,11 @@ pipeline {
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nse"
+                	sh "env"
+                }
             }
         }
         stage('unpack') {
@@ -59,8 +64,14 @@ pipeline {
         }
         stage('patch') {
             steps {
+                sh 'sed s/nsr-tandem/nsv-tandem/g -i scripts/config.sub'
+                sh 'sed s/NSR-?:NONSTOP_KERNEL:/NSV-?:NONSTOP_KERNEL:/g -i scripts/config.guess'
+                sh 'sed s/nsr-tandem/nsv-tandem/g -i scripts/config.guess'
                 sh 'printf "/__libc_lock_define_initialized_recursive/m/size_t nullentrylen;/\n/.\nw\n" | ed intl/loadmsgcat.c'
-                
+                sh 'sed "/ADD_BLOCK (block_list, tmp_dirname)/i #ifndef __TANDEM" -i intl/dcigettext.c'
+                sh 'sed "/ADD_BLOCK (block_list, tmp_dirname)/a #endif //__TANDEM" -i intl/dcigettext.c'
+                sh 'sed "s?#include <sys/errno.h>?#include <errno.h>?" -i cipher/rndunix.c'
+                sh 'sed "s?#include <sys/signal.h>?#include <signal.h>?" -i cipher/rndunix.c'
             }
         }
         stage('config') {
@@ -101,7 +112,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         "VERSION=${downloadVersion}",
                         'BASENAME=gnupg',
-                        'DEST=/web/stage']) {
+                        'DEST=/home/ituglib/randall/stage']) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
                         tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
                             --exclude="*.o" \
