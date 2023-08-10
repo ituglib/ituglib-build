@@ -1,4 +1,5 @@
 JDBCMX_LIB="/usr/tandem/jdbcMx/T1275L38/lib"
+GROOVY_PATH="/home/jenkinstag/.sdkman/candidates/groovy/current/bin/"
 EXPAT_ROOT="/usr/tandem/xml/T0625L01_AAE"
 LOCAL_STAGING="/web/stage"
 LOCAL_DOWNLOADS="/home/jenkinsbuild/downloads"

@@ -1,17 +1,32 @@
 /* GnuPG deploy pipeline. */
 
+def localStaging
+def jdbcMxLibrary
+def groovyPath
+
 pipeline {
     agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
+    	stage('setup') {
+    		steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                	jdbcMxLibrary = "${JDBCMX_LIB}"
+                	groovyPath="${GROOVY_PATH}"
+                }
+    		}
+    	}
         stage('src') {
             steps {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyPath}",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
@@ -29,8 +44,8 @@ pipeline {
             steps {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyPath}",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
@@ -51,8 +66,8 @@ pipeline {
             steps {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyPath}",
                             'BASENAME=gnupg',
                             'DIST=/web/stage',
                             'DEST=/web/opensrc',
