@@ -1,6 +1,7 @@
 /** RSync Pipeline for L-series */
 def buildVersion
 def runTests
+def localStaging
 
 pipeline {
     agent any
@@ -55,6 +56,11 @@ pipeline {
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                }
             }
         }
         stage('config') {
@@ -92,7 +98,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make test'
                 }
             }
         }
@@ -111,7 +117,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                          '_RLD_LIB_PATH=:/usr/local/lib',
                          'BASENAME=rsync',
-                         'DEST=/web/stage']) {
+                         "DEST=${localStaging}"]) {
                         sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }
@@ -152,7 +158,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make test'
                 }
             }
         }
@@ -171,7 +177,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl1.1',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }
@@ -212,7 +218,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
-                    sh 'make test || echo "Hardlinks fails for timeouts. Check that"'
+                    sh 'make test'
                 }
             }
         }
@@ -231,7 +237,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl3.0',
-                        'DEST=/web/stage']) {
+                        "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
                 }
             }

@@ -1,20 +1,37 @@
 /* Rsync deploy pipeline. */
 
+def deployTarget
+def websiteTarget
+def jdbcMxLibrary
+def groovyRoot
+
 pipeline {
     agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
+    	stage('setup') {
+    		steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	deployTarget = "${DEPLOY_TARGET}"
+                	websiteTarget = "${WEBSITE_TARGET}"
+                	jdbcMxLibrary = "${JDBCMX_LIB}"
+                	groovyRoot="${GROOVY_ROOT}"
+                }
+    		}
+    	}
         stage('nse') {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
@@ -30,11 +47,11 @@ pipeline {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync-ssl1.1',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
@@ -50,11 +67,11 @@ pipeline {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync-ssl3.0',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
@@ -70,11 +87,11 @@ pipeline {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -90,11 +107,11 @@ pipeline {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync-ssl1.1',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -110,11 +127,11 @@ pipeline {
             steps {
                 lock('rsync-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
-                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=rsync-ssl3.0',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
