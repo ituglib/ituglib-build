@@ -1,4 +1,4 @@
-/* Git Jenkins Pipeline for TNS/V */
+/* Git Jenkins Pipeline for TNS/E */
 
 def buildVersion
 def runTests
@@ -12,7 +12,7 @@ def expatRoot
 pipeline {
     agent any
     options {
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+        buildDiscarder(logRotator(numToKeepStr: '3'))
     }
     triggers {
         pollSCM('H H H * *')
@@ -337,7 +337,7 @@ pipeline {
                         'PREFIX=/usr/local',
                         'BASENAME=git',
                         'DEST=install']) {
-                    sh 'make install DESTDIR_SQ=${WORKSPACE}/install'
+                    sh "make install prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-L/usr/local/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }

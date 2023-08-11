@@ -2,4 +2,4 @@ DEPLOY_USER="ituglib.randall"
 DEPLOY_HOST="tcmvns.tcmsupport.com"
 DEPLOY_PORT="49284"
 DEPLOY_TARGET="/web/stage"
-
+WEBSITE_TARGET="/web/opensrc"
