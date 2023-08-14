@@ -1,0 +1,71 @@
+/* Git deploy pipeline. */
+
+def deployTarget
+def websiteTarget
+def productToClean
+def versionToClean
+def dryRun
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    stages {
+    	stage('setup') {
+    		steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	deployTarget = "${DEPLOY_TARGET}"
+                	websiteTarget = "${WEBSITE_TARGET}"
+                }
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Cleanup Items?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Product to Clean', name: 'product'),
+                            string(defaultValue: '', description: 'Version to Clean', name: 'version'),
+                            booleanParam(defaultValue: false, description: 'Dry Run Only', name: 'dryrun'),
+                        ])
+                    productToClean = userInput.product
+                    versionToClean = userInput.version
+                    dryRun = userInput.dryrun
+                }
+    		}
+    	}
+    	stage('preamble') {
+   			when {
+   				expression {
+   					return dryRun;
+   				}
+   			}
+    		steps {
+               	withEnv(["VERSION=${versionToClean}",
+               			 "PRODUCT=${productToClean}",
+           				 "DEST=${deployTarget}",]) {
+               		sh "ls -l ${DEST}/${PRODUCT}-*${VERSION}-*"
+               	}
+    		}
+    	}
+    	stage('cleanup') {
+   			when {
+   				expression {
+   					return !dryRun;
+   				}
+   			}
+    		steps {
+               	withEnv(["VERSION=${versionToClean}",
+               			 "PRODUCT=${productToClean}",
+           				 "DEST=${deployTarget}",]) {
+           			sh "echo Removing ${PRODUCT}-*${VERSION}-*"
+               		sh "rm -f ${DEST}/${PRODUCT}-*${VERSION}-*"
+               	}
+    		}
+    	}
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
