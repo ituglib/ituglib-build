@@ -57,7 +57,7 @@ pipeline {
                	withEnv(["VERSION=${versionToClean}",
                			 "PRODUCT=${productToClean}",
            				 "DEST=${deployTarget}",]) {
-           			sh "echo Removing ${PRODUCT}-*${VERSION}-*"
+           			sh "echo Removing ${DEST}/${PRODUCT}-*${VERSION}-*"
                		sh "rm -f ${DEST}/${PRODUCT}-*${VERSION}-*"
                	}
     		}
