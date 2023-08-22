@@ -142,7 +142,7 @@ pipeline {
         }
         stage('config-1.1') {
             steps {
-                withEnv(['PREFIX=/usr/local',
+                withEnv(['PREFIX=/usr/local-ssl1.1',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'make clean'
@@ -217,7 +217,7 @@ pipeline {
         }
         stage('config-3.0') {
             steps {
-                withEnv(['PREFIX=/usr/local',
+                withEnv(['PREFIX=/usr/local-ssl3.0',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make clean'
