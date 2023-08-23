@@ -2,6 +2,7 @@
 
 def buildVersion
 def runTests
+def cleanWorkspace
 def destinationUser
 def destinationHost
 def destinationPort
@@ -26,9 +27,11 @@ pipeline {
 	                        parameters: [
 	                            string(defaultValue: '', description: 'Git version to build', name: 'version'),
 	                            booleanParam(defaultValue: true, description: 'Run tests', name: 'tests'),
+	                            booleanParam(defaultValue: true, description: 'Cleanup Workspace', name: 'cleanup'),
 	                        ])
 	                    buildVersion = userInput.version
 	                    runTests = userInput.tests
+	                    cleanWorkspace = userInput.cleanup
 	                }
                 }
             }
@@ -408,7 +411,11 @@ pipeline {
             mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins NSBLDE4] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
         }
         success {
-            cleanWs()
+        	script {
+	        	if (cleanWorkspace) {
+	           		cleanWs();
+	           	}
+           	}
         }
     }
 }
