@@ -34,6 +34,7 @@ pipeline {
                             "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-src',
+                            'PACKAGE_WITH_SUDO=true',
                             'TYPE=src']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
@@ -53,6 +54,7 @@ pipeline {
                             "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nse',
+                            'PACKAGE_WITH_SUDO=true',
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
@@ -75,6 +77,7 @@ pipeline {
                             "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
+                            'PACKAGE_WITH_SUDO=true',
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L20.10/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
