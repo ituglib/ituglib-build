@@ -71,7 +71,7 @@ pipeline {
                 lock('gnupg-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
-                            "GROOVY_PATH=${groovyPath}/bin",
+                            "GROOVY_PATH=${groovyRoot}/bin",
                             'BASENAME=gnupg',
                             "DIST=${deployTarget}",
                             "DEST=${websiteTarget}",
