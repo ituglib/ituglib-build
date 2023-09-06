@@ -1,0 +1,123 @@
+/*
+ Which build pipeline for TNS/X
+*/
+
+def localStaging
+def downloadVersion
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        skipDefaultCheckout()
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('setup') {
+            steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                }
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'Which Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
+        stage('unpack') {
+            steps {
+                withEnv(["WHICH_VERSION=${downloadVersion}",
+               			 'WHICH_URL_PREFIX=https://ftp.gnu.org/gnu/which',
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                    cleanWs()
+                    sh 'test -f ${DOWNLOADS}/which-${WHICH_VERSION}.tar.gz || curl --insecure -L ${WHICH_URL_PREFIX}/which-${WHICH_VERSION}.tar.gz -o ${DOWNLOADS}/which-${WHICH_VERSION}.tar.gz'
+                    sh 'tar xf ${DOWNLOADS}/which-${WHICH_VERSION}.tar.gz'
+                    sh 'mv which-${WHICH_VERSION}/* .'
+                }
+            }
+        }
+        stage('patch') {
+			steps {
+	        	sh 'sed "/^\\*)\\$/i none)" -i depcomp'
+	        	sh 'sed "/^\\*)\\$/i \\"\\$@\\" || exit \\$?" -i depcomp'
+	        	sh 'sed "/^\\*)\\$/i ;;" -i depcomp'
+        	}
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=1252,272,734 -WRVU=L17.08" conf_script_floss_cc'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignore errors"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'make check'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=which',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/which" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
