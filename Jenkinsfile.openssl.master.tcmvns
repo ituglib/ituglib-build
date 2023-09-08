@@ -1,0 +1,69 @@
+/* OpenSSL 3.2.x Monitor Changes to Catch Breakages - TNS/X Pipeline */
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    triggers {
+        pollSCM('H 2,4 * * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: 'master']], /* To be changed to openssl-3.2 on release. */
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout']],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+            }
+        }
+        stage('tell') {
+            steps() {
+                mail bcc: '', body: "STARTED: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins CGNAC1] STARTED: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+            }
+        }
+        stage('config') {
+            steps() {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh './Configure nonstop-nsx_64 --with-rand-seed=rdcpu enable-fips'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
+                }
+            }
+        }
+        stage('cleanup') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
