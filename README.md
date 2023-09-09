@@ -11,9 +11,11 @@ typically required for the pipeline. Just create a new pipeline project and
 paste the file contents into the Pipeline script box.
 
 - Jenkinsfile - the project for automatically picking up ITUGLIB.
-- Jenkinsfile.deploy.* - deployment scripts for each product (HPITUG only).
-- Jenkinsfile.*.hpitug - project specific to HPITUG
-- Jenkinsfile.*.cgnac1 - project specific to CGNAC1
+- Jenkinsfile.deploy.* - deployment scripts for each product (TCMVNS only).
+- Jenkinsfile.*.tcmvns - project specific to TCMVNS
+- Jenkinsfile.*.nsblde4 - project specific to NSBLDE4
+- Jenkinsfile.*.cgnac1 - project specific to CGNAC1 (to be turned off)
+- Jenkinsfile.*.hpitug - project specific to HPITUG (deprecated)
 
 - *.dist - descriptor files used by the Jenkinsfile projects to figure out
          how to compute the version being built. This varies by product.
