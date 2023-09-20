@@ -12,7 +12,7 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: 'openssl-3.0']],
+                    branches: [[name: 'master']], /* To be changed to openssl-3.2 on release. */
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
@@ -31,7 +31,7 @@ pipeline {
         stage('config') {
             steps() {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
                     sh './Configure nonstop-nsx_64 --with-rand-seed=rdcpu enable-fips'
                 }
             }
@@ -47,7 +47,7 @@ pipeline {
         stage('test') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
                     sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
                 }
             }
