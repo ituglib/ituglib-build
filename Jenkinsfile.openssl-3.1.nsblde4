@@ -1,6 +1,7 @@
 /* OpenSSL 3.1.x TNS/E Pipeline */
 
 def buildVersion
+def testArgs
 def destinationUser
 def destinationHost
 def destinationPort
@@ -20,11 +21,13 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
+                            string(defaultValue: '-j4 V=1', description: 'make test arguments', name: 'testargs'),
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
                             string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
                             string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
                         ])
                     buildVersion = userInput.input
+                    testArgs = userInput.testargs
                     destinationUser = userInput.user
                     destinationHost = userInput.host
                     destinationPort = userInput.port
@@ -88,8 +91,9 @@ pipeline {
                 stage('test') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        		"TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }
@@ -98,7 +102,6 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -158,8 +161,9 @@ pipeline {
                 stage('test-32') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        		"TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }
@@ -168,7 +172,6 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -228,8 +231,9 @@ pipeline {
                 stage('test-put') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                "TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }
@@ -238,7 +242,6 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
@@ -298,8 +301,9 @@ pipeline {
                 stage('test-spt') {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        		"TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make test || echo "Test Failed But Ignored"'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "Test Failed But Ignored"'
                         }
                     }
                 }
@@ -308,7 +312,6 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib-spt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.1/lib-spt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
                         }
                     }
                 }
