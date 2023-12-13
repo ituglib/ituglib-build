@@ -1,4 +1,4 @@
-/* OpenSSL 3.2.x TNS/V Pipeline */
+/* OpenSSL 3.3.x TNS/V Pipeline */
 
 def buildVersion
 
@@ -56,7 +56,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.2 --openssldir=/usr/local-ssl3.2/ssl --with-rand-seed=rdcpu enable-fips'
+                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.3 --openssldir=/usr/local-ssl3.3/ssl --with-rand-seed=rdcpu enable-fips'
                         }
                     }
                 }
@@ -88,8 +88,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -98,9 +98,9 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl',
-                                'PRODUCT_BASE_VERSION=3.2',
+                                'PRODUCT_BASE_VERSION=3.3',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
@@ -113,7 +113,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.2 --openssldir=/usr/local-ssl3.2/ssl --with-rand-seed=rdcpu enable-fips'
+                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.3 --openssldir=/usr/local-ssl3.3/ssl --with-rand-seed=rdcpu enable-fips'
                         }
                     }
                 }
@@ -145,8 +145,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -155,9 +155,9 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-32',
-                                'PRODUCT_BASE_VERSION=3.2',
+                                'PRODUCT_BASE_VERSION=3.3',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
@@ -170,7 +170,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.2 --openssldir=/usr/local-ssl3.2/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.3 --openssldir=/usr/local-ssl3.3/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
                         }
                     }
                 }
@@ -202,8 +202,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L16.05"'
                         }
                     }
                 }
@@ -212,9 +212,9 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-put',
-                                'PRODUCT_BASE_VERSION=3.2',
+                                'PRODUCT_BASE_VERSION=3.3',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.2/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
