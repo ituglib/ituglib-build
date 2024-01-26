@@ -42,8 +42,8 @@ class FileSet {
    }
 
    public void insertNewFile(int fileKey, int versionKey, int directoryKey,
-                             String type, File tarFile) {
-      String INSERT = "INSERT INTO "+schema+".files (file_key,version_key,directory_key,file_type,file_name,file_size,file_mod_time) VALUES (?,?,?,?,?,?,?)";
+                             String type, File tarFile, String hashValue, String hashType) {
+      String INSERT = "INSERT INTO "+schema+".files (file_key,version_key,directory_key,file_type,file_name,file_size,file_mod_time,hash_type,hash_value) VALUES (?,?,?,?,?,?,?,?,?)";
       PreparedStatement statement = connection.prepareStatement(INSERT);
       statement.setInt(1, fileKey);
       statement.setInt(2, versionKey);
@@ -52,16 +52,20 @@ class FileSet {
       statement.setString(5, tarFile.getName());
       statement.setLong(6, tarFile.length());
       statement.setTimestamp(7, new Timestamp(tarFile.lastModified()));
+      statement.setString(8, hashType);
+      statement.setString(9, hashValue);
       statement.executeUpdate();
       statement.close();
    }
 
-   public void updateExisting(int fileKey, File tarFile) {
-      String UPDATE = "UPDATE "+schema+".files SET file_size=?,file_mod_time=? WHERE file_key=?";
+   public void updateExisting(int fileKey, File tarFile, String hashValue, String hashType) {
+      String UPDATE = "UPDATE "+schema+".files SET file_size=?,file_mod_time=?,hash_type=?,hash_value=? WHERE file_key=?";
       PreparedStatement statement = connection.prepareStatement(UPDATE);
       statement.setLong(1, tarFile.length());
       statement.setTimestamp(2, new Timestamp(tarFile.lastModified()));
-      statement.setInt(3, fileKey);
+      statement.setString(3, hashType);
+      statement.setString(4, hashValue);
+      statement.setInt(5, fileKey);
       statement.executeUpdate();
       statement.close();
    }

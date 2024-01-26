@@ -1,5 +1,6 @@
 import hudson.model.*;
 import java.io.*;
+import java.security.*;
 import java.sql.*;
 import java.util.regex.*;
 
@@ -47,6 +48,18 @@ abstract class AbstractPackageEngine {
       this.taskLabel = getTaskLabel();
    }
 
+    private String bytesToHex(byte[] hash) {
+      StringBuilder hexString = new StringBuilder(2 * hash.length);
+      for (int i = 0; i < hash.length; i++) {
+         String hex = Integer.toHexString(0xff & hash[i]);
+         if(hex.length() == 1) {
+            hexString.append('0');
+         }
+         hexString.append(hex);
+      }
+      return hexString.toString();
+   }
+ 
    public AbstractRepackage getRepackager(File archive, String version, String compression) {
       return new Repackage(archive, version, compression);
    }
@@ -106,7 +119,11 @@ abstract class AbstractPackageEngine {
             File tarFile = new File(destinationDirectory, newPatternString);
             repackager.recompress(temp, tarFile);
             temp.delete();
-      
+            
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] tarFileData = Files.readAllBytes(tarFile.toPath());
+            String encodedHash = bytesToHex(digest.digest(tarFileData));
+
             Versions versions = new Versions(schema, connection);
             versions.setNonstopExtensions(nonstopExtensions);
             versions.setDependencies(dependencies);
@@ -142,10 +159,10 @@ abstract class AbstractPackageEngine {
                } else {
                   println taskLabel+"New file "+tarFile.getName();
                }
-               fileset.insertNewFile(fileKey, versionKey, directoryKey, type, tarFile);
+               fileset.insertNewFile(fileKey, versionKey, directoryKey, type, tarFile, encodedHash, "sha256");
             } else {
                println taskLabel+"Found "+tarFile.getName()+" in the database";
-               fileset.updateExisting(fileKey, tarFile);
+               fileset.updateExisting(fileKey, tarFile, encodedHash, "sha256");
             }
             connection.commit();
             repackager.clean(temp);
