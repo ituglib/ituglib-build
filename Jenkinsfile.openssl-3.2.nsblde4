@@ -93,7 +93,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         		"TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }
@@ -163,7 +163,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         		"TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }
@@ -233,7 +233,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 "TEST_ARGS=${testArgs}",
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make ${TEST_ARGS} test || echo "might fail"'
                         }
                     }
                 }

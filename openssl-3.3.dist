@@ -8,6 +8,6 @@ if [ "${PRE_RELEASE_TAG}" = "" ]; then
 else
 	export VERSION=${MAJOR}.${MINOR}.${PATCH}-${PRE_RELEASE_TAG}
 fi
-echo "Packaging OpenSSL (SPT) version ${VERSION}"
+echo "Packaging OpenSSL version ${VERSION}"
 
 
