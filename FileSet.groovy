@@ -3,6 +3,7 @@ import java.io.*;
 import java.sql.*;
 
 class FileSet {
+   boolean debug = System.getenv("DEBUG") != null;
    String schema;
    Connection connection;
    
