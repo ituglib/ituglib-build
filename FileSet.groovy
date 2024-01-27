@@ -56,6 +56,9 @@ class FileSet {
       statement.setString(9, hashValue);
       statement.executeUpdate();
       statement.close();
+      if (debug) {
+         println hashType+":"+hashValue;
+      }
    }
 
    public void updateExisting(int fileKey, File tarFile, String hashValue, String hashType) {
@@ -68,6 +71,9 @@ class FileSet {
       statement.setInt(5, fileKey);
       statement.executeUpdate();
       statement.close();
+      if (debug) {
+         println hashType+":"+hashValue;
+      }
    }
 }
 
