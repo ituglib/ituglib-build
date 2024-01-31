@@ -122,10 +122,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
@@ -194,8 +195,8 @@ pipeline {
                                 'DEST=/home/ituglib/randall/stage',
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
@@ -262,10 +263,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-put',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
@@ -332,10 +334,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-spt',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
