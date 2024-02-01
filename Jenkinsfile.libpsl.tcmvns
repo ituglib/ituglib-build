@@ -1,0 +1,153 @@
+/*
+ Paste the rest of this file into a standard Pipeline project to
+ build/test/stage libpsl NSX standard.
+ Also set Discard old builds, typically log rotation to 2
+ Poll SCM something useful, like H/45 2 * * *, remember that this job takes
+ a long time to clone and checkout.
+ Whomever the user is running this (a.k.a. Jenkins), must have proper
+ credentials in NonStop SSH.
+*/
+
+def localStaging
+def downloadVersion
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        skipDefaultCheckout()
+    }
+    triggers {
+        pollSCM('H H H * *')
+    }
+    stages {
+        stage('checkout') {
+            steps {
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('setup') {
+            steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                }
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'libpsl Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
+        stage('unpack') {
+            steps {
+                withEnv(["LIBPSL_VERSION=${downloadVersion}",
+               			 'LIBPSL_URL_PREFIX=https://github.com/rockdaboot/libpsl/releases/download',
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                    cleanWs()
+                    curl -k -L https://github.com/rockdaboot/libpsl/releases/download/0.21.5/libpsl-0.21.5.tar.gz -o libpsl-0.21.5.tar.gz
+                    
+                    sh 'test -f ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz || curl --insecure -L ${LIBPSL_URL_PREFIX}/${LIBPSL_VERSION}/libpsl-0.21.5-${LIBPSL_VERSION}.tar.gz -o ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz'
+                    sh 'tar xf ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz'
+                    sh 'mv libpsl-${LIBPSL_VERSION}/* .'
+                }
+            }
+        }
+        stage('patch') {
+			steps {
+	        	sh 'sed "/<ws2tcpip.h>/a #elif defined __TANDEM" -i src/psl.c'
+	        	sh 'sed "/<ws2tcpip.h>/i # include <sys/socket.h>" -i src/psl.c'
+	        	sh 'sed "/<ws2tcpip.h>/i # include <netdb.h>" -i src/psl.c'
+	        	sh 'sed "/<ws2tcpip.h>/i # include <netinet/in6.h>" -i src/psl.c'
+	        	sh 'sed "/<ws2tcpip.h>/i # include <netinet/in.h>" -i src/psl.c'
+	        	sh 'sed "/<ws2tcpip.h>/i # include <unistd.h>" -i src/psl.c'
+
+	        	sh 'sed "s/alloca(/(char *)malloc(/g" -i tests/test-is-cookie-domain-acceptable.c'
+	        	sh 'sed "s/alloca(/(char *)malloc(/g" -i tests/test-is-public-all.c'
+	        	sh 'sed "s/alloca(/(char *)malloc(/g" -i tests/test-is-public-builtin.c'
+	        	sh 'sed "s/alloca(/(char *)malloc(/g" -i tests/test-is-public.c'
+	        	sh 'sed "s/alloca(/(char *)malloc(/g" -i tests/test-registrable-domain.c'
+        	}
+        }
+        stage('redate') {
+            steps {
+                script {
+                    currentTime = sh(returnStdout: true, script: 'date +%Y%m%d%H%M.%S').trim()
+                    sh(returnStdout: true, script: 'echo Set all files to '+currentTime+' to inhibit aclocal-1.16 requirement')
+                    sh(returnStdout: true, script: 'find . -exec touch -t '+currentTime+' {} ";" || echo Ignore any errors')
+                }
+            }
+        }
+        stage('config') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=1252,272,734 -I/usr/include -I/usr/local/include" conf_script_floss_cc'
+                }
+            }
+        }
+        stage('build') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignore pthread errors"'
+                }
+            }
+        }
+        stage('test') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check'
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=libpsl',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/psl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
+

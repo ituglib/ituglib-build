@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/bin/psl --version | grep '^psl' | \
+		sed '1,$s/psl \([^ ]*\) .*$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | grep '^psl' | \
+		sed '1,$s/psl \([^ ]*\) .*$/\1/'`
+echo "Packaging psl version ${VERSION}"
+
