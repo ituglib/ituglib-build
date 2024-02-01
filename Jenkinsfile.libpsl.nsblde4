@@ -10,6 +10,10 @@
 
 def localStaging
 def downloadVersion
+def destinationUser
+def destinationHost
+def destinationPort
+def localDownloads
 
 pipeline {
     agent any
@@ -17,11 +21,8 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '2'))
         skipDefaultCheckout()
     }
-    triggers {
-        pollSCM('H H H * *')
-    }
     stages {
-        stage('checkout') {
+        stage('ituglib') {
             steps {
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
@@ -40,17 +41,22 @@ pipeline {
         }
         stage('setup') {
             steps {
-                script {
-                	load "../Ituglib_Build/Jenkinsfile.globals.all"
-                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
-                	localStaging = "${LOCAL_STAGING}"
-                }
 			    script {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
-                            string(defaultValue: '', description: 'libpsl Version', name: 'input'),
+                            string(defaultValue: '', description: 'Libpsl Version', name: 'input'),
+                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
+                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
+                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
                         ])
-                    downloadVersion = userInput
+                    downloadVersion = userInput.input
+                    destinationUser = userInput.user
+                    destinationHost = userInput.host
+                    destinationPort = userInput.port
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nse"
+                	localStaging = "${LOCAL_STAGING}"
+                	localDownloads = "${LOCAL_DOWNLOADS}"
                 }
             }
         }
@@ -58,7 +64,7 @@ pipeline {
             steps {
                 withEnv(["LIBPSL_VERSION=${downloadVersion}",
                			 'LIBPSL_URL_PREFIX=https://github.com/rockdaboot/libpsl/releases/download',
-                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                         'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz || curl --insecure -L ${LIBPSL_URL_PREFIX}/${LIBPSL_VERSION}/libpsl-${LIBPSL_VERSION}.tar.gz -o ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz'
                     sh 'tar xf ${DOWNLOADS}/libpsl-${LIBPSL_VERSION}.tar.gz'
@@ -131,13 +137,26 @@ pipeline {
                 }
             }
         }
-        stage('deploy') {
+        stage('package') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=libpsl',
                         "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/psl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=libpsl',
+                        'DEST=/home/ituglib/randall/stage',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
                 }
             }
         }
