@@ -62,7 +62,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                 		'PKG_CONFIG_PATH=/home/randall/pkgconfig',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/coreutils/include -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-zlib=/usr/coreutils --with-openssl --prefix=/usr/local-ssl1.1 --without-libpsl'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/coreutils/include -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-zlib=/usr/coreutils --with-openssl --prefix=/usr/local-ssl1.1'
                 }
             }
         }
@@ -115,7 +115,7 @@ pipeline {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.0/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils --without-libpsl'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.0/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
                 }
             }
         }
@@ -161,6 +161,33 @@ pipeline {
                 }
             }
         }
+        stage('config-ssl3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.2/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.2/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.2 --with-ssl=/usr/local-ssl3.2 --with-ca-path=/usr/local-ssl3.2/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                    sh 'findcall_floss'
+                }
+            }
+        }
         stage('test-ssl3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -183,7 +210,7 @@ pipeline {
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.2',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.2/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -194,7 +221,7 @@ pipeline {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl --with-zlib=/usr/coreutils --without-libpsl'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl --with-zlib=/usr/coreutils'
                 }
             }
         }
