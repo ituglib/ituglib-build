@@ -18,7 +18,7 @@ pipeline {
                 checkout([$class: 'GitSCM',
                     changelog: true,
                     poll: true,
-                    branches: [[name: "refs/tags/v${buildVersion}"]],
+                    branches: [[name: "seen"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
