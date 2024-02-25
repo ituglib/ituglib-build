@@ -15,8 +15,6 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    changelog: true,
-                    poll: true,
                     branches: [[name: "seen"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
@@ -32,7 +30,8 @@ pipeline {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
                         extensions: [
-                            [$class: 'CleanBeforeCheckout']],
+                            [$class: 'CleanBeforeCheckout'],
+                            [$class: 'IgnoreNotifyCommit']],
                         doGenerateSubmoduleConfigurations: false, extensions: [
                             [$class: 'CleanCheckout'],
                             [$class: 'CloneOption', timeout: 120, shallow: true],
