@@ -109,7 +109,7 @@ pipeline {
         stage('package-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=curl-ssl1.1',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -133,7 +133,7 @@ pipeline {
         stage('config-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0_32/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0_32/lib:/usr/local/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/lib/.libs'
@@ -161,7 +161,7 @@ pipeline {
         stage('test-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -177,7 +177,7 @@ pipeline {
         stage('package-ssl3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.0',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -201,7 +201,7 @@ pipeline {
         stage('config-ssl3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.2_32/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2_32/lib:/usr/local/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/lib/.libs'
@@ -229,7 +229,7 @@ pipeline {
         stage('test-ssl3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
@@ -237,7 +237,7 @@ pipeline {
         stage('install-ssl3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
@@ -245,7 +245,7 @@ pipeline {
         stage('package-ssl3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.2',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
@@ -269,7 +269,7 @@ pipeline {
         stage('config-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/lib/.libs'
@@ -313,7 +313,7 @@ pipeline {
         stage('package-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local/lib:/usr/local/lib',
                         'BASENAME=curl',
                         "DOWNLOAD_VERSION=$downloadVersion",
                         'DEST=/home/ituglib/randall/stage']) {
