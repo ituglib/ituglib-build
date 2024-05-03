@@ -93,7 +93,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" OPENSSL_CFLAGS="-I/usr/local-ssl3.0/include -L/usr/local-ssl3.0/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=openssl'
+                    sh 'CFLAGS="-c11" OPENSSL_CFLAGS="-I/usr/local-ssl3.0/include -L/usr/local-ssl3.0/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=openssl'
                 }
             }
         }

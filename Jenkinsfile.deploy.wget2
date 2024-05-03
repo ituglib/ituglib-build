@@ -1,0 +1,138 @@
+/* Wget2 deploy pipeline. */
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    stages {
+        stage('src') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-src',
+                            'TYPE=src']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy normal.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('src-ssl1.1') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2-ssl1.1',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-src',
+                            'TYPE=src']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy normal.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('src-ssl3.0') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-src',
+                            'TYPE=src']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy normal.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L23.08 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=wget2_install-2-1-0html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl1.1') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2-ssl1.1',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=wget2_install-2-1-0html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-ssl3.0') {
+            steps {
+                lock('wget-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=wget2-ssl3.0',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=wget2_install-2-1-0html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}

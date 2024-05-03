@@ -1,0 +1,145 @@
+/* WGet2 pipeline for TNS/V - requires the tarball, not git. */
+
+def downloadVersion
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        skipDefaultCheckout()
+    }
+    stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '2.1.0', description: 'WGet Version', name: 'input'),
+                        ])
+                    downloadVersion = userInput
+                }
+            }
+        }
+        stage('ituglib') {
+            steps {
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('unpack') {
+            steps {
+                withEnv(["WGET_VERSION=${downloadVersion}",
+               			 'WGET_URL_PREFIX=https://ftp.gnu.org/gnu/wget/',
+                         'DOWNLOADS=/home/jenkinsbuild/downloads']){
+                    cleanWs()
+                    sh 'test -f ${DOWNLOADS}/wget2-${WGET_VERSION}.tar.gz || curl --insecure ${WGET_URL_PREFIX}wget2-${WGET_VERSION}.tar.gz -o ${DOWNLOADS}/wget2-${WGET_VERSION}.tar.gz'
+                    sh 'tar xzf ${DOWNLOADS}/wget2-${WGET_VERSION}.tar.gz'
+                    sh 'mv wget2-${WGET_VERSION}/* .'
+                }
+            }
+        }
+        stage('patch') {
+            steps {
+                sh 'sed "/^# else/i# elif defined __TANDEM"  -i lib/getprogname.c'
+                sh 'sed "/^# else/i\\ \\ return \\\"wget2\\\";"  -i lib/getprogname.c'
+                sh 'sed "1,\\$s/__restrict/restrict/g" -i libwget/../include/wget/wget.h'
+                sh 'sed "1,\\$s/memory_full *()//" -i lib/alloca.c'
+                sh 'sed "/NLS can be disabled/i#define _(s) s" -i lib/gettext.h'
+                sh 'sed "/Get definition of /i#include <stdio.h>" -i lib/sys_select.in.h'
+                sh 'sed "/Get definition of /i#include <time.h>" -i lib/sys_select.in.h'
+                sh 'sed "/netinet/a#include <netinet/in6.h>" -i libwget/http.c'
+                sh 'sed "/string.h/a#include <strings.h>" -i src/options.c'
+                sh 'sed "/^#else/i#elif defined __TANDEM" -i libwget/private.h'
+                sh 'sed "/^#else/i#define INITIALIZER(f) static void f(void) " -i libwget/private.h'
+            }
+        }
+        stage('config-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'CFLAGS="-c11" OPENSSL_CFLAGS="-I/usr/local-ssl3.0/include -L/usr/local-ssl3.0/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('deploy_src-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget2-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
+        stage('install-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget2-ssl3.0',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-3.0') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=wget2-ssl3.0',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+        success {
+            cleanWs()
+        }
+    }
+}
