@@ -16,7 +16,7 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '', description: 'Nano Version', name: 'input'),
-                            string(defaultValue: 'v7', description: 'Nano Series', name: 'series'),
+                            string(defaultValue: 'v8', description: 'Nano Series', name: 'series'),
                         ])
                     downloadVersion = userInput.input
                     downloadSeries = userInput.series

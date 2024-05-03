@@ -1,4 +1,4 @@
-/* OpenSSL 3.2.x Monitor Changes to Catch Breakages - TNS/X Pipeline */
+/* OpenSSL Master Monitor Changes to Catch Breakages - TNS/X Pipeline */
 
 pipeline {
     agent any
@@ -6,13 +6,13 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     triggers {
-        pollSCM('H 2,4 * * *')
+        pollSCM('H 3,4 * * *')
     }
     stages {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: 'master']], /* To be changed to openssl-3.2 on release. */
+                    branches: [[name: 'master']],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
@@ -48,11 +48,43 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local/lib']) {
-                    sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test'
+                    sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
                 }
             }
         }
         stage('cleanup') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                }
+            }
+        }
+        stage('config-put') {
+            steps() {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh './Configure nonstop-nsx_64_put --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                }
+            }
+        }
+        stage('build-put') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('test-put') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local/lib']) {
+                    sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make test'
+                }
+            }
+        }
+        stage('cleanup-put') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
