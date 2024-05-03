@@ -1,5 +1,5 @@
-2test -z "${VERSION_PATH}" && \
-	export VERSION=`${WORKSPACE}/src/wget --version | \
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/src/wget2 --version | \
 		grep '^GNU Wget2 ' | \
 		sed '1,$s/GNU Wget2 \([^ ]*\) .*/\1/'` \
  || \

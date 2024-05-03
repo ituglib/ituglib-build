@@ -101,6 +101,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=wget2-ssl3.0',
+                        "VERSION=${downloadVersion}",
                         'DEST=/web/stage']) {
                     sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
                         tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
@@ -128,8 +129,9 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=wget2-ssl3.0',
+                        "VERSION=${downloadVersion}",
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget2" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
