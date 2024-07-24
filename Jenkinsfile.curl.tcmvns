@@ -46,6 +46,7 @@ pipeline {
                     sh 'test -f ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz || curl --insecure ${CURL_URL_PREFIX}curl-${CURL_VERSION}.tar.gz -o ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
+                    sh 'sed "s/\\.ss_family/.__ss_family/g" -i src/tool_operate.c'
                 }
             }
         }
