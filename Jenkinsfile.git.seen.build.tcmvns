@@ -15,7 +15,7 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: "seen"]],
+                    branches: [[name: "next"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout'],
                         [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
