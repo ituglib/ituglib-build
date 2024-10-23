@@ -52,6 +52,78 @@ pipeline {
             }
         }
         */
+        stage('nse-3.4.x') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nse-3.4.x-32') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl-32',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nse-3.4.x-put') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl-put',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nse',
+                            'TYPE=TNS/E',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0-put.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nse-3.3.x') {
             steps {
                 lock('openssl-deploy') {
@@ -507,6 +579,78 @@ pipeline {
             }
         }
         */
+        stage('nsx-3.4.x') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-3.4.x-32') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl-32',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-3.4.x-put') {
+            steps {
+                lock('openssl-deploy') {
+                    withEnv(['PATH=/usr/local/bin:/usr/coreutils/bin:/usr/bin:/bin:/usr/ucb',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/current/lib:/usr/local/lib',
+                            'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
+                            'BASENAME=openssl-put',
+                            'VERSION=3\\.4\\.[0-9]+[a-z]*',
+                            'DEBUG=true',
+                            'DIST=/web/stage',
+                            'DEST=/web/opensrc',
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=openssl_install-3.4.0-put.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform-version.tar.groovy'
+                    }
+                }
+            }
+        }
         stage('nsx-3.3.x') {
             steps {
                 lock('openssl-deploy') {
