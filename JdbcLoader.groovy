@@ -8,7 +8,7 @@ class JdbcLoader {
    static private final String JDBC_MX_TAR =
       System.getenv("JDBC_MX_TAR") != null ?
          System.getenv("JDBC_MX_TAR")
-         : "/usr/tandem/jdbcMx/T1275L38/lib/jdbcMx.jar";
+         : "/usr/tandem/jdbcMx/T1275L39/lib/jdbcMx.jar";
    static private final String JDBC_DRIVER = 
       "com.tandem.sqlmx.SQLMXDriver";
 
