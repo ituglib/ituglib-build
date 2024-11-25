@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/git --version | fgrep 'git version' | \
+		sed '1,$s/git version \(.*\..*\..*\)[^.]*$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | fgrep 'git version' | \
+		sed '1,$s/git version \(.*\..*\..*\)[^.]*$/\1/'`
+echo "Packaging git for OpenSSL 3 version ${VERSION}"
+

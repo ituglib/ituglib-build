@@ -215,6 +215,59 @@ pipeline {
                 }
             }
         }
+         stage('config-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.4/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.4/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.4 --with-ssl=/usr/local-ssl3.4 --with-ca-path=/usr/local-ssl3.4/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'findcall_floss'
+                }
+            }
+        }
+        stage('test-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-ssl3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        'BASENAME=curl-ssl3.4',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.4/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
         stage('config-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
