@@ -10,7 +10,7 @@ pipeline {
             steps {
                 lock('gmake-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=gmake',
                             'DIST=/web/stage',
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 lock('gmake-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L38/lib:/usr/local/lib',
+                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=gmake',
                             'DIST=/web/stage',

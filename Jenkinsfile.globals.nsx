@@ -1,4 +1,4 @@
-JDBCMX_LIB="/usr/tandem/jdbcMx/T1275L38/lib"
+JDBCMX_LIB="/usr/tandem/jdbcMx/T1275L39/lib"
 GROOVY_ROOT="/home/jenkinstag/.sdkman/candidates/groovy/current"
 EXPAT_ROOT="/usr/tandem/xml/T0625L01_AAE"
 LOCAL_STAGING="/web/stage"
