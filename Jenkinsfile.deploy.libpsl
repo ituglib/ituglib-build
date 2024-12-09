@@ -65,6 +65,27 @@ pipeline {
                 }
             }
         }
+        stage('nsx-64') {
+            steps {
+                lock('libpsl-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
+                            'BASENAME=libpsl-64',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
     }
     post {
         always {
