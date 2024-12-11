@@ -498,7 +498,7 @@ pipeline {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.4/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.4/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.4 --libdir=/usr/local-ssl3.4/lib64 --bindir=/usr/local-ssl3.4/bin64 --with-ssl=/usr/local-ssl3.4 --with-ca-path=/usr/local-ssl3.4/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.4/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.4/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.4 --libdir=/usr/local-ssl3.4/lib64 --bindir=/usr/local-ssl3.4/bin64 --with-ssl=/usr/local-ssl3.4 --with-ca-path=/usr/local-ssl3.4/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
                 }
             }
         }
