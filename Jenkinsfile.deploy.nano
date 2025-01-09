@@ -38,7 +38,8 @@ pipeline {
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=nano_install.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -59,7 +60,8 @@ pipeline {
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
-                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=nano_install.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
