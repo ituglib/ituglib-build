@@ -42,7 +42,7 @@ pipeline {
                         [$class: 'CloneOption', timeout: 120, shallow: true],
                         [$class: 'CheckoutOption', timeout: 120],
                         ],
-	                userRemoteConfigs: [[url: 'https://github.com/WayneD/rsync.git']]])
+	                userRemoteConfigs: [[url: 'https://github.com/RsyncProject/rsync.git']]])
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
@@ -63,12 +63,11 @@ pipeline {
                 }
             }
         }
-        /* TODO: 64 Bit RSync with OpenSSL 3.0 */
         stage('config') {
             steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/coreutils/include" LDFLAGS="-L/usr/coreutils/lib" conf_script_floss_cc --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
@@ -77,7 +76,7 @@ pipeline {
             steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -85,7 +84,7 @@ pipeline {
         stage('floss') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'findcall_floss || echo "findcall_floss fails. ignored."'
                 }
             }
@@ -98,7 +97,7 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make test'
                 }
             }
@@ -106,7 +105,7 @@ pipeline {
         stage('install') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=rsync',
                         'DEST=install']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
@@ -116,7 +115,7 @@ pipeline {
         stage('deploy') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                         '_RLD_FIRST_LIB_PATH=/usr/local/lib',
+                         '_RLD_LIB_PATH=:/usr/local/lib',
                          'BASENAME=rsync',
                          "DEST=${localStaging}"]) {
                         sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
@@ -125,9 +124,9 @@ pipeline {
         }
         stage('config-1.1') {
             steps {
-                withEnv(['PREFIX=/usr/local-ssl1.1',
+                withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
                     sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl1.1/include -I/usr/coreutils/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
@@ -137,7 +136,7 @@ pipeline {
             steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -145,7 +144,7 @@ pipeline {
         stage('floss-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "findcall_floss fails. ignored."'
                 }
             }
@@ -158,7 +157,7 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'make test'
                 }
             }
@@ -166,7 +165,7 @@ pipeline {
         stage('install-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl1.1',
                         'DEST=install']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
@@ -176,7 +175,7 @@ pipeline {
         stage('deploy-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl1.1',
                         "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
@@ -185,9 +184,9 @@ pipeline {
         }
         stage('config-3.0') {
             steps {
-                withEnv(['PREFIX=/usr/local-ssl3.0',
+                withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
                     sh 'CFLAGS="-c99 -Wnowarn=734 -I/usr/local-ssl3.0/include -I/usr/coreutils/include" LDFLAGS="-L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
@@ -197,7 +196,7 @@ pipeline {
             steps {
                 withEnv(['PREFIX=/usr/local',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make'
                 }
             }
@@ -205,7 +204,7 @@ pipeline {
         stage('floss-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "findcall_floss fails. ignored."'
                 }
             }
@@ -218,7 +217,7 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make test'
                 }
             }
@@ -226,7 +225,7 @@ pipeline {
         stage('install-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl3.0',
                         'DEST=install']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
@@ -236,7 +235,7 @@ pipeline {
         stage('deploy-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=rsync-ssl3.0',
                         "DEST=${localStaging}"]) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/rsync" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep dev`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'

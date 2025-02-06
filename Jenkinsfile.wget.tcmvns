@@ -79,7 +79,7 @@ pipeline {
                 sh 'printf "/progress_implementation/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/progress.c'
                 sh 'printf "/queue_element/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/recur.c'
                 sh 'printf "/total_downloaded_bytes/\n.-1\ni\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/retr.c'
-                sh 'printf "/struct scheme_data/\ni\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/url.c'
+                sh 'printf "/struct scheme_data/\ni\n#undef printf\n#define rpl_printf printf\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed src/url.c'
                 sh 'printf "/memfatal/\n.-1\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef printf\n#define rpl_printf printf\n.\nw\n" | ed src/utils.c'
                 sh 'printf "/The log file/\ni\n#undef fprintf\n#define rpl_fprintf fprintf\n#undef fwrite\n#define rpl_fwrite fwrite\n.\nw\n" | ed src/warc.c'
                 sh 'printf "/test_all_from/\ni\n#undef printf\n#define rpl_printf printf\n#undef fprintf\n#define rpl_fprintf fprintf\n.\nw\n" | ed fuzz/main.c'
@@ -93,6 +93,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
                     sh 'CFLAGS="-c11" OPENSSL_CFLAGS="-I/usr/local-ssl3.0/include -L/usr/local-ssl3.0/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=openssl'
                 }
             }
@@ -155,6 +156,146 @@ pipeline {
                         'BASENAME=wget-ssl3.0',
                         'DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('config-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                    sh 'CFLAGS="-c11" OPENSSL_CFLAGS="-I/usr/local-ssl3.2/include -L/usr/local-ssl3.2/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.2 --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('deploy_src-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.2',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
+        stage('install-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.2',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-3.2') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.2',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.2/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('config-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                    sh 'CFLAGS="-c11" OPENSSL_CFLAGS="-I/usr/local-ssl3.4/include -L/usr/local-ssl3.4/lib" OPENSSL_LIBS="-lssl -lcrypto" conf_script_floss_cc --prefix=/usr/local-ssl3.4 --with-ssl=openssl'
+                }
+            }
+        }
+        stage('build-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Definitely fails but that is unavoidable"'
+                }
+            }
+        }
+        stage('test-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('deploy_src-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.4',
+                        'DEST=/web/stage']) {
+                    sh '. "${WORKSPACE}/../Ituglib_Build/dist.info" && \
+                        tar cvzf "${DEST}/${BASENAME}-${VERSION}-src.tar.gz" \
+                            --exclude="*.o" \
+                            --exclude="*.a" \
+                            --exclude="*.so" \
+                            --exclude=".git*" \
+                            --exclude="./.git/*" \
+                            .'
+                }
+            }
+        }
+        stage('install-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.4',
+                        'DEST=install']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-3.4') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        'BASENAME=wget-ssl3.4',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.4/bin/wget" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }

@@ -47,7 +47,7 @@ pipeline {
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
                     sh 'sed "s/\\.ss_family/.__ss_family/g" -i src/tool_operate.c'
-                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;a # else" -i include/curl/system.h'
+                    //sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;a # else" -i include/curl/system.h'
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;a #  define CURL_TYPEOF_CURL_OFF_T     long" -i include/curl/system.h'
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;a #  define CURL_FORMAT_CURL_OFF_T     \\"ld\\"" -i include/curl/system.h'
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_FORMAT_CURL_OFF_TU    \\"lu\\"" -i include/curl/system.h'
@@ -66,6 +66,8 @@ pipeline {
                     sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-pingpong.c'
                     sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-pingpong.c'
                     sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/test.h/!{p;d;};n;a #include <netinet/in.h>" -i tests/libtest/lib1960.c'
+                    sh 'sed "/test.h/!{p;d;};n;n;a #include <arpa/inet.h>" -i tests/libtest/lib1960.c'
                 }
             }
         }
