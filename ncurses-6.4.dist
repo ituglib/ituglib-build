@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`fgrep 'NCURSES_VERSION_STRING' ${WORKSPACE}/include/ncurses_cfg.h | \
+		sed '1,$s/.*NCURSES_VERSION_STRING[ \t]*"\(.*\)"/\1/'` \
+ || \
+	export VERSION=`grep '#define[ \t]*NCURSES_VERSION_STRING[ \t]' ${VERSION_PATH} | \
+		sed '1,$s/.*NCURSES_VERSION_STRING[ \t]*"\(.*\)"/\1/'`
+echo "Packaging ncurses version ${VERSION}"
+
