@@ -47,24 +47,24 @@ pipeline {
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
-                sh 'sed "/#define intptr_t long/!{p;d};n;a #if defined (__TANDEM)" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;a # if ! defined (__cplusplus)" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;a #  define intptr_t long" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;a # endif" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;a #else" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;n;a # define intptr_t long" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;n;n;a #endif" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};a #if defined (__TANDEM)" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;a # if ! defined (__cplusplus)" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;n;a #  define intptr_t long" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;a # endif" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;a #else" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;a # define intptr_t long" -i configure'
+                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;n;a #endif" -i configure'
                 sh 'sed "/#define intptr_t long/d" -i configure'
             }
         }
-        stage('wide') {
+        stage('32-bit') {
             stages() {
                 stage('config') {
                     steps() {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L17.08 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --prefix=/usr/local/lib'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1" ./configure --prefix=/usr/local/lib'
                         }
                     }
                 }
@@ -98,7 +98,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L17.08"'
+                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -106,23 +106,22 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
-                                'BASENAME=ncurses',
-                                "PRODUCT_BASE_VERSION=${buildVersion}",
+                                'BASENAME=ncurses_32',
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${WORKSPACE}/include/ncurses_cfg.h" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
             }
         }
-        stage('wide-lp64') {
+        stage('wide') {
             stages() {
                 stage('config') {
                     steps() {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64" CFLAGS="-Wlp64 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --prefix=/usr/local/lib64'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --prefix=/usr/local/lib'
                         }
                     }
                 }
@@ -147,7 +146,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -156,7 +155,121 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L17.08"'
+                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=ncurses',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${WORKSPACE}/include/ncurses_cfg.h" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+		stage('wide-t') {
+            stages() {
+                stage('config') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --enable-reentrant --prefix=/usr/local/lib'
+                        }
+                    }
+                }
+                stage('build') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make'
+                        }
+                    }
+                }
+                stage('findcall_floss') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                /*
+                stage('test') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                */
+                stage('install') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=ncursest',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${WORKSPACE}/include/ncurses_cfg.h" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+        stage('wide-lp64') {
+            stages() {
+                stage('config') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --prefix=/usr/local/lib64'
+                        }
+                    }
+                }
+                stage('build') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make'
+                        }
+                    }
+                }
+                stage('findcall_floss') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                /*
+                stage('test') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                */
+                stage('install') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -165,9 +278,65 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=ncurses_64',
-                                "PRODUCT_BASE_VERSION=${buildVersion}",
                                 'DEST=/web/stage']) {
-                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib64 && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib64 && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${WORKSPACE}/include/ncurses_cfg.h" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+        stage('wide-lp64-t') {
+            stages() {
+                stage('config') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --enable-reentrant --prefix=/usr/local/lib64'
+                        }
+                    }
+                }
+                stage('build') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make'
+                        }
+                    }
+                }
+                stage('findcall_floss') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                /*
+                stage('test') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                */
+                stage('install') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=ncurses_64t',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local/lib64 && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${WORKSPACE}/include/ncurses_cfg.h" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
