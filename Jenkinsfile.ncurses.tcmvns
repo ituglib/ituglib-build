@@ -25,7 +25,8 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: "refs/tags/v${buildVersion}"]],
+                    //branches: [[name: "refs/tags/v${buildVersion}"]],
+                    branches: [[name: "master"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
@@ -33,7 +34,8 @@ pipeline {
                         [$class: 'CloneOption', timeout: 120, shallow: true],
                         [$class: 'CheckoutOption', timeout: 120],
                         ],
-                    userRemoteConfigs: [[url: 'https://github.com/mirror/ncurses.git']]])
+                    //userRemoteConfigs: [[url: 'https://github.com/mirror/ncurses.git']]])
+                    userRemoteConfigs: [[url: 'https://github.com/ThomasDickey/ncurses-snapshots.git']]])
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
@@ -64,7 +66,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1" ./configure --prefix=/usr/local/lib'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1" ./configure --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -89,7 +91,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -98,7 +100,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -121,7 +123,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --prefix=/usr/local/lib'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -146,7 +148,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -155,7 +157,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -178,7 +180,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --enable-reentrant --prefix=/usr/local/lib'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -203,7 +205,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -212,7 +214,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -235,7 +237,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --prefix=/usr/local/lib64'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
                         }
                     }
                 }
@@ -260,7 +262,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -269,7 +271,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
@@ -292,7 +294,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --enable-reentrant --prefix=/usr/local/lib64'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
                         }
                     }
                 }
@@ -317,7 +319,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make -j4 V=1 test || echo "might fail"'
                         }
                     }
                 }
@@ -326,7 +328,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/lib:/usr/local/lib make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
                         }
                     }
                 }
