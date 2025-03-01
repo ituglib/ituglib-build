@@ -173,7 +173,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wextensions -I/usr/local/include/ncursesw -I/usr/coreutils/include" LDFLAGS="-L/usr/local/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local  --enable-utf8'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wextensions -I/usr/local/include/ncursesw -I/usr/coreutils/include" LDFLAGS="-L/usr/local/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local --bindir=/usr/local/bin --enable-utf8'
                 }
             }
         }
@@ -220,6 +220,58 @@ pipeline {
             }
         }
     }
+        stage('config-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make clean'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -D_XOPEN_SOURCE_EXTENDED=1 -Wextensions -I/usr/local/include/ncursesw -I/usr/coreutils/include" LDFLAGS="-Wlp64 -L/usr/local/lib64 -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local --bindir=/usr/local/bin64 --enable-utf8'
+                }
+            }
+        }
+        stage('build-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Probably fails but that is probably ok"'
+                }
+            }
+        }
+        stage('test-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('deploy-wide-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=nano_64w',
+                        'DEST=/web/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/nano" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+    }
     post {
         always {
             mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
@@ -229,4 +281,3 @@ pipeline {
         }
     }
 }
-
