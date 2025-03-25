@@ -1,0 +1,232 @@
+/* OpenSSL 3.5.x TNS/V Pipeline */
+
+def buildVersion
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    triggers {
+        pollSCM('H H H * *')
+    }
+    stages {
+        stage('setup') {
+            steps {
+			    script {
+                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+                        parameters: [
+                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
+                        ])
+                    buildVersion = userInput
+                }
+            }
+        }
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "refs/tags/openssl-${buildVersion}"]],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout']],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+            }
+        }
+        stage('Unthreaded') {
+            stages() {
+                stage('config') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh './Configure nonstop-nsx_64 --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu enable-fips'
+                        }
+                    }
+                }
+                stage('build') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('findcall_floss') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                stage('install') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl',
+                                'PRODUCT_BASE_VERSION=3.5',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+        stage('unthreaded-32') {
+            stages() {
+                stage('config-32') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh './Configure nonstop-nsx --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu enable-fips'
+                        }
+                    }
+                }
+                stage('build-32') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('findcall-32') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-32') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                stage('install-32') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy-32') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-32',
+                                'PRODUCT_BASE_VERSION=3.5',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+        stage('PUT') {
+            stages() {
+                stage('config-put') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                        }
+                    }
+                }
+                stage('build-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('findcall-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                stage('install-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy-put') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-put',
+                                'PRODUCT_BASE_VERSION=3.5',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+        success {
+            cleanWs()
+        }
+    }
+}

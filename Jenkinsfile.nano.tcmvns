@@ -173,6 +173,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
                     sh 'make clean'
+                    sh 'rm -rf install'
                     sh 'CFLAGS="-c99" CPPFLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -Wextensions -I/usr/local/include/ncursesw -I/usr/coreutils/include" LDFLAGS="-L/usr/local/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local --bindir=/usr/local/bin --enable-utf8'
                 }
             }
@@ -219,11 +220,11 @@ pipeline {
                 }
             }
         }
-    }
         stage('config-wide-64') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
+                    sh 'rm -rf install'
                     sh 'make clean'
                     sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -D_XOPEN_SOURCE_EXTENDED=1 -Wextensions -I/usr/local/include/ncursesw -I/usr/coreutils/include" LDFLAGS="-Wlp64 -L/usr/local/lib64 -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local --bindir=/usr/local/bin64 --enable-utf8'
                 }
@@ -257,7 +258,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                    sh 'make install DESTDIR=${WORKSPACE}/install bindir=/usr/local/bin64'
                 }
             }
         }
@@ -267,7 +268,7 @@ pipeline {
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=nano_64w',
                         'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/nano" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin64/nano" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
