@@ -1,9 +1,11 @@
 /* Combined Curl pipeline for TNS/E - requires the tarball, not git. */
 
 def downloadVersion
+def downloadArea
 def destinationUser
 def destinationHost
 def destinationPort
+def isRc
 
 pipeline {
     agent any
@@ -21,11 +23,15 @@ pipeline {
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
                             string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
                             string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
+                            booleanParam(defaultValue: false, description: 'Treat as RC', name: 'rc'),
                         ])
                     downloadVersion = userInput.input
                     destinationUser = userInput.user
                     destinationHost = userInput.host
                     destinationPort = userInput.port
+                    downloadVersion = userInput.input
+                    isRc = userInput.rc
+                    downloadArea = isRc ? "rc" : "download"
                 }
             }
         }
@@ -49,29 +55,42 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(["CURL_VERSION=${downloadVersion}",
-                         'CURL_URL_PREFIX=https://curl.se/download/',
+                         "CURL_URL_PREFIX=https://curl.se/${downloadArea}/",
                          'DOWNLOADS=/home/ituglib/randall/downloads']){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz || curl --insecure ${CURL_URL_PREFIX}curl-${CURL_VERSION}.tar.gz -o ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'tar xzf ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
                     sh 'mv curl-${CURL_VERSION}/* .'
                     sh 'sed "s/\\.ss_family/.__ss_family/g" -i src/tool_operate.c'
+                    //sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;a # else" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;a #  define CURL_TYPEOF_CURL_OFF_T     long" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;a #  define CURL_FORMAT_CURL_OFF_T     \\"ld\\"" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_FORMAT_CURL_OFF_TU    \\"lu\\"" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_SUFFIX_CURL_OFF_T     L" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_SUFFIX_CURL_OFF_TU    UL" -i include/curl/system.h'
+                    sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_TYPEOF_CURL_SOCKLEN_T int" -i include/curl/system.h'
+                    sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-data.c'
+                    sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-pingpong.c'
+                    sh 'sed "/test.h/!{p;d;};n;a #include <netinet/in.h>" -i tests/libtest/lib1960.c'
+                    sh 'sed "/test.h/!{p;d;};n;n;a #include <arpa/inet.h>" -i tests/libtest/lib1960.c'
                 }
             }
         }
-        /* TODO:
-         * 64-bit Curl build sample for OpenSSL 3.0. Still need to output /lib64 and /bin64
-         * _RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64 \
-         *    CFLAGS="-c99 -no-floss -Wlp64" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/local-ssl3.0/include -Wlp64" \
-         *    LDFLAGS="-L/usr/local-ssl3.0/lib64 -L/usr/local/lib -Wlp64" \
-         *    conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 \
-         *    --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --
-         */
         stage('config-ssl1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -I/usr/coreutils/include -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-zlib=/usr/coreutils --with-openssl --prefix=/usr/local-ssl1.1'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -I/usr/coreutils/include -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-zlib=/usr/coreutils --with-openssl --prefix=/usr/local-ssl1.1'
                 }
             }
         }
@@ -139,7 +158,7 @@ pipeline {
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/lib/.libs'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.0/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.0/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
                 }
             }
         }
@@ -191,6 +210,73 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl-ssl3.0',
+                        'DEST=/home/ituglib/randall/stage',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+        stage('config-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.0/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.0/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --libdir=/usr/local-ssl3.0/lib64 --bindir=/usr/local-ssl3.0/bin64 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --without-libpsl --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Skip error"'
+                }
+            }
+        }
+        stage('test-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('package-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib',
+                        'BASENAME=curl-ssl3.0-64',
+                        "DOWNLOAD_VERSION=$downloadVersion",
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote-ssl3.0-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=curl-ssl3.0-64',
                         'DEST=/home/ituglib/randall/stage',
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
@@ -267,6 +353,73 @@ pipeline {
                 }
             }
         }
+        stage('config-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.2/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.2/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.2 --libdir=/usr/local-ssl3.2/lib64 --bindir=/usr/local-ssl3.2/bin64 --with-ssl=/usr/local-ssl3.2 --with-ca-path=/usr/local-ssl3.2/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --without-libpsl --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Skip error"'
+                }
+            }
+        }
+        stage('test-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('package-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib',
+                        'BASENAME=curl-ssl3.2-64',
+                        "DOWNLOAD_VERSION=$downloadVersion",
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.2/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote-ssl3.2-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=curl-ssl3.2-64',
+                        'DEST=/home/ituglib/randall/stage',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
         stage('config-ssl3.3') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -327,6 +480,73 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=curl-ssl3.3',
+                        'DEST=/home/ituglib/randall/stage',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+        stage('config-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.3/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.3/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.3 --libdir=/usr/local-ssl3.3/lib64 --bindir=/usr/local-ssl3.3/bin64 --with-ssl=/usr/local-ssl3.3 --with-ca-path=/usr/local-ssl3.3/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --without-libpsl --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Skip error"'
+                }
+            }
+        }
+        stage('test-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('package-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib',
+                        'BASENAME=curl-ssl3.3-64',
+                        "DOWNLOAD_VERSION=$downloadVersion",
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.3/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote-ssl3.3-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=curl-ssl3.3-64',
                         'DEST=/home/ituglib/randall/stage',
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                         'REMOTE_DEST=/web/stage']) {
@@ -403,6 +623,73 @@ pipeline {
                 }
             }
         }
+        stage('config-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64']) {
+                    sh 'make clean'
+                    sh 'find . -name "*.o" -exec rm {} ";"'
+                    sh 'rm -rf ${WORKSPACE}/install'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wlp64 -Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/lib64 -I/usr/local-ssl3.4/openssl/include" LDFLAGS="-Wlp64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib64 -L/usr/local-ssl3.4/lib64" conf_script_floss_cc --prefix=/usr/local-ssl3.4 --libdir=/usr/local-ssl3.4/lib64 --bindir=/usr/local-ssl3.4/bin64 --with-ssl=/usr/local-ssl3.4 --with-ca-path=/usr/local-ssl3.4/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --without-libpsl --with-zlib=/usr/coreutils'
+                }
+            }
+        }
+        stage('build-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
+                    sh 'make'
+                }
+            }
+        }
+        stage('findcall_floss-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Skip error"'
+                }
+            }
+        }
+        stage('test-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
+                    sh 'make check || echo "Tests failed but expected"'
+                }
+            }
+        }
+        stage('install-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
+                    sh 'make install DESTDIR=${WORKSPACE}/install'
+                }
+            }
+        }
+        stage('package-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        'BASENAME=curl-ssl3.4-64',
+                        "DOWNLOAD_VERSION=$downloadVersion",
+                        'DEST=/home/ituglib/randall/stage']) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.4/bin64/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                }
+            }
+        }
+        stage('remote-ssl3.4-64') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_LIB_PATH=:/usr/local/lib',
+                        'BASENAME=curl-ssl3.4-64',
+                        'DEST=/home/ituglib/randall/stage',
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        'REMOTE_DEST=/web/stage']) {
+                    sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
         stage('config-ssl1.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
@@ -411,7 +698,7 @@ pipeline {
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/lib/.libs'
                     sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -WIEEE_float -I/usr/coreutils/include -I/usr/local/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl --with-zlib=/usr/coreutils'
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl --with-zlib=/usr/coreutils'
                 }
             }
         }
