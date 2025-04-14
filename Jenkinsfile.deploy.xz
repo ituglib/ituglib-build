@@ -36,7 +36,29 @@ pipeline {
                             'SUFFIX=-nse',
                             'TYPE=TNS/E',
 							'README_FILE=xz_install-5-4-4.html',
-                            'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
+                            'NONSTOP_EXTENSIONS=J06.23 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+        stage('nsx-64') {
+            steps {
+                lock('xz-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
+                            'BASENAME=xz-64',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+							'README_FILE=xz_install-5-4-4.html',
+                            'NONSTOP_EXTENSIONS=L24.08 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
@@ -74,3 +96,4 @@ pipeline {
         }
     }
 }
+b
