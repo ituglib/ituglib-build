@@ -138,7 +138,9 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=1252,272,734 -D_PUT_MODEL_ -Wlp64 -I/usr/include -I/usr/local/include" LDFLAGS="-lput -lfloss" conf_script_floss_cc --libdir=/usr/local/lib64 --bindir=/usr/local/bin64'
+                    sh 'make clean'
+                    sh "rm -rvf ${WORKSPACE}/install"
+                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=1252,272,734 -D_PUT_MODEL_ -Wlp64 -I/usr/include -I/usr/local/include" LDFLAGS="-Wlp64 -lput -lfloss64" conf_script_floss_cc --libdir=/usr/local/lib64 --bindir=/usr/local/bin64'
                 }
             }
         }
@@ -150,7 +152,7 @@ pipeline {
                 }
             }
         }
-        stage('findcall_floss-64") {
+        stage('findcall_floss-64') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib']) {
@@ -174,13 +176,13 @@ pipeline {
                 }
             }
         }
-        stage('deploy') {
+        stage('deploy-64') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=:/usr/local/lib',
                         'BASENAME=xz-64',
                         "DEST=${localStaging}"]) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/xz" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin64/xz" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }
@@ -191,4 +193,3 @@ pipeline {
         }
     }
 }
-
