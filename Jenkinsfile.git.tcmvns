@@ -1,6 +1,7 @@
 /* Git Jenkins Pipeline for TNS/V */
 
 def buildVersion
+def runTests35
 def runTests34
 def runTests33
 def runTests32
@@ -24,12 +25,14 @@ pipeline {
 	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
 	                        parameters: [
 	                            string(defaultValue: '', description: 'Git version to build', name: 'version'),
+	                            booleanParam(defaultValue: true, description: 'Run tests 3.5', name: 'tests35'),
 	                            booleanParam(defaultValue: true, description: 'Run tests 3.4', name: 'tests34'),
 	                            booleanParam(defaultValue: false, description: 'Run tests 3.3', name: 'tests33'),
 	                            booleanParam(defaultValue: false, description: 'Run tests 3.2', name: 'tests32'),
 	                            booleanParam(defaultValue: true, description: 'Run tests 3.0', name: 'tests30'),
 	                        ])
 	                    buildVersion = userInput.version
+	                    runTests35 = userInput.tests35
 	                    runTests34 = userInput.tests34
 	                    runTests33 = userInput.tests33
 	                    runTests32 = userInput.tests32
@@ -88,6 +91,90 @@ pipeline {
                 }
             }
         }
+        stage('build-3.5') {
+            steps {
+                withEnv(["GIT_DIST=${localStaging}",
+                        'PREFIX=/usr/local-ssl3.5',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Winline -I/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                }
+            }
+        }
+        stage('findcall_floss-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring results"'
+                }
+            }
+        }
+        stage('test-3.5') {
+        	when {
+        		expression {
+        			return runTests35;
+        		}
+        	}
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh "echo Running tests for 3.5"
+                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                }
+            }
+        }
+        stage('install-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'PREFIX=/usr/local-ssl3.5',
+                        'BASENAME=git-ssl3.5',
+                        'DEST=install']) {
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local'
+                }
+            }
+        }
+        stage('deploy-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('install-3.5-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                    sh 'cp -p /usr/local-ssl3.5/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                    sh 'cp -p /usr/local-ssl3.5/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                }
+            }
+        }
+        stage('deploy-3.5-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
         stage('build-3.4') {
             steps {
                 withEnv(["GIT_DIST=${localStaging}",
@@ -96,7 +183,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -118,7 +205,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh "echo Running tests for 3.4"
-                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -129,7 +216,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl3.4',
                         'BASENAME=git-ssl3.4',
                         'DEST=install']) {
-                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -180,7 +267,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -202,7 +289,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh "echo Running tests for 3.3"
-                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -213,7 +300,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl3.3',
                         'BASENAME=git-ssl3.3',
                         'DEST=install']) {
-                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -264,7 +351,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -286,7 +373,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh "echo Running tests for 3.2"
-                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -297,7 +384,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl3.2',
                         'BASENAME=git-ssl3.2',
                         'DEST=install']) {
-                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -348,7 +435,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -370,7 +457,7 @@ pipeline {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh "echo Running tests for 3.0"
-                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "GIT_TEST_DEFAULT_REF_FORMAT=reftable GIT_TEST_CLONE_2GB=true /usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -381,7 +468,7 @@ pipeline {
                         'PREFIX=/usr/local-ssl3.0',
                         'BASENAME=git-ssl3.0',
                         'DEST=install']) {
-                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -432,7 +519,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -449,7 +536,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -461,7 +548,7 @@ pipeline {
                         'BASENAME=git-ssl1.1',
                         'PREFIX=/usr/local-ssl1.1',
                         'DEST=install']) {
-                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -512,7 +599,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -529,7 +616,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L${expatRoot}/lib\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "/usr/coreutils/bin/make -k test CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L${expatRoot}/lib\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -541,7 +628,7 @@ pipeline {
                         'PREFIX=/usr/local',
                         'BASENAME=git',
                         'DEST=install']) {
-                    sh "make install prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I/usr/local/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"-D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 /usr/coreutils/lib/libz.a -L/usr/local/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                 }
             }
