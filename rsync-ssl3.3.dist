@@ -1,0 +1,10 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/rsync --version | \
+		grep '^rsync  version ' | \
+		sed '1,$s/rsync  version \([^ ]*\) .*/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | \
+		grep '^rsync  version ' | \
+		sed '1,$s/rsync  version \([^ ]*\) .*/\1/'`
+echo "Packaging rsync version ${VERSION}"
+
