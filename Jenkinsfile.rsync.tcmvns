@@ -248,8 +248,8 @@ pipeline {
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
-                    sh 'CC=c99 CFLAGS="-Wlp64 -Wnowarn=734" CPPFLAGS="-I/usr/local-ssl3.0/include -I/usr/coreutils/include" LDFLAGS="-Wlp64 -L/usr/local-ssl3.0/lib64 -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --bindir=/usr/local-ssl3.0/bin64 --disable-locale --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
-//                    sh 'CFLAGS="-c99 -Wlp64 -Wnowarn=734 -I/usr/local-ssl3.0/include -I/usr/coreutils/include" LDFLAGS="-Wlp64 -L/usr/local-ssl3.0/lib64 -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --bindir=/usr/local-ssl3.0/bin64 --disable-iconv --disable-locale --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+//                    sh 'CC=c99 CFLAGS="-Wlp64 -Wnowarn=734" CPPFLAGS="-I/usr/local-ssl3.0/include -I/usr/coreutils/include" LDFLAGS="-Wlp64 -L/usr/local-ssl3.0/lib64 -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --bindir=/usr/local-ssl3.0/bin64 --disable-locale --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
+                    sh 'CFLAGS="-c99 -Wlp64" CPPFLAGS="-Wnowarn=734 -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I/usr/include" LDFLAGS="-Wlp64 -L/usr/local-ssl3.0/lib64 -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --bindir=/usr/local-ssl3.0/bin64 --disable-iconv --disable-locale --disable-md2man --disable-xxhash --disable-lz4 --disable-zstd'
                 }
             }
         }
