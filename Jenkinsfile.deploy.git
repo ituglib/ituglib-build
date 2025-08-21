@@ -37,7 +37,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -59,7 +59,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -81,7 +81,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -103,7 +103,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -125,7 +125,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0.html']) {
+                            'README_FILE=git_install-2-51-0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -147,7 +147,7 @@ pipeline {
                             'TYPE=TNS/E',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -169,7 +169,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -191,7 +191,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -213,7 +213,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -235,7 +235,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -257,7 +257,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -279,7 +279,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -301,7 +301,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -323,7 +323,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -345,7 +345,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -367,7 +367,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -389,7 +389,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-ssl.html']) {
+                            'README_FILE=git_install-2-51-0-ssl.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -411,7 +411,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -433,7 +433,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0.html']) {
+                            'README_FILE=git_install-2-51-0.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
@@ -455,7 +455,7 @@ pipeline {
                             'TYPE=TNS/X',
                             'NONSTOP_EXTENSIONS=L19.08/J06.22 and above only',
                             'DEPENDENCIES=Check Readme file for older RVUs',
-                            'README_FILE=git_install-2-28-0-crypto.html']) {
+                            'README_FILE=git_install-2-51-0-crypto.html']) {
                         sh 'sudo rm -rf /tmp/${BASENAME}'
                         sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
                             ${GROOVY_PATH}/groovy platform.tar.groovy'
