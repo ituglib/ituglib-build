@@ -1,0 +1,8 @@
+test -z "${VERSION_PATH}" && \
+	export VERSION=`${WORKSPACE}/install/usr/local/bin/jgit version | fgrep 'jgit version' | \
+		sed '1,$s/jgit version \(.*\..*\..*\)[^.]*$/\1/'` \
+ || \
+	export VERSION=`${VERSION_PATH} --version | fgrep 'jgit version' | \
+		sed '1,$s/jgit version \(.*\..*\..*\)[^.]*$/\1/'`
+echo "Packaging jgit for Java17+ ${VERSION}"
+
