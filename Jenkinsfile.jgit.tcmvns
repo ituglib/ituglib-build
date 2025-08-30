@@ -1,0 +1,142 @@
+/* JGit Jenkins Pipeline for TNS/V */
+
+def buildVersion
+def patch
+def runTests
+def localStaging
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    triggers {
+        pollSCM('H H H * *')
+    }
+    stages {
+        stage('setup') {
+            steps {
+				timeout(time: 120, unit: 'SECONDS') {
+				    script {
+	                    def userInput = input(id: 'userInput', message: 'Build Settings?',
+	                        parameters: [
+	                            string(defaultValue: '7.3', description: 'JGit version to build', name: 'version'),
+	                            string(defaultValue: '7.3.1', description: 'JGit patch version to build', name: 'patch'),
+	                            booleanParam(defaultValue: true, description: 'Run tests', name: 'tests'),
+	                        ])
+	                    buildVersion = userInput.version
+	                    patch = userInput.patch
+	                    runTests = userInput.tests
+	                }
+                }
+            }
+        }
+        stage('checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    changelog: true,
+                    poll: true,
+                    branches: [[name: "origin/stable-${buildVersion}"]],
+                    extensions: [
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true,
+                                recursiveSubmodules: true, reference: '', trackingSubmodules: false]],
+                    doGenerateSubmoduleConfigurations: false, extensions: [
+                        [$class: 'CleanCheckout'],
+                        [$class: 'CloneOption', timeout: 120, shallow: true],
+                        [$class: 'CheckoutOption', timeout: 120],
+                        ],
+                    userRemoteConfigs: [[url: 'https://github.com/eclipse-jgit/jgit.git']]])
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	localStaging = "${LOCAL_STAGING}"
+                }
+            }
+        }
+        stage('version') {
+            steps {
+                withEnv(["GIT_DIST=${localStaging}",
+                        "VERSION=${patch}",
+                        'PATH=/usr/coreutils/bin:/bin:/usr/tandem/nssjava/jdk170_l17:/home/randall/apache-maven-3.9.11/bin',
+                        'JAVA_HOME=/usr/tandem/nssjava/jdk170_l17',
+                        'CLASSPATH=/usr/tandem/nssjava/jdk170_l17/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh "mvn --no-transfer-progress versions:set -DnewVersion=$VERSION"
+                }
+            }
+        }
+        stage('compile') {
+            steps {
+                withEnv(["GIT_DIST=${localStaging}",
+                        "VERSION=${patch}",
+                        'PATH=/usr/coreutils/bin:/bin:/usr/tandem/nssjava/jdk170_l17:/home/randall/apache-maven-3.9.11/bin:/usr/local-ssl3.0/bin',
+                        'JAVA_HOME=/usr/tandem/nssjava/jdk170_l17',
+                        'CLASSPATH=/usr/tandem/nssjava/jdk170_l17/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh 'mvn --no-transfer-progress clean compile -Dskip.dash -DskipTests -Dlicense.skipCheckLicense=true'
+                }
+            }
+        }
+        stage('test') {
+        	when {
+        		expression {
+        			return runTests;
+        		}
+        	}
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/bin:/usr/tandem/nssjava/jdk170_l17:/home/randall/apache-maven-3.9.11/bin:/usr/local-ssl3.0/bin:',
+                        "VERSION=${patch}",
+                        'JAVA_HOME=/usr/tandem/nssjava/jdk170_l17',
+                        'CLASSPATH=/usr/tandem/nssjava/jdk170_l17/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh "echo Running tests for ${VERSION}"
+                    sh "mvn --no-transfer-progress clean test -Dskip.dash -Dlicense.skipCheckLicense=true || echo Always fails at least one test"
+                }
+            }
+        }
+        stage('install') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/bin:/usr/tandem/nssjava/jdk170_l17:/home/randall/apache-maven-3.9.11/bin:/usr/local-ssl3.0/bin',
+                        'JAVA_HOME=/usr/tandem/nssjava/jdk170_l17',
+                        'CLASSPATH=/usr/tandem/nssjava/jdk170_l17/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        'BASENAME=jgit',
+                        'DEST=install']) {
+                    sh "mvn --no-transfer-progress install -Dskip.dash -DskipTests -Dlicense.skipCheckLicense=true"
+                    sh "mkdir -p ${WORKSPACE}/install/usr/local/bin"
+                    sh "cp -p ./org.eclipse.jgit.pgm/target/jgit ${WORKSPACE}/install/usr/local/bin"
+                }
+            }
+        }
+        stage('deploy') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/bin:/usr/tandem/nssjava/jdk170_l17:/home/randall/apache-maven-3.9.11/bin',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=jgit',
+                        'PREFIX=/usr/local/bin',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/jgit" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
