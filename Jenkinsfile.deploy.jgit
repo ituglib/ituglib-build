@@ -1,0 +1,54 @@
+/* Git deploy pipeline. */
+
+def deployTarget
+def websiteTarget
+def jdbcMxLibrary
+def groovyRoot
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+    }
+    stages {
+    	stage('setup') {
+    		steps {
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	deployTarget = "${DEPLOY_TARGET}"
+                	websiteTarget = "${WEBSITE_TARGET}"
+                	jdbcMxLibrary = "${JDBCMX_LIB}"
+                	groovyRoot="${GROOVY_ROOT}"
+                }
+    		}
+    	}
+        stage('nsx') {
+            steps {
+                lock('jgit-deploy') {
+                    withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                            "_RLD_LIB_PATH=${jdbcMxLibrary}:/usr/local/lib",
+                            "GROOVY_PATH=${groovyRoot}/bin",
+                            'BASENAME=jgit',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
+                            'SCHEMA=ITUG.OPENLIB',
+                            'SUFFIX=-nsx',
+                            'TYPE=TNS/X',
+                            'NONSTOP_EXTENSIONS=L24.08 and above only',
+                            'DEPENDENCIES=Check Readme file for older RVUs',
+                            'README_FILE=jgit_install-7-3-0.html']) {
+                        sh 'sudo rm -rf /tmp/${BASENAME}'
+                        sh 'cd "${WORKSPACE}/../Ituglib_Build" && \
+                            ${GROOVY_PATH}/groovy platform.tar.groovy'
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            mail bcc: '', body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\nDuration: ${currentBuild.durationString}\nChange: ${currentBuild.changeSets}\n More info at: ${env.BUILD_URL}", cc: '', from: 'rsbecker@nexbridge.com', replyTo: '', subject: "[Jenkins Stage TCMVNS] ${currentBuild.currentResult}: job ${env.JOB_NAME}", to: 'rsbecker@nexbridge.com'
+        }
+    }
+}
