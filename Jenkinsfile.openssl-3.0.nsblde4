@@ -22,8 +22,8 @@ pipeline {
 	                        parameters: [
 	                            string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
 	                            string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
-	                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
-	                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
+	                            string(defaultValue: '10.0.0.190', description: 'Destination Host', name: 'host'),
+	                            string(defaultValue: '28222', description: 'Destination Port', name: 'port'),
 	                        ])
 	                    buildVersion = userInput.input
 	                    destinationUser = userInput.user

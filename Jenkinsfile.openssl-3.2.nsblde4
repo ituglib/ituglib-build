@@ -23,8 +23,8 @@ pipeline {
                             string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
                             string(defaultValue: '-j4 V=1', description: 'make test arguments', name: 'testargs'),
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
-                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
-                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
+                            string(defaultValue: '10.0.0.190', description: 'Destination Host', name: 'host'),
+                            string(defaultValue: '28222', description: 'Destination Port', name: 'port'),
                         ])
                     buildVersion = userInput.input
                     testArgs = userInput.testargs
