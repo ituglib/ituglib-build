@@ -1,20 +1,48 @@
 /* ncurses deploy pipeline. */
 
+def jdbcMxPath
+def deployTarget
+def websiteTarget
+
 pipeline {
     agent any
     options {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
     stages {
+         stage('setup') {
+            steps {
+                dir('../Ituglib_Build') {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: 'main']],
+                        extensions: [
+                            [$class: 'CleanBeforeCheckout']],
+                        doGenerateSubmoduleConfigurations: false, extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', timeout: 120, shallow: true],
+                            [$class: 'CheckoutOption', timeout: 120],
+                            [$class: 'IgnoreNotifyCommit'],
+                            ],
+                        userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
+                }
+                script {
+                	load "../Ituglib_Build/Jenkinsfile.globals.all"
+                	load "../Ituglib_Build/Jenkinsfile.globals.nsx"
+                	jdbcMxPath = "${JDBCMX_LIB}"
+                	deployTarget = "${DEPLOY_TARGET}"
+                	websiteTarget = "${WEBSITE_TARGET}"
+                }
+            }
+        }
         stage('nsx-ncurses_64t') {
             steps {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
+                            "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_64t',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -32,11 +60,11 @@ pipeline {
             steps {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
+                            "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_64',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -54,11 +82,11 @@ pipeline {
             steps {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
+                            "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncursest',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -76,11 +104,11 @@ pipeline {
             steps {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
+                            "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_32',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
@@ -98,11 +126,11 @@ pipeline {
             steps {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                            '_RLD_LIB_PATH=/usr/tandem/jdbcMx/T1275L39/lib:/usr/local/lib',
+                            "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses',
-                            'DIST=/web/stage',
-                            'DEST=/web/opensrc',
+                            "DIST=${deployTarget}",
+                            "DEST=${websiteTarget}",
                             'SCHEMA=ITUG.OPENLIB',
                             'SUFFIX=-nsx',
                             'TYPE=TNS/X',
