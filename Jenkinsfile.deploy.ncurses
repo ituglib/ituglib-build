@@ -39,6 +39,7 @@ pipeline {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
+                            "JDBC_MX_TAR=${JDBCMX_LIB}/jdbcMx.jar",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_64t',
                             "DIST=${deployTarget}",
@@ -61,6 +62,7 @@ pipeline {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
+                            "JDBC_MX_TAR=${JDBCMX_LIB}/jdbcMx.jar",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_64',
                             "DIST=${deployTarget}",
@@ -83,6 +85,7 @@ pipeline {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
+                            "JDBC_MX_TAR=${JDBCMX_LIB}/jdbcMx.jar",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncursest',
                             "DIST=${deployTarget}",
@@ -105,6 +108,7 @@ pipeline {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
+                            "JDBC_MX_TAR=${JDBCMX_LIB}/jdbcMx.jar",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses_32',
                             "DIST=${deployTarget}",
@@ -127,6 +131,7 @@ pipeline {
                 lock('ncurses-deploy') {
                     withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                             "_RLD_LIB_PATH=${JDBCMX_LIB}:/usr/local/lib",
+                            "JDBC_MX_TAR=${JDBCMX_LIB}/jdbcMx.jar",
                             'GROOVY_PATH=/home/jenkinstag/.sdkman/candidates/groovy/current/bin/',
                             'BASENAME=ncurses',
                             "DIST=${deployTarget}",
