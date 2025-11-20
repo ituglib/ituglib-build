@@ -5,11 +5,13 @@ import jenkins.model.Jenkins
 // Remove everything which is currently queued
 def q = Jenkins.instance.queue
 for (queued in Jenkins.instance.queue.items) {
+    System.out.println("Stopping "+q);
 	q.cancel(queued.task)
 }
 
 // stop all the currently running jobs
 for (job in Jenkins.instance.items) {
+    System.out.println("Stopping "+job);
 	stopJobs(job)
 }
 

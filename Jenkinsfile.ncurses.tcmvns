@@ -49,14 +49,14 @@ pipeline {
                             ],
                         userRemoteConfigs: [[url: 'https://github.com/ituglib/ituglib-build.git']]])
                 }
-                sh 'sed "/#define intptr_t long/!{p;d};a #if defined (__TANDEM)" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;a # if ! defined (__cplusplus)" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;a #  define intptr_t long" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;a # endif" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;a #else" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;a # define intptr_t long" -i configure'
-                sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;n;a #endif" -i configure'
-                sh 'sed "/#define intptr_t long/d" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};a #if defined (__TANDEM)" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;a # if ! defined (__cplusplus)" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;n;a #  define intptr_t long" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;n;n;a # endif" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;a #else" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;a # define intptr_t long" -i configure'
+                //sh 'sed "/#define intptr_t long/!{p;d};n;n;n;n;n;n;a #endif" -i configure'
+                //sh 'sed "/#define intptr_t long/d" -i configure'
             }
         }
         stage('32-bit') {
@@ -66,7 +66,8 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1" ./configure --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
+                            //sh 'CC=c11 CXX="c11" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1" ./configure --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -D__NSK_OPTIONAL_TYPES__=1" ./configure --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -74,7 +75,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make'
+                            sh 'make -k'
                         }
                     }
                 }
@@ -123,7 +124,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -D__NSK_OPTIONAL_TYPES__=1 -Wmultibyte_char" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -180,7 +181,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -D__NSK_OPTIONAL_TYPES__=1 -Wmultibyte_char" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib --bindir=/usr/local/bin --with-shared'
                         }
                     }
                 }
@@ -237,7 +238,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -D__NSK_OPTIONAL_TYPES__=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
                         }
                     }
                 }
@@ -294,7 +295,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
+                            sh 'CC=c11 CXX="c11 -Wcplusplus -Wversion4 -Wlp64 -WRVU=L20.10" CPPFLAGS="-I /home/jenkinsbuild/include" CFLAGS="-Wlp64 -WRVU=L20.10 -D_XOPEN_SOURCE_EXTENDED=1 -DHAVE_IOSTREAM_NAMESPACE=1 -DHAVE_IOSTREAM=1 -D__NSK_OPTIONAL_TYPES__=1 -Wmultibyte_char" LDFLAGS="-Wlp64" ./configure --enable-widec --enable-reentrant  --prefix=/usr/local --libdir=/usr/local/lib64 --bindir=/usr/local/bin64 --with-shared'
                         }
                     }
                 }

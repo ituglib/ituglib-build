@@ -25,7 +25,8 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    branches: [[name: "refs/tags/openssl-${buildVersion}"]],
+                    //branches: [[name: "refs/tags/openssl-${buildVersion}"]],
+                    branches: [[name: "ituglib-release"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
@@ -33,7 +34,8 @@ pipeline {
                         [$class: 'CloneOption', timeout: 120, shallow: true],
                         [$class: 'CheckoutOption', timeout: 120],
                         ],
-                    userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                    //userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                    userRemoteConfigs: [[url: 'https://github.com/rsbeckerca/openssl.git']]])
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
@@ -170,7 +172,7 @@ pipeline {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
                             sh 'git clean -dxf'
-                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT"'
+                            sh './Configure nonstop-nsx_64_put --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT" no-secure-memory'
                         }
                     }
                 }
@@ -215,6 +217,63 @@ pipeline {
                                 'PRODUCT_BASE_VERSION=3.5',
                                 'DEST=/web/stage']) {
                             sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                        }
+                    }
+                }
+            }
+        }
+        stage('KLT') {
+            stages() {
+                stage('config-klt') {
+                    steps() {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'git clean -dxf'
+                            sh './Configure nonstop-nsx_64_klt --prefix=/usr/local-ssl3.5 --openssldir=/usr/local-ssl3.5/ssl --with-rand-seed=rdcpu threads enable-fips "-D_REENTRANT" no-secure-memory'
+                        }
+                    }
+                }
+                stage('build-klt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'make CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('findcall-klt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'findcall_floss || echo "might fail"'
+                        }
+                    }
+                }
+                stage('test-klt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh 'OPENSSL_MODULES=${WORKSPACE}/providers _RLD_FIRST_LIB_PATH=${WORKSPACE}:/usr/local/lib make -j4 V=1 test || echo "might fail"'
+                        }
+                    }
+                }
+                stage('install-klt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib']) {
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                        }
+                    }
+                }
+                stage('deploy-klt') {
+                    steps {
+                        withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                                '_RLD_LIB_PATH=:/usr/local/lib',
+                                'BASENAME=openssl-klt',
+                                'PRODUCT_BASE_VERSION=3.5',
+                                'DEST=/web/stage']) {
+                            sh '_RLD_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/.." && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                         }
                     }
                 }
