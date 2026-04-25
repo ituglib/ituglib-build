@@ -1,6 +1,7 @@
 /* Curl pipeline for TNS/V - requires the tarball, not git. */
 
 def downloadVersion
+def isRc
 
 pipeline {
     agent any
@@ -15,8 +16,12 @@ pipeline {
                     def userInput = input(id: 'userInput', message: 'Build Settings?',
                         parameters: [
                             string(defaultValue: '', description: 'Curl Version', name: 'input'),
+                            booleanParam(defaultValue: false, description: 'Treat as RC', name: 'rc'),
+
                         ])
-                    downloadVersion = userInput
+                    downloadVersion = userInput.input
+                    isRc = userInput.rc
+                    downloadArea = isRc ? "rc" : "download"
                 }
             }
         }
@@ -40,7 +45,7 @@ pipeline {
         stage('unpack') {
             steps {
                 withEnv(["CURL_VERSION=${downloadVersion}",
-               			 'CURL_URL_PREFIX=https://curl.se/download/',
+               			 "CURL_URL_PREFIX=https://curl.se/${downloadArea}/",
                          'DOWNLOADS=/home/jenkinsbuild/downloads']){
                     cleanWs()
                     sh 'test -f ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz || curl --insecure ${CURL_URL_PREFIX}curl-${CURL_VERSION}.tar.gz -o ${DOWNLOADS}/curl-${CURL_VERSION}.tar.gz'
@@ -54,79 +59,29 @@ pipeline {
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_SUFFIX_CURL_OFF_T     L" -i include/curl/system.h'
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_SUFFIX_CURL_OFF_TU    UL" -i include/curl/system.h'
                     sh 'sed "/(__TANDEM)/!{p;d;};n;n;n;n;n;n;n;n;n;n;n;n;n;n;a #  define CURL_TYPEOF_CURL_SOCKLEN_T int" -i include/curl/system.h'
-                    sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-data.c'
-                    sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-pingpong.c'
-                    sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-pingpong.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-pingpong.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-pingpong.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-pingpong.c'
-                    sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/HAVE_NETINET_IN_H/!{p;d;};n;n;a #include <netinet/in6.h>" -i tests/server/util.c'
+                    //sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-data.c'
+                    //sh 'sed "/Sleep/!{p;d;};a #elif defined (__TANDEM)" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;a # if defined (_PUT_MODEL_) || defined(_KLT_MODEL_)" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;a       usleep(100*1000);" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;a #else" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;n;a       sleep(100);" -i tests/http/clients/ws-pingpong.c'
+                    //sh 'sed "/Sleep/!{p;d;};n;n;n;n;n;a #endif" -i tests/http/clients/ws-pingpong.c'
                     sh 'sed "/test.h/!{p;d;};n;a #include <netinet/in.h>" -i tests/libtest/lib1960.c'
                     sh 'sed "/test.h/!{p;d;};n;n;a #include <arpa/inet.h>" -i tests/libtest/lib1960.c'
-                }
-            }
-        }
-        stage('config-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                		'PKG_CONFIG_PATH=/home/randall/pkgconfig',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D__NSK_OPTIONAL_TYPES__ -I/usr/coreutils/include -I/usr/local-ssl1.1/include" LDFLAGS="-L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local-ssl1.1 --with-ssl=/usr/local-ssl1.1 --with-ca-path=/usr/local-ssl1.1/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-zlib=/usr/coreutils --with-openssl --prefix=/usr/local-ssl1.1'
-                }
-            }
-        }
-        stage('build-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'make'
-                }
-            }
-        }
-        stage('findcall_floss-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'findcall_floss'
-                }
-            }
-        }
-        stage('test-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local-ssl1.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'make check || echo "Tests failed but expected"'
-                }
-            }
-        }
-        stage('install-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
-                }
-            }
-        }
-        stage('deploy-ssl1.1') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
-                        'BASENAME=curl-ssl1.1',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl1.1/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
+                    sh 'sed "/urldata.h/!{p;d;};n;n;a #include <arpa/inet.h>" -i lib/smb.c'
                 }
             }
         }
         stage('config-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib']) {
-                    sh 'make clean'
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
                     sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local-ssl3.0/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local-ssl3.0/lib" conf_script_floss_cc --prefix=/usr/local-ssl3.0 --with-ssl=/usr/local-ssl3.0 --with-ca-path=/usr/local-ssl3.0/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6  --with-zlib=/usr/coreutils'
@@ -135,7 +90,7 @@ pipeline {
         }
         stage('build-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -143,7 +98,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
@@ -151,24 +106,24 @@ pipeline {
         }
         stage('test-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
         }
         stage('install-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
         }
         stage('deploy-ssl3.0') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                withEnv(['PATH=/usr/local-ssl3.0/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.0',
                         'DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
@@ -177,8 +132,8 @@ pipeline {
         }
         stage('config-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64']) {
+                withEnv(['PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
                     sh 'rm -rf ${WORKSPACE}/install'
@@ -188,7 +143,7 @@ pipeline {
         }
         stage('build-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -196,7 +151,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Skip error"'
                 }
@@ -204,24 +159,24 @@ pipeline {
         }
         stage('test-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                withEnv(['PATH=PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
             }
         }
         stage('install-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
+                withEnv(['PATH=PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
             }
         }
         stage('deploy-ssl3.0-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib',
+                withEnv(['PATH=PATH=/usr/local-ssl3.0/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib64:/usr/local/lib',
                         'BASENAME=curl-ssl3.0-64',
                         'DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.0/bin64/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
@@ -230,7 +185,7 @@ pipeline {
         }
         stage('config-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -241,7 +196,7 @@ pipeline {
         }
         stage('build-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -249,7 +204,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
@@ -257,7 +212,7 @@ pipeline {
         }
         stage('test-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -265,7 +220,7 @@ pipeline {
         }
         stage('install-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -273,7 +228,7 @@ pipeline {
         }
         stage('deploy-ssl3.2') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.2',
                         'DEST=/web/stage']) {
@@ -283,7 +238,7 @@ pipeline {
         }
         stage('config-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -294,7 +249,7 @@ pipeline {
         }
         stage('build-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -302,7 +257,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Skip error"'
                 }
@@ -310,7 +265,7 @@ pipeline {
         }
         stage('test-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -318,7 +273,7 @@ pipeline {
         }
         stage('install-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -326,7 +281,7 @@ pipeline {
         }
         stage('deploy-ssl3.2-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.2/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.2/lib64:/usr/local/lib',
                         'BASENAME=curl-ssl3.2-64',
                         'DEST=/web/stage']) {
@@ -336,7 +291,7 @@ pipeline {
         }
         stage('config-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -347,7 +302,7 @@ pipeline {
         }
         stage('build-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -355,7 +310,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
@@ -363,7 +318,7 @@ pipeline {
         }
         stage('test-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -371,7 +326,7 @@ pipeline {
         }
         stage('install-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -379,7 +334,7 @@ pipeline {
         }
         stage('deploy-ssl3.3') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.3',
                         'DEST=/web/stage']) {
@@ -389,7 +344,7 @@ pipeline {
         }
         stage('config-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -400,7 +355,7 @@ pipeline {
         }
         stage('build-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -408,7 +363,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Skip error"'
                 }
@@ -416,7 +371,7 @@ pipeline {
         }
         stage('test-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -424,7 +379,7 @@ pipeline {
         }
         stage('install-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -432,7 +387,7 @@ pipeline {
         }
         stage('deploy-ssl3.3-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.3/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.3/lib64:/usr/local/lib',
                         'BASENAME=curl-ssl3.3-64',
                         'DEST=/web/stage']) {
@@ -442,7 +397,7 @@ pipeline {
         }
         stage('config-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -453,7 +408,7 @@ pipeline {
         }
         stage('build-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -461,7 +416,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
@@ -469,7 +424,7 @@ pipeline {
         }
         stage('test-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -477,7 +432,7 @@ pipeline {
         }
         stage('install-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -485,7 +440,7 @@ pipeline {
         }
         stage('deploy-ssl3.4') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.4',
                         'DEST=/web/stage']) {
@@ -495,7 +450,7 @@ pipeline {
         }
         stage('config-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -506,7 +461,7 @@ pipeline {
         }
         stage('build-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -514,7 +469,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Skip error"'
                 }
@@ -522,7 +477,7 @@ pipeline {
         }
         stage('test-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -530,7 +485,7 @@ pipeline {
         }
         stage('install-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -538,7 +493,7 @@ pipeline {
         }
         stage('deploy-ssl3.4-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.4/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.4/lib64:/usr/local/lib',
                         'BASENAME=curl-ssl3.4-64',
                         'DEST=/web/stage']) {
@@ -548,7 +503,7 @@ pipeline {
         }
         stage('config-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -559,7 +514,7 @@ pipeline {
         }
         stage('build-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -567,7 +522,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
                     sh 'findcall_floss'
                 }
@@ -575,7 +530,7 @@ pipeline {
         }
         stage('test-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -583,7 +538,7 @@ pipeline {
         }
         stage('install-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -591,7 +546,7 @@ pipeline {
         }
         stage('deploy-ssl3.5') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib:/usr/local/lib',
                         'BASENAME=curl-ssl3.5',
                         'DEST=/web/stage']) {
@@ -601,7 +556,7 @@ pipeline {
         }
         stage('config-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib64']) {
                     sh 'make clean'
                     sh 'find . -name "*.o" -exec rm {} ";"'
@@ -612,7 +567,7 @@ pipeline {
         }
         stage('build-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib64:/usr/local/lib']) {
                     sh 'make'
                 }
@@ -620,7 +575,7 @@ pipeline {
         }
         stage('findcall_floss-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.5/lib64:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Skip error"'
                 }
@@ -628,7 +583,7 @@ pipeline {
         }
         stage('test-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib64:/usr/local/lib']) {
                     sh 'make check || echo "Tests failed but expected"'
                 }
@@ -636,7 +591,7 @@ pipeline {
         }
         stage('install-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib64:/usr/local/lib']) {
                     sh 'make install DESTDIR=${WORKSPACE}/install'
                 }
@@ -644,64 +599,11 @@ pipeline {
         }
         stage('deploy-ssl3.5-64') {
             steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                withEnv(['PATH=/usr/local-ssl3.5/bin64:/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_LIB_PATH=/usr/local-ssl3.5/lib64:/usr/local/lib',
                         'BASENAME=curl-ssl3.5-64',
                         'DEST=/web/stage']) {
                     sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin64/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
-                }
-            }
-        }
-        stage('config-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local/lib:/usr/local/lib']) {
-                    sh 'make clean'
-                    sh 'find . -name "*.o" -exec rm {} ";"'
-                    sh 'rm -rf ${WORKSPACE}/install'
-                    sh 'CFLAGS="-c99" CPPFLAGS="-Wnowarn=2040 -D_XOPEN_SOURCE_EXTENDED=1 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -D__NSK_OPTIONAL_TYPES__ -WIEEE_float -I/usr/coreutils/include -I/usr/local/openssl/include" LDFLAGS="/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L/usr/local/lib" conf_script_floss_cc --prefix=/usr/local --with-ssl=/usr/local --with-ca-path=/usr/local/ssl/certs --disable-pthreads --disable-threaded-resolver --enable-ipv6 --with-openssl --with-zlib=/usr/coreutils'
-                }
-            }
-        }
-        stage('build-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
-                    sh 'make'
-                }
-            }
-        }
-        stage('findcall_floss-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=:/usr/local/lib']) {
-                    sh 'findcall_floss'
-                }
-            }
-        }
-        stage('test-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
-                    sh 'make check || echo "Tests failed but expected"'
-                }
-            }
-        }
-        stage('install-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
-                    sh 'make install DESTDIR=${WORKSPACE}/install'
-                }
-            }
-        }
-        stage('deploy-ssl1.0') {
-            steps {
-                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_LIB_PATH=/usr/local-ssl1.0/lib:/usr/local/lib',
-                        'BASENAME=curl',
-                        'DEST=/web/stage']) {
-                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local/bin/curl" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nsx && bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest'
                 }
             }
         }

@@ -90,21 +90,131 @@ pipeline {
                 }
             }
         }
-/*
+        stage('build-3.5') {
+            steps {
+                withEnv(["GIT_DIST=${destinationTarget}",
+                        'PREFIX=/usr/local-ssl3.5',
+                        'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
+                }
+            }
+        }
+        stage('findcall_floss-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh 'findcall_floss || echo "Ignoring results"'
+                }
+            }
+        }
+        stage('test-3.5') {
+        	when {
+        		expression {
+        			return runTests;
+        		}
+        	}
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                }
+            }
+        }
+        stage('install-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'PREFIX=/usr/local-ssl3.5',
+                        'BASENAME=git-ssl3.5',
+                        'DEST=install']) {
+                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.5/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.5/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" CURL_LDFLAGS=\"-lcurl -lpsl\" "
+                    sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
+                    sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local/share'
+                    sh 'rmdir ${WORKSPACE}/install/usr/local'
+                }
+            }
+        }
+        stage('deploy-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('remote-3.5') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git-ssl3.5',
+                        "DEST=${localStaging}",
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        "REMOTE_DEST=${destinationTarget}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
+        stage('install-3.5-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.5/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.5/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.5/lib'
+                }
+            }
+        }
+        stage('deploy-3.5-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.5',
+                        'PREFIX=/usr/local-ssl3.5',
+                        "DEST=${localStaging}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install/" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else bash ${WORKSPACE}/../Ituglib_Build/package.bin.nomanifest; fi'
+                }
+            }
+        }
+        stage('remote-3.5-ssl') {
+            steps {
+                withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.5/lib:/usr/local/lib',
+                        'BASENAME=git+libcrypto-ssl3.5',
+                        "DEST=${localStaging}",
+                        "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
+                        "REMOTE_DEST=${destinationTarget}"]) {
+                    sh 'export INSTALL_LOCATION="${WORKSPACE}/install" && export VERSION_PATH="${INSTALL_LOCATION}/usr/local-ssl3.5/bin/git" && . ${WORKSPACE}/../Ituglib_Build/dist.info.nse && TESTV=`echo $VERSION | fgrep -e -rc`;if [ "$TESTV" != "" ]; then echo "Development Version Suppressed"; else echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE; fi'
+                    sh 'rm ${DEST}/${BASENAME}-*'
+                }
+            }
+        }
         stage('build-3.4') {
             steps {
                 withEnv(["GIT_DIST=${destinationTarget}",
                         'PREFIX=/usr/local-ssl3.4',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
         stage('findcall_floss-3.4') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Ignoring results"'
                 }
             }
@@ -117,19 +227,19 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
         stage('install-3.4') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'PREFIX=/usr/local-ssl3.4',
                         'BASENAME=git-ssl3.4',
                         'DEST=install']) {
-                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.4/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.4/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -140,7 +250,7 @@ pipeline {
         stage('deploy-3.4') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.4',
                         'PREFIX=/usr/local-ssl3.4',
                         "DEST=${localStaging}"]) {
@@ -151,7 +261,7 @@ pipeline {
         stage('remote-3.4') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.4',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -164,20 +274,20 @@ pipeline {
         stage('install-3.4-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.4',
                         'PREFIX=/usr/local-ssl3.4',
                         "DEST=${localStaging}"]) {
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.4/lib'
-                    sh 'cp -p /usr/local-ssl3.4/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.4/lib'
-                    sh 'cp -p /usr/local-ssl3.4/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.4/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.4/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.4/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.4/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.4/lib'
                 }
             }
         }
         stage('deploy-3.4-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.4',
                         'PREFIX=/usr/local-ssl3.4',
                         "DEST=${localStaging}"]) {
@@ -188,7 +298,7 @@ pipeline {
         stage('remote-3.4-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.4/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.4/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.4',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -203,15 +313,17 @@ pipeline {
                 withEnv(["GIT_DIST=${destinationTarget}",
                         'PREFIX=/usr/local-ssl3.3',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\"  SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
         stage('findcall_floss-3.3') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Ignoring results"'
                 }
             }
@@ -224,19 +336,19 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
         stage('install-3.3') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'PREFIX=/usr/local-ssl3.3',
                         'BASENAME=git-ssl3.3',
                         'DEST=install']) {
-                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.3/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.3/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -247,7 +359,7 @@ pipeline {
         stage('deploy-3.3') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.3',
                         'PREFIX=/usr/local-ssl3.3',
                         "DEST=${localStaging}"]) {
@@ -258,7 +370,7 @@ pipeline {
         stage('remote-3.3') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.3',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -271,20 +383,20 @@ pipeline {
         stage('install-3.3-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.3',
                         'PREFIX=/usr/local-ssl3.3',
                         "DEST=${localStaging}"]) {
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.3/lib'
-                    sh 'cp -p /usr/local-ssl3.3/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.3/lib'
-                    sh 'cp -p /usr/local-ssl3.3/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.3/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.3/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.3/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.3/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.3/lib'
                 }
             }
         }
         stage('deploy-3.3-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.3',
                         'PREFIX=/usr/local-ssl3.3',
                         "DEST=${localStaging}"]) {
@@ -295,7 +407,7 @@ pipeline {
         stage('remote-3.3-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.3/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.3/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.3',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -310,15 +422,17 @@ pipeline {
                 withEnv(["GIT_DIST=${destinationTarget}",
                         'PREFIX=/usr/local-ssl3.2',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
         stage('findcall_floss-3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Ignoring results"'
                 }
             }
@@ -331,19 +445,19 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
         stage('install-3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'PREFIX=/usr/local-ssl3.2',
                         'BASENAME=git-ssl3.2',
                         'DEST=install']) {
-                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.2/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.2/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -354,7 +468,7 @@ pipeline {
         stage('deploy-3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.2',
                         'PREFIX=/usr/local-ssl3.2',
                         "DEST=${localStaging}"]) {
@@ -365,7 +479,7 @@ pipeline {
         stage('remote-3.2') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.2',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -378,20 +492,20 @@ pipeline {
         stage('install-3.2-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.2',
                         'PREFIX=/usr/local-ssl3.2',
                         "DEST=${localStaging}"]) {
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.2/lib'
-                    sh 'cp -p /usr/local-ssl3.2/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.2/lib'
-                    sh 'cp -p /usr/local-ssl3.2/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.2/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.2/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.2/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.2/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.2/lib'
                 }
             }
         }
         stage('deploy-3.2-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.2',
                         'PREFIX=/usr/local-ssl3.2',
                         "DEST=${localStaging}"]) {
@@ -402,7 +516,7 @@ pipeline {
         stage('remote-3.2-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.2/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.2/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.2',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -412,26 +526,26 @@ pipeline {
                 }
             }
         }
-*/
         stage('build-3.0') {
             steps {
                 withEnv(["GIT_DIST=${destinationTarget}",
                         'PREFIX=/usr/local-ssl3.0',
                         'PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh 'git clean -dxf'
+
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
         stage('findcall_floss-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib']) {
                     sh 'findcall_floss || echo "Ignoring results"'
                 }
             }
         }
-/*
         stage('test-3.0') {
         	when {
         		expression {
@@ -440,20 +554,19 @@ pipeline {
         	}
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib']) {
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
-*/
         stage('install-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'PREFIX=/usr/local-ssl3.0',
                         'BASENAME=git-ssl3.0',
                         'DEST=install']) {
-                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" "
+                    sh "make install V=1 NO_TCLTK=NoThanks prefix=${PREFIX} DESTDIR_SQ=${WORKSPACE}/install CFLAGS=\"-g -O2 -Winline -I/home/ituglib/randall/usr/local-ssl3.0/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/home/ituglib/randall/usr/local-ssl3.0/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" "
                     sh 'make quick-install-man PREFIX=${PREFIX} MAN_REPO=${WORKSPACE}/../Git_ManPages DESTDIR=${WORKSPACE}/install GIT_MAN_REF=HEAD'
                     sh 'mv ${WORKSPACE}/install/usr/local/share/man ${WORKSPACE}/install/${PREFIX}/share'
                     sh 'rmdir ${WORKSPACE}/install/usr/local/share'
@@ -464,7 +577,7 @@ pipeline {
         stage('deploy-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.0',
                         'PREFIX=/usr/local-ssl3.0',
                         "DEST=${localStaging}"]) {
@@ -475,7 +588,7 @@ pipeline {
         stage('remote-3.0') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git-ssl3.0',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -488,20 +601,20 @@ pipeline {
         stage('install-3.0-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.0',
                         'PREFIX=/usr/local-ssl3.0',
                         "DEST=${localStaging}"]) {
                     sh 'mkdir -p ${WORKSPACE}/install/usr/local-ssl3.0/lib'
-                    sh 'cp -p /usr/local-ssl3.0/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
-                    sh 'cp -p /usr/local-ssl3.0/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.0/lib/libcrypto.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
+                    sh 'cp -p /home/ituglib/randall/usr/local-ssl3.0/lib/libssl.so ${WORKSPACE}/install/usr/local-ssl3.0/lib'
                 }
             }
         }
         stage('deploy-3.0-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.0',
                         'PREFIX=/usr/local-ssl3.0',
                         "DEST=${localStaging}"]) {
@@ -512,7 +625,7 @@ pipeline {
         stage('remote-3.0-ssl') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/home/ituglib/randall/usr/local-ssl3.0/lib:/usr/local/lib',
                         'BASENAME=git+libcrypto-ssl3.0',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -530,7 +643,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make V=1 NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -547,7 +660,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib\"  TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "/usr/coreutils/bin/make -k test V=1 CFLAGS=\"-g -O2 -Winline -I/usr/local-ssl1.1/include -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/local-ssl1.1/lib -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }
@@ -581,7 +694,7 @@ pipeline {
         stage('remote-1.1') {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
-                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl3.0/lib:/usr/local/lib',
+                        '_RLD_FIRST_LIB_PATH=/usr/local-ssl1.1/lib:/usr/local/lib',
                         'BASENAME=git-ssl1.1',
                         "DEST=${localStaging}",
                         "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
@@ -636,7 +749,7 @@ pipeline {
                         '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
                     sh 'git clean -dxf'
 
-                    sh "/usr/coreutils/bin/make NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L${expatRoot}/lib\" SHELL=/usr/coreutils/bin/bash"
+                    sh "/usr/coreutils/bin/make NO_TCLTK=NoThanks prefix=${PREFIX} CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L/usr/coreutils/lib -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" SHELL=/usr/coreutils/bin/bash"
                 }
             }
         }
@@ -653,7 +766,7 @@ pipeline {
             steps {
                 withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                         '_RLD_FIRST_LIB_PATH=/usr/local/lib']) {
-                    sh "/usr/coreutils/bin/make -k test CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L${expatRoot}/lib\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
+                    sh "/usr/coreutils/bin/make -k test CFLAGS=\"-g -O2 -Winline -I/usr/coreutils/include -I${expatRoot}/include\" LDFLAGS=\"/usr/coreutils/lib/libz.a -L${expatRoot}/lib -lpsl\" CURL_LDFLAGS=\"-lcurl -lpsl\" TEST_LINT= SHELL=/usr/coreutils/bin/bash || echo \"Git Test FAILURE, however t9001 and t9020 always fail\""
                 }
             }
         }

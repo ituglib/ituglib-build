@@ -75,7 +75,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -99,8 +99,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -145,7 +145,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -169,8 +169,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -215,7 +215,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -239,8 +239,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -285,7 +285,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -309,8 +309,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.0/lib-spt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }

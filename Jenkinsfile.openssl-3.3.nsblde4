@@ -23,8 +23,8 @@ pipeline {
                             string(defaultValue: '', description: 'OpenSSL Version', name: 'input'),
                             string(defaultValue: '-j4 V=1', description: 'make test arguments', name: 'testargs'),
                             string(defaultValue: 'ituglib.randall', description: 'Destination User', name: 'user'),
-                            string(defaultValue: 'tcmvns.tcmsupport.com', description: 'Destination Host', name: 'host'),
-                            string(defaultValue: '49284', description: 'Destination Port', name: 'port'),
+                            string(defaultValue: '10.0.0.190', description: 'Destination Host', name: 'host'),
+                            string(defaultValue: '28222', description: 'Destination Port', name: 'port'),
                         ])
                     buildVersion = userInput.input
                     testArgs = userInput.testargs
@@ -76,7 +76,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -101,7 +101,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -122,10 +122,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
@@ -146,7 +147,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -171,7 +172,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -192,10 +193,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-32',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }
@@ -216,7 +218,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=J06.20"'
+                            sh 'make CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -241,7 +243,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.20"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.3/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=J06.22 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -262,10 +264,11 @@ pipeline {
                                 '_RLD_LIB_PATH=:/usr/local/lib',
                                 'BASENAME=openssl-put',
                                 'DEST=/home/ituglib/randall/stage',
+                                "BUILD_VERSION=${buildVersion}",
                                 "REMOTE=-oPort=${destinationPort} ${destinationUser}@${destinationHost}",
                                 'REMOTE_DEST=/web/stage']) {
-                            sh 'echo "put $DEST/${BASENAME}-* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
-                            sh 'rm ${DEST}/${BASENAME}-*'
+                            sh 'echo "put $DEST/${BASENAME}-*${BUILD_VERSION}* $REMOTE_DEST" | /G/system/zssh/sftposs $REMOTE'
+                            sh 'rm ${DEST}/${BASENAME}-*${BUILD_VERSION}*'
                         }
                     }
                 }

@@ -25,8 +25,8 @@ pipeline {
         stage('checkout') {
             steps {
                 checkout([$class: 'GitSCM',
-                    //branches: [[name: "refs/tags/openssl-${buildVersion}"]],
-                    branches: [[name: "ituglib-release"]],
+                    branches: [[name: "refs/tags/openssl-${buildVersion}"]],
+                    // branches: [[name: "ituglib-release"]],
                     extensions: [
                         [$class: 'CleanBeforeCheckout']],
                     doGenerateSubmoduleConfigurations: false, extensions: [
@@ -34,8 +34,8 @@ pipeline {
                         [$class: 'CloneOption', timeout: 120, shallow: true],
                         [$class: 'CheckoutOption', timeout: 120],
                         ],
-                    //userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
-                    userRemoteConfigs: [[url: 'https://github.com/rsbeckerca/openssl.git']]])
+                    userRemoteConfigs: [[url: 'https://github.com/openssl/openssl.git']]])
+                    //userRemoteConfigs: [[url: 'https://github.com/rsbeckerca/openssl.git']]])
                 dir('../Ituglib_Build') {
                     checkout([$class: 'GitSCM',
                         branches: [[name: 'main']],
@@ -66,7 +66,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L20.10"'
+                            sh 'make CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -90,8 +90,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -123,7 +123,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L20.10"'
+                            sh 'make CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -147,8 +147,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -180,7 +180,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L20.10"'
+                            sh 'make CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -204,8 +204,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-put:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L18.02 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -237,7 +237,7 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh 'make CFLAGS="-WRVU=L20.10"'
+                            sh 'make CFLAGS="-WRVU=L25.09 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
@@ -261,8 +261,8 @@ pipeline {
                     steps {
                         withEnv(['PATH=/usr/coreutils/bin:/usr/local/bin:/usr/bin:/bin:/usr/ucb',
                                 '_RLD_LIB_PATH=:/usr/local/lib']) {
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
-                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L20.10"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L25.09 -D_LARGEFILE64_SOURCE=1"'
+                            sh '_RLD_FIRST_LIB_PATH=${WORKSPACE}/install/usr/local-ssl3.5/lib64-klt:/usr/local/lib && make install_fips DESTDIR=${WORKSPACE}/install CFLAGS="-WRVU=L25.09 -D_LARGEFILE64_SOURCE=1"'
                         }
                     }
                 }
